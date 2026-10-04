@@ -1,0 +1,1 @@
+One YAML entry per model role (dense encoder, reranker, generator, verifier, NER). Each entry records: HF id, revision, quantization, VRAM at load, max input tokens, licence, and the benchmark run that selected it. Empty until `docs/MODEL_SELECTION.md` reports results.

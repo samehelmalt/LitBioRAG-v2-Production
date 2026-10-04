@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "litbiorag-v2"
+version = "0.0.1"
+description = "Evidence-gated biomedical literature RAG"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.5",
+]
+api = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "httpx>=0.27",
+]
+ml = [
+    "torch>=2.2",
+    "transformers>=4.44",
+    "sentence-transformers>=3.0",
+    "faiss-cpu>=1.8",
+    "numpy>=1.26",
+    "pandas>=2.2",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*", "models*", "evaluation*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

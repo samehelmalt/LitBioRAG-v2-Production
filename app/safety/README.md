@@ -1,0 +1,1 @@
+Gate v2: ordered hard checks (safety, retrieval sufficiency, claim support, contradiction, entity, numeric, citation) then a calibrated confidence -> PASS / WARN / BLOCK. Abstention is a valid outcome.

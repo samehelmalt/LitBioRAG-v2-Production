@@ -1,0 +1,1 @@
+YAML configs for retrieval, reranking, generation, verification and the gate. Values are operating parameters only (k, pool sizes, thresholds, model role names). Paths and secrets come from environment variables (`.env.example`). Thresholds in `gate.yaml` are written by the calibration step, never by hand.

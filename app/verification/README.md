@@ -1,0 +1,1 @@
+Claim-level pipeline: split -> evidence map -> entailment/contradiction (verifier model from a different family than the generator) -> entity consistency -> numeric consistency -> citation resolution.

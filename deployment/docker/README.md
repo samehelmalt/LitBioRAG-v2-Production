@@ -1,0 +1,1 @@
+Dockerfile and docker-compose for the API, the metadata store and the index volumes are added in Step 9 (API) after the retrieval and verification components exist. Target hardware: GPUs with 12 GB VRAM, 16 GB system RAM, quantized models, on-disk indexes.

@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Data, models, indexes (never in git)
+data/*
+!data/README.md
+models/weights/
+*.safetensors
+*.bin
+*.pt
+*.gguf
+*.faiss
+*.index
+*.pkl
+
+# Benchmark outputs (committed only under evaluation/benchmarks/<run>/ by explicit decision)
+runs/
+outputs/
+logs/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
