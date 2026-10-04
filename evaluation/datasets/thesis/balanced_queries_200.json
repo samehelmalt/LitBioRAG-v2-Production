@@ -1,0 +1,3341 @@
+[
+  {
+    "id": 1,
+    "question": "Utilizing Telemedicine in the Trauma Intensive Care Unit: Does It Impact Teamwork?",
+    "answer": "Telemedicine may offer advantages for some teamwork competencies without sacrificing the efficacy of others and may be adopted by intact rounding teams without hindering teamwork.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25885369"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_utilizing_telemedicine_in_the_trauma_intensive_care_unit_doe",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 2,
+    "question": "Do Longer Intervals between Challenges Reduce the Risk of Adverse Reactions in Oral Wheat Challenges?",
+    "answer": "This study suggests that the 30-min interval method reduces the risk of adverse events, compared to the 15-min interval method.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26624006"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_longer_intervals_between_challenges_reduce_the_risk_of_ad",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 3,
+    "question": "Does Parents' Social Cohesion Influence Their Perception of Neighborhood Safety and Their Children's Active Commuting to and From School?",
+    "answer": "Our study findings indicate that both social and physical environments are important factors in determining ACS among boys.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27617435"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_parents_social_cohesion_influence_their_perception_of_n",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 4,
+    "question": "Do CHA2 DS2 VASc and HAS-BLED scores influence 'real-world' anticoagulation management in atrial fibrillation?",
+    "answer": "Antithrombotic management in AF is well implemented in Polish conditions, but we show the lack of pattern concerning who is being treated with OAC and ASA when it comes to the risk of stroke and bleeding.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26419506"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_cha2_ds2_vasc_and_has_bled_scores_influence_real_world_an",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 5,
+    "question": "Which properties of the mRNA does N6-methyladenosine (m6A) affect?",
+    "answer": "N(6)-methyladenosine (m6A) is the most abundant modified base in eukaryotic mRNA and has been linked to diverse effects on mRNA fate. m6A predominantly and directly reduces mRNA stability.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26121403",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25475057",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25569111",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25452335"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56df03c751531f7e3300000a",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 6,
+    "question": "Is the toxin produced by Clostridium botulinum always deadly?",
+    "answer": "There are numerous examples where children and animals survived infection with clostridium botulinum.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26697417",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26866491"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58a341a660087bc10a000017",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 7,
+    "question": "Can enhancer-promoter interactions form independently of genomic distance?",
+    "answer": "Yes, enhancer-promoter interactions can form independently of genomic distance. A study in Drosophila embryos found that a significant proportion of enhancer-promoter interactions are established across Topologically Associating Domains (TAD) boundaries, which are regions of the genome that are thought to facilitate and constrain enhancer-promoter interactions. However, the study also found that developmental genes are enriched in intra-TAD but not inter-TAD interactions, suggesting that there may be specific mechanisms that facilitate intra-TAD interactions for these genes. Furthermore, the formation of inter-TAD enhancer-promoter interactions is not solely driven by genomic distance, with distal interactions sometimes favored over proximal ones. This indicates that there may be other general mechanisms at play that establish and maintain specific enhancer-promoter interactions across large distances, regardless of genomic distance.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27799341"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "662edc6f187cba990d00000c",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 8,
+    "question": "Is lenvatinib effective for thyroid cancer?",
+    "answer": "Yes, lenvatinib is effective for thyroid cancer.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25671254",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26316818",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26105190",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25553081",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25974026",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25913680"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56c1f002ef6e394741000038",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 9,
+    "question": "What is the indication for Mirabegron?",
+    "answer": "Mirabegron, the first 尾3-adrenoceptor agonist in clinical practice, is approved for treatment of overactive bladder (OAB) syndrome symptoms.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26663687",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25791612",
+      "http://www.ncbi.nlm.nih.gov/pubmed/24602031",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26665779",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26501573"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58f4b2f070f9fc6f0f000012",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "NORMATIVE",
+    "question_type": "factoid"
+  },
+  {
+    "id": 10,
+    "question": "Are piRNAs involved in gene silencing?",
+    "answer": "Piwi induces piRNA-guided transcriptional silencing and establishment of a repressive chromatin state. piRNA-guided slicing of transposon transcripts enforces their transcriptional silencing via specifying the nuclear piRNA repertoire. Transcriptional silencing implies a piRNA-mediated formation of repressive chromatin which diminishes the transcriptional capacity of the target locus.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26302790",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26279487",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26472911"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56c6f6005795f9a73e000009",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 11,
+    "question": "What is known about the PYHIN proteins?",
+    "answer": "The human PYHIN proteins, AIM2, IFI16, IFIX, and MNDA, are critical regulators of immune response, transcription, apoptosis, and cell cycle.\nAbsent in melanoma 2 (AIM2) is a member of the PYHIN (pyrin and HIN domain-containing protein) family with important roles in sensing double-stranded DNA (dsDNA) and assembling the AIM2 inflammasome, which has wide-ranging, pro-inflammatory and pro-pyroptotic properties.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25665578"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "60490e321cb411341a000168",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 12,
+    "question": "Does a true knowledge of dental crowding affect orthodontic treatment decisions?",
+    "answer": "Direct visualization may overestimate the amount of crowding present. When the true amount of crowding is known, it can lead to more consistent treatment planning, with the decision to extract fewer teeth in the borderline cases. A formal space analysis is likely to assist with treatment planning.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25788331"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_a_true_knowledge_of_dental_crowding_affect_orthodontic_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 13,
+    "question": "Is cervix removal associated with patient-centered outcomes of pain, dyspareunia, well-being and satisfaction after laparoscopic hysterectomy?",
+    "answer": "Patient-centered outcomes suggest overall equivalent tolerance of supracervical and total hysterectomy procedures with a trend towards short-term pain improvement with cervical retention.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25145555"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_cervix_removal_associated_with_patient_centered_outcomes_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 14,
+    "question": "Is the $1000 Genome as Near as We Think?",
+    "answer": "WES and TGP are considerably lower-cost alternatives to WGS. However, this does not imply that these NGS approaches should be preferred in clinical practice, since this should be based on the tradeoff between costs and the expected clinical utility of the approach chosen. The results of the present study contribute to the evaluation of such tradeoffs.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27630156"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_the_1000_genome_as_near_as_we_think",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 15,
+    "question": "Is response to price equal for those with higher alcohol consumption?",
+    "answer": "Within Australia, policies that increase the price of alcohol are about equally effective in relative terms for reducing alcohol consumption both for the general population and among those who drink heavily.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25407840"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_response_to_price_equal_for_those_with_higher_alcohol_con",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 16,
+    "question": "Should All Cases of High-Grade Serous Ovarian, Tubal, and Primary Peritoneal Carcinomas Be Reclassified as Tubo-Ovarian Serous Carcinoma?",
+    "answer": "Type II tumors are more common than type I and account for most tubal and peritoneal cancers. High-grade serous carcinomas, whether classified as ovarian/tubal/peritoneal, seem to behave as one disease entity with no significant difference in survival outcomes, therefore supporting the proposition of a separate classification of \"tubo-ovarian serous carcinoma\".",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26035124"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_should_all_cases_of_high_grade_serous_ovarian_tubal_and_prim",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 17,
+    "question": "Is the Pyriform Ligament Important for Alar Width Maintenance After Le Fort I Osteotomy?",
+    "answer": "The pyriform ligament is easily identified during exposure of the maxilla and pyriform aperture and can be used to control widening of the alar base after Le Fort I osteotomy.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26608155"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_the_pyriform_ligament_important_for_alar_width_maintenanc",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 18,
+    "question": "Describe the usefulness of MiRduplexSVM.",
+    "answer": "MiRduplexSVM is a high-performing miRNA-duplex prediction and evaluation methodology. It's a method that combines a unique problem representation and an unbiased optimization protocol to learn from mirBase19.0 an accurate predictive model. It is the first model that provides precise information about all four ends of the miRNA duplex.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25961860"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5895ee638707e6ea39000001",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 19,
+    "question": "Is Netrin-1 a secreted protein?",
+    "answer": "Yes,\nnetrin-1 is a secreted protein.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26039999"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c89461675a4a5d219000013",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 20,
+    "question": "Is pilates as effective as conventional pelvic floor muscle exercises in the conservative treatment of post-prostatectomy urinary incontinence?",
+    "answer": "The Pilates exercise program proved to be as effective as conventional PFME to speed up continence recovery in PPUI. It also achieved a higher rate of fully continent patients when compared to the control group in the short-term. Neurourol. Urodynam. 35:615-621, 2016. © 2015 Wiley Periodicals, Inc.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25809925"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_pilates_as_effective_as_conventional_pelvic_floor_muscle_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 21,
+    "question": "Early thromboembolic prophylaxis in patients with blunt solid abdominal organ injuries undergoing nonoperative management: is it safe?",
+    "answer": "Early enoxaparin-based anticoagulation may be a safe option in trauma patients with blunt solid organ injury. This study showed no significant correlation between early anticoagulation and development of bleeding complications.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24928334"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_early_thromboembolic_prophylaxis_in_patients_with_blunt_soli",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 22,
+    "question": "What is the role of DNA Repair Cofactors ATMIN and NBS1?",
+    "answer": "The DNA double-strand break signaling kinase ATM and its cofactor NBS1 are required during T cell development and for the maintenance of genomic stability. The role of a second ATM cofactor, ATMIN (also known as ASCIZ) in T cells is much less clear, and whether ATMIN and NBS1 function in synergy in T cells is unknown.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26544571"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58853c56e56acf5176000018",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 23,
+    "question": "Comparative study of 2-D and bichanneled 3-D laparoscopic images: Is there a difference?",
+    "answer": "We believe that the 3-D camera system can allow young surgeons to perform standard laparoscopic tasks safely and quickly, so as to accelerate the learning curve. However, new-generation 3-D systems will be essential to overcome surgeons' discomfort.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26043363"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_comparative_study_of_2_d_and_bichanneled_3_d_laparoscopic_im",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "COMPARATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 24,
+    "question": "Is Li–Fraumeni syndrome a rare, autosomal recessive, hereditary disorder that predisposes carriers to cancer development?",
+    "answer": "Li-Fraumeni syndrome is a rare, autosomal DOMINANT, hereditary disorder that predisposes carriers to cancer development.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27516001"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5e639a8b1af46fc130000011",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 25,
+    "question": "Should UGT1A1 alteration be routinely determined in colorectal cancer patients?",
+    "answer": "Yes, UGT1A1 alteration should be routinely determined in colorectal cancer patients.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1A1 gene is a potential biomarker for colorectal cancer diagnosis and prognosis.The UGT1",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25782327",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26591441",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25817555",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25981652",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26692528",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26830078",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27072236",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26811156",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26098842",
+      "http://www.ncbi.nlm.nih.gov/pubmed/30550693",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25545261"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "65f775e8c4010b4d7800002d",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 26,
+    "question": "Does an intraoperative finding of an intact dural sac help to prognosticate neurological recovery in cauda equinal and epiconal injuries in thoracolumbar fractures?",
+    "answer": "Neurological recovery in cauda equinal and epiconal injuries in thoracolumbar fractures is significantly less likely in an intact dural sac, probably because the dural breach prevents the roots to take as much impact as compared to an intact dural sac.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25217246"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_an_intraoperative_finding_of_an_intact_dural_sac_help_t",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 27,
+    "question": "Is There a Right Ear Advantage in Congenital Aural Atresia?",
+    "answer": "Contrary to the hypothesis that a normal hearing right ear confers a language advantage in patients with unilateral hearing loss, children with left CAA (normal right ear) were statistically more likely to be enrolled in a special education program and have behavioral problems. Reported communication problems were more common in right CAA patients, but this did not reach statistical significance. No differences were found in use of amplification, frequency modulated system, individualized education program, or grade retention. Further investigation of both the clinical implications and underlying psychoacoustics of unilateral hearing loss and the identification and habilitation of \"at risk\" unilateral hearing loss children is warranted.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27631831"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_there_a_right_ear_advantage_in_congenital_aural_atresia",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 28,
+    "question": "Is obesity related to cognitive decline?",
+    "answer": "Obesity is a common medical illness that is increasingly recognised as conferring risk of decline in cognitive performance, independent of other comorbid medical conditions. Overweight and obesity are associated with an increased risk of subnormal intellectual performance in young adult males. Subjects with low birth weight and adolescent overweight/obesity are at particular risk of subnormal performance.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26163814",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25496905",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26107577"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c0e838b133db5eb7800002e",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 29,
+    "question": "Unemployment Rate, Smoking in China: Are They Related?",
+    "answer": "The unemployment rate was positively associated with smoking behavior. Smoking control and intervention strategies should focus on both the individual's characteristics and the physical environment in which unemployment rate tend to rise.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26761019"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_unemployment_rate_smoking_in_china_are_they_related",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 30,
+    "question": "Does the anteromedial portal provide clinical superiority compared to the transtibial portal in anterior cruciate ligament reconstruction in nonprofessional athletes in short-term follow-up?",
+    "answer": "The AM technique has no clinical superiority compared to the TT technique in ACL reconstruction in nonprofessional athletes.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26422342"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_the_anteromedial_portal_provide_clinical_superiority_co",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "COMPARATIVE",
+    "question_type": "yesno"
+  },
+  {
+    "id": 31,
+    "question": "Is Clostridioides difficile an aerobe or a anaerobe bacterium?",
+    "answer": "Clostridioides difficile is a strict (obligate) anaerobic bacterium.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26231446",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27507338"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "67d71d8f18b1e36f2e00002b",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 32,
+    "question": "Postoperative pneumoperitoneum: is it normal or pathologic?",
+    "answer": "Postoperative pneumoperitoneum on abdominal CT can be seen in up to 23% of patients 3-weeks postoperatively; however, only 6% of the patients required intervention emphasizing the typically benign consequences of postoperative free air.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25940159"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_postoperative_pneumoperitoneum_is_it_normal_or_pathologic",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 33,
+    "question": "Is Tecovirimat effective for smallpox?",
+    "answer": "Yes, tecovirimat FDA approved for treatment of smallpox.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25480757",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25896687"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c58923c86df2b9174000005",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 34,
+    "question": "Coated platelets and severe haemophilia A bleeding phenotype: Is there a connection?",
+    "answer": "Coated platelet levels were not associated with bleeding phenotype in this study; however, these data may suggest coated platelet levels are lower in haemophilia patients relative to healthy volunteers.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26561343"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_coated_platelets_and_severe_haemophilia_a_bleeding_phenotype",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 35,
+    "question": "Is modified vaccinia Ankara effective for smallpox?",
+    "answer": "Yes, modified vaccinia Ankara is effective for smallpox.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26380340"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5e30f23cfbd6abf43b000042",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 36,
+    "question": "Are there ways of joint Bayesian inference of risk variants?",
+    "answer": "Yes. RiVIERA (Risk Variant Inference using Epigenomic Reference Annotations) is a Bayesian model for inference of driver variants from summary statistics across multiple traits using hundreds of epigenomic annotations.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27407109"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a80dbaafaa1ab7d2e000026",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 37,
+    "question": "Increased anti-KIR4.1 antibodies in multiple sclerosis: could it be a marker of disease relapse?",
+    "answer": "Anti-KIR4.1 Abs were found in similar proportions of patients with MS and NMO, at a significantly higher level than observed in HCs; consequently, the presence of Abs does not discriminate between these demyelinating diseases. However, anti-KIR4.1 Ab levels differed in MS patients during relapse and remission; as such, they may represent a marker of disease exacerbation.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25392324"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_increased_anti_kir4_1_antibodies_in_multiple_sclerosis_could",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 38,
+    "question": "Has ruxolitinib received FDA approval?",
+    "answer": "Yes, ruxolitinib is FDA approved. In 2011 the oral JAK2 kinase inhibitor ruxolitinib became the first Food and Drug Administration (FDA)-approved drug for the treatment of myelofibrosis.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27796499"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a7626989e632bc066000001",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 39,
+    "question": "GBA-associated parkinsonism and dementia: beyond α-synucleinopathies?",
+    "answer": "Although numbers are small, our findings indicate that the clinical phenotype of GBA-associated neurodegenerative disease is more heterogeneous than previously assumed, including phenotypes not usually associated with underlying α-synucleinopathies. This may be of relevance, once causal therapeutic strategies for GBA-associated neurodegenerative disease are developed.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26549049"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_gba_associated_parkinsonism_and_dementia_beyond_synucleinopa",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 40,
+    "question": "Is deletion at 6q24.2-26 associated with shorter survival for ovarian cancer patients?",
+    "answer": "No, the 6q24.2-26 deletion is an independent marker of favorable outcome in high-grade serous ovarian carcinoma (HGSOC) patients with potential clinical value as it can be analyzed by FISH on tumor sections and guide the selection of patients towards more conservative therapeutic strategies in order to reduce side-effects and improve quality of life.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26463438"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5e51dab06d0a27794100003d",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 41,
+    "question": "Does the interval since vaginal delivery influence the chance of vaginal birth after cesarean?",
+    "answer": "A longer interval since vaginal delivery is associated with a decreased odd of VBAC. However, the addition of this interval to VBAC prediction models does not substantively improve their predictive ability.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25586319"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_the_interval_since_vaginal_delivery_influence_the_chanc",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 42,
+    "question": "What alternate indication has Vanoxerine been repositioned for?",
+    "answer": "Vanoxerine's effects were strongly frequency-dependent and we repositioned it for treatment of atrial fibrillation and flutter. Vanoxerine has been in clinical trials for Parkinsonism, depression and cocaine addiction but lacked efficacy.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26616666",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25684233",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27108936"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58c9a8fe02b8c6095300002a",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "NORMATIVE",
+    "question_type": "factoid"
+  },
+  {
+    "id": 43,
+    "question": "Are radiomic features useful in predicting survival in glioblastoma patients?",
+    "answer": "Yes, radiomic features are useful in predicting survival in glioblastoma patients. Radiomics involves extracting numerous quantitative features from medical images, such as MRI scans, to capture tumor characteristics that are not visible to the naked eye. These features can be correlated with clinical outcomes, including survival rates, by providing insights into tumor heterogeneity, shape, and texture. Studies have shown that radiomic features can improve prognostic assessments and guide treatment planning for glioblastoma patients. Machine learning models utilizing these features have been developed to enhance predictions of survival, offering a more comprehensive understanding of the tumor and its behavior. By integrating radiomic data into clinical practice, healthcare providers can potentially tailor treatment strategies more effectively, improving patient outcomes. Overall, radiomics represents a promising approach in the management of glioblastoma, aiding in the prediction of survival and the personalization of treatment plans.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27326665",
+      "http://www.ncbi.nlm.nih.gov/pubmed/28325002"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "680a237618b1e36f2e000152",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 44,
+    "question": "Evaluation of Small Adrenal Incidental Nodules: Is Imaging Follow-Up Necessary?",
+    "answer": "Patients with small incidental adrenal nodules do not require additional imaging to exclude the possibility of adrenocortical carcinoma.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26694019"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_evaluation_of_small_adrenal_incidental_nodules_is_imaging_fo",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 45,
+    "question": "Does attentional focus during balance training in people with Parkinson's disease affect outcome?",
+    "answer": "Attentional focus instructions to augment a 4-week balance training program did not result in any change over and above a control group in measures of gait and balance in individuals with Parkinson's disease. Additionally, while all four groups improved, there was no difference among the groups, including the control, suggesting that the 4-week balance training program in this trial was not effective.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25697454"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_attentional_focus_during_balance_training_in_people_wit",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 46,
+    "question": "What is smFISH?",
+    "answer": "smFISH (Single-molecule fluorescence in situ hybridization) allows for quantitative imaging of single RNA molecules. Multi-color, single-molecule fluorescence in situ hybridization (smFISH) is particularly useful since it enables analysis of several different transcripts simultaneously. Combining smFISH with immunofluorescent protein detection provides additional information about the association between transcription level, cellular localization, and protein expression in individual cells.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26098021"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56af5abb0a360a5e45000012",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 47,
+    "question": "Is there a role for the development of a supra-regional network for the management of penile cancer in the Republic of Ireland?",
+    "answer": "Our findings suggest that managing penile cancer in special interest centres may improve oncological outcome.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25444439"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_there_a_role_for_the_development_of_a_supra_regional_netw",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 48,
+    "question": "Does the early feedback of results improve reassurance following diagnostic testing?",
+    "answer": "The early provision of test results had no impact on patient reassurance. The study suggests the identification and targeting of patients high in cardiac anxiety may be a better method for improving reassurance than reducing the waiting time for results following medical testing.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25133827"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_the_early_feedback_of_results_improve_reassurance_follo",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 49,
+    "question": "Is autophagy modulated in a circadian fashion?",
+    "answer": "Yes, metabolic pathways, bile acid synthesis, and autophagic and immune/inflammatory processes are driven by the biological clock.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27171500"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a87fd0561bb38fb24000010",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 50,
+    "question": "Is erythropoietin effective for treatment of amyotrophic lateral sclerosis?",
+    "answer": "No, erythropoietin is not effective for treatment of amyotrophic lateral sclerosis.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25595151",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25886781"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c647c52e842deac6700001c",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 51,
+    "question": "Has any single infectious agent been identified as the cause of irritable bowel syndrome?",
+    "answer": "No single infectious agent has been identified as the sole cause of irritable bowel syndrome (IBS). While various bacterial, viral, and parasitic pathogens have been linked to IBS development, including Campylobacter, Giardia lamblia, and Blastocystis hominis, among others, the evidence suggests that IBS is a multifactorial disorder. Acute infectious gastroenteritis can trigger IBS symptoms in some individuals, but the underlying mechanisms are complex and involve alterations in the gut microbiome, immune system, and intestinal function. The current understanding is that IBS is a heterogeneous condition with various contributing factors, including infectious agents, rather than a single causative agent.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27409092",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26819502",
+      "http://www.ncbi.nlm.nih.gov/pubmed/28883961"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "67ed650c18b1e36f2e0000fe",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 52,
+    "question": "Do individual, online motivational interviewing chat sessions enhance weight loss in a group-based, online weight control program?",
+    "answer": "Online MI chat sessions were not a viable strategy to enhance Web-based weight control treatment outcomes.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27616628"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_individual_online_motivational_interviewing_chat_sessions",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 53,
+    "question": "Onset of opportunity to use cannabis and progression from opportunity to dependence: Are influences consistent across transitions?",
+    "answer": "The profile of factors associated with opportunity to use cannabis and dependence only partially overlaps, suggesting targeting of interventions may benefit from being tailored to the stages of drug use.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26811121"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_onset_of_opportunity_to_use_cannabis_and_progression_from_op",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 54,
+    "question": "Can diagnostic ultrasound scanners be a potential vector of opportunistic bacterial infection?",
+    "answer": "Contamination not only affects parts of diagnostic equipment placed in direct contact with the patient, but also, those surfaces that only medical personnel have had contact with.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27622409"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_diagnostic_ultrasound_scanners_be_a_potential_vector_of_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 55,
+    "question": "Management of testosterone therapy in adolescents and young men with hypogonadism: are we following adult clinical practice guidelines?",
+    "answer": "Pediatric endocrinologists in this review did not consistently follow the Clinical Practice Guideline for testosterone therapy in hypogonadal adult males. Strategies that improve adherence to guidelines could help maximize the benefits of therapy and minimize treatment-associated risks.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25324443"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_management_of_testosterone_therapy_in_adolescents_and_young_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 56,
+    "question": "Do black race patients have worse survival in colorectal cancer?",
+    "answer": "Yes, according to the data from the National Cancer Database, black patients do have a worse survival rate in colorectal cancer compared to white patients. The unadjusted survival analysis found a 15% higher chance of dying for black patients compared to white patients. Even after adjusting for patient, tumor, and demographic variables, the risk of death was still marginally higher for black patients. The absolute 5-year survival difference between black and white patients was 9.2% (57.3% for black patients vs 66.5% for white patients). However, it's important to note that after adjusting for differences in treatment, the increased risk of death for black patients disappeared. Additionally, insurance coverage differences accounted for approximately half of the disparity in survival rates.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27138583",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27467183"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "65f77236c4010b4d7800001f",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 57,
+    "question": "Does osteoarthritis of the ankle joint progress after triple arthrodesis?",
+    "answer": "This study reports minor, not statistically significant, changes of the ankle joint following triple arthrodesis after 7.5 years. Clinical outcome remained stable in time. Clinical relevance It seems that triple arthrodesis as such does not lead to major osteoarthritis of the ankle, given that adequate alignment of the hindfoot is achieved.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27810026"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_osteoarthritis_of_the_ankle_joint_progress_after_triple",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 58,
+    "question": "Hungry for nothing: should dental patients fast prior to conscious sedation?",
+    "answer": "Medical professionals in dentistry provide a wide range of conflicting views on the employment of fasting prior to conscious sedation reflecting the lack of homogeneity in literature surrounding this topic.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25895232"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_hungry_for_nothing_should_dental_patients_fast_prior_to_cons",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 59,
+    "question": "Can Resorbable Fixation Screws Replace Titanium Fixation Screws?",
+    "answer": "In this study, the resorbable screws were found to be soft and flexible compared with the titanium screw. According to the results of this nano-indentation study, resorbable and titanium screws cannot be used interchangeably.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27134157"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_resorbable_fixation_screws_replace_titanium_fixation_scr",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 60,
+    "question": "Is water in dental units microbiologically safe?",
+    "answer": "The results show that water delivered to a dental unit should be periodically tested bacteriologically and in terms of physical and chemical properties. Water systems of dental units should also be periodically disinfected to eliminate bacteria and biofilm.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26674163"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_water_in_dental_units_microbiologically_safe",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 61,
+    "question": "Is phospholipid hydroperoxide glutathione peroxidase a selenoprotein?",
+    "answer": "Yes,\nthe phospholipid hydroperoxide glutathione peroxidase (PHGPx/GPx4) is  the major selenoprotein.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25922076"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c5f22951a4c55d80b00001d",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 62,
+    "question": "Do patients use decision and communication aids as prompted when meeting with breast cancer specialists?",
+    "answer": "Prompting patients assures better use of decision than communication aids. Clinicians may need to take a more active role to ensure patients receive adequate notes and recordings.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/23294338"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_patients_use_decision_and_communication_aids_as_prompted_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 63,
+    "question": "Does bleomycin cause lung toxicity?",
+    "answer": "Pulmonary toxicity is a devastating complication of bleomycin chemotherapy.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26834240",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27190828",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26888428",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27241272"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "601efda31cb411341a000069",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 64,
+    "question": "Virtual rehabilitation in a school setting: is it feasible for children with cerebral palsy?",
+    "answer": "The IREX is feasible to implement in a school-based setting supervised by teachers. This provides an option for delivering physiotherapy to children in isolated areas who do not receive on-going therapy. Implication for Rehabilitation Virtual rehabilitation programmes using the IREX are feasible in a school-based setting. The negative impact of technical difficulties is likely to be overcome by the user's enjoyment and rehabilitation benefits gained. Input from a therapist in designing and monitoring the programme is critical.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24001213"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_virtual_rehabilitation_in_a_school_setting_is_it_feasible_fo",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 65,
+    "question": "Is there a safer electrosurgical current for endoscopic sphincterotomy in patients with liver cirrhosis?",
+    "answer": "Endoscopic sphincterotomy bleeding is less frequently observed in patients with cirrhosis who underwent sphincterotomy with alternating mixed current in the pulse cut mode compared with those with blended current.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25576330"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_there_a_safer_electrosurgical_current_for_endoscopic_sphi",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 66,
+    "question": "Can States Simultaneously Improve Health Outcomes and Reduce Health Outcome Disparities?",
+    "answer": "For mortality in US states over a recent period, improvement in the population mean and disparity reduction do not usually occur together. The disparity reduction rates observed may provide realistic guidance for public and private policy makers in setting goals for reducing population health disparity and creating investment priorities. As a starting point for discussion, the observed national median annual percentage improvement of 1.1 per year combined, 3.6% per year absolute gap reduction, and 1.2% per year relative gap reduction would be modest and reasonable goals.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27560720"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_states_simultaneously_improve_health_outcomes_and_reduce",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 67,
+    "question": "Is Ameloblastoma a malignant type of cancer?",
+    "answer": "No. Ameloblastoma is classified as a benign odontogenic tumor, although it can exhibit aggressive behavior and has a high recurrence rate.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27386438"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "67e94f4418b1e36f2e0000dc",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 68,
+    "question": "What is the cause of the disease Xeroderma Pigmentosum?",
+    "answer": "Mutations in the ERCC1 or ERCC4 genes cause a remarkable array of rare inherited human disorders including specific forms of xeroderma pigmentosum. Individuals with NER-defective xeroderma pigmentosum (XP), in which bulky DNA lesions are not efficiently removed, are cancer-prone and suffer neurodegeneration.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26074087"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5e46e74e3f5415952900000b",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 69,
+    "question": "Is there an association between presenteeism and depression?",
+    "answer": "Yes. Presenteeism is associated with depression. Remission of depression is associated with improvement of presenteeism.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25173795"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "54f49e56d0d681a040000004",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 70,
+    "question": "Is APOE ε4 associated with poorer cognitive outcome following traumatic brain injury?",
+    "answer": "This meta-analysis indicates that APOE ε4 does not have a detrimental effect on cognitive performance following TBI. We propose that the relationship between APOE and cognitive function following TBI is complex, and a more-nuanced exploration of APOE genotypes is needed. (PsycINFO Database Record",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26986748"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_apoe_4_associated_with_poorer_cognitive_outcome_following",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 71,
+    "question": "Epithelial turnover in duodenal familial adenomatous polyposis: A possible role for estrogen receptors?",
+    "answer": "This study confirmed that ER-β is strongly decreased in duodenal FAP carcinomas, declining in a multiple step fashion, thereby suggesting a putative anti-carcinogenic effect. ER-α showed the opposite trend. ER-β/caspase 3 co-expression suggests this hormone's possible involvement in apoptosis. Hormonal influences in FAP duodenal tumorigenesis, and modulation of these as a possible chemoprevention strategy, may be a promising approach.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27003997"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_epithelial_turnover_in_duodenal_familial_adenomatous_polypos",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 72,
+    "question": "Are the Contraceptive Recommendations of Family Medicine Educators Evidence-Based?",
+    "answer": "The contraceptive recommendations of this cohort of family medicine educators only partially reflected evidence-based guidelines. More misconceptions were noted regarding eligibility criteria for the IUD than for OCPs. To avoid denying safe and effective contraception to otherwise appropriate candidates and putting women at risk of unintended pregnancy, evidence-based contraceptive recommendations must be improved among family medicine educators.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27159092"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_are_the_contraceptive_recommendations_of_family_medicine_edu",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 73,
+    "question": "Is the Wnt protein modified by notum?",
+    "answer": "Yes, \tNotum deacylates Wnt proteins to suppress signalling activity.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25731175"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "57089865cf1c32585100000c",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 74,
+    "question": "Fractionation of Palliative Radiation Therapy for Bone Metastases in Ontario: Do Practice Guidelines Guide Practice?",
+    "answer": "The publication of an Ontario practice guideline endorsing the use of SF PRT.B was associated with only a transient increase in the use of SFs in Ontario and did little to reduce intercenter variations in fractionation.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26454681"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_fractionation_of_palliative_radiation_therapy_for_bone_metas",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 75,
+    "question": "Is avanafil indicated for treatment of erectile dysfunction?",
+    "answer": "Yes, avanafil is indicated for treatment of erectile dysfunction.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25801159",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25591992",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26316720",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27121186",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25684196",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27377089",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26784833"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5895d0457d9090f35300000d",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "NORMATIVE",
+    "question_type": "yesno"
+  },
+  {
+    "id": 76,
+    "question": "Clinical Results After Conservative Management for Grade III Acromioclavicular Joint Injuries: Does Eventual Surgery Affect Overall Outcomes?",
+    "answer": "According to our results, (1) a trial of nonoperative treatment is warranted because successful outcomes can be expected even in patients who eventually opt for surgery and (2) patients who presented more than 30 days after their injury were less likely to complete nonoperative treatment successfully.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26853948"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_clinical_results_after_conservative_management_for_grade_iii",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "PROCEDURAL",
+    "question_type": "summary"
+  },
+  {
+    "id": 77,
+    "question": "Do we treat individuals as patients or as potential donors?",
+    "answer": "Ethical questions should be discussed more both in educations of healthcare professionals and in clinical practice.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24781340"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_we_treat_individuals_as_patients_or_as_potential_donors",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 78,
+    "question": "Which drugs are included in the VAC regiment for Ewing's sarcoma?",
+    "answer": "VAC regiment for Ewing's sarcoma includes vincristine, actinomycin, cyclophosphamide.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26271204"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "60274ec61cb411341a0000e5",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 79,
+    "question": "Is rucaparib used for ovarian cancer treatment?",
+    "answer": "Yes, rucaparib is a PARP inhibitor that is used for ovarian cancer treatment.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26281686",
+      "http://www.ncbi.nlm.nih.gov/pubmed/24962512",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27141070",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27087632",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27141062",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27002934",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27716873",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27022037"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "588485bbe56acf517600000b",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 80,
+    "question": "Do Sociodemographic Factors Influence Outcome in Prostate Cancer Patients Treated With External Beam Radiation Therapy?",
+    "answer": "This analysis suggests that sociodemographic factors are not important prognostic factors in determining outcome after EBRT for prostate cancer.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24879473"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_sociodemographic_factors_influence_outcome_in_prostate_ca",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 81,
+    "question": "What is the role of metalloproteinase-17 (ADAM17) in NK cells?",
+    "answer": "The metalloproteinase-17 (ADAM17) is involved in CD16A cleavage and acts as a regulatory checkpoint in NK cells",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27077118"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5c6ffc5b7c78d69471000057",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 82,
+    "question": "Are selenium supplements recommended for prostate cancer prevention?",
+    "answer": "No. The SELECT study failed to show any significant risk reduction for prostate cancers ascribable to selenium and vitamin E supplementations.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25854337",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25505227",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26957512",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25990689"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58f0b40d70f9fc6f0f000008",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "NORMATIVE",
+    "question_type": "yesno"
+  },
+  {
+    "id": 83,
+    "question": "Please list 2 treatments for a torn rotator cuff",
+    "answer": "to compare clinical outcomes between conventional en masse repair and separate double-layer double-row repair for the treatment of delaminated rotator cuff tears.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26847487",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26912284",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26564215",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26254089",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27157656"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "58c99acf02b8c60953000028",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 84,
+    "question": "Antenatal testing in uncomplicated pregnancies: should testing be initiated after 40 or 41 weeks?",
+    "answer": "Pregnancies tested at 40 weeks were identified as abnormal and sent to L&D at the same rate as those tested at 41 weeks. Therefore, it may be reasonable to initiate fetal surveillance at the estimated date of delivery.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25014512"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_antenatal_testing_in_uncomplicated_pregnancies_should_testin",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 85,
+    "question": "Do genes with monoallelic expression contribute proportionally to genetic diversity in humans?",
+    "answer": "No, genes with monoallelic expression contribute disproportionately to genetic diversity in humans.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26808112"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5e51a2d76d0a27794100003a",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 86,
+    "question": "Is Cri Du Chat associated with an expansion of a repeat with in the gene found on chromosome 5?",
+    "answer": "Cri-du-chat syndrome is a chromosomal disorder caused by a deletion of the short arm of chromosome 5",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27144168"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "58dbba438acda3452900001c",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 87,
+    "question": "Why is Trifluridine/Tipiracil more active than other fluorpyrimidines in colorectal cancer patients?",
+    "answer": "Trifluridine/Tipiracil is more active in colorectal cancer patients due to its unique mechanism of action, which involves DNA incorporation and an alternative activation pathway via thymidine kinase.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26557901",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25700705",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26722024"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "662fc6aa187cba990d000017",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "summary"
+  },
+  {
+    "id": 88,
+    "question": "Does simvastatin improve outcomes of aneurysmal subarachnoid hemorrhage?",
+    "answer": "No. Simvastatin showed no benefits in decreasing the incidence of vasospasm, DCI, or all-cause mortality after aneurysmal subarachnoid hemorrhage. Patients with aneurysmal subarachnoid hemorrhage should not be treated routinely with simvastatin during the acute stage.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25516195",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26285662",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26587185"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c73ad0b7c78d69471000093",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 89,
+    "question": "Are there gender, racial or relationship differences in caregiver task difficulty, depressive symptoms and life changes among stroke family caregivers?",
+    "answer": "Findings suggest that female and non-African American stroke caregivers are relatively more likely to experience task difficulty, depressive symptoms and negative life changes as a result of providing care. African American spouses were also at risk. Tailoring interventions based on caregivers' characteristics may improve outcomes.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25141098"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_are_there_gender_racial_or_relationship_differences_in_careg",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 90,
+    "question": "What is Mondor's disease?",
+    "answer": "Mondor's disease is a rare benign and self-limiting condition characterized by thrombophlebitis of the superficial veins of the anterolateral thoracoabdominal wall and genital area.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24989360",
+      "http://www.ncbi.nlm.nih.gov/pubmed/24867818",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25960806",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25923155",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25530373",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25667776",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26803533",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26971966"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "589a246778275d0c4a00002f",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 91,
+    "question": "According to guidelines, insulin resistance is one risk factor in the diagnosis of metabolic syndrome, name 3 more risk factors.",
+    "answer": "Metabolic syndrome (MetS) is generally defined as a cluster of metabolically related cardiovascular risk factors which are often associated with the condition of insulin resistance, elevated blood pressure, and abdominal obesity.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26280340",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26543426"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5a981e66fcd1d6a10c00002f",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 92,
+    "question": "SCAPIS Pilot Study: Sitness, Fitness and Fatness - Is Sedentary Time Substitution by Physical Activity Equally Important for Everyone's Markers of Glucose Regulation?",
+    "answer": "LIPA, and not only MVPA, may have beneficial associations with glucose regulation. This is of great clinical and public health importance, not least because it may confer a higher compliance rate to regular PA.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26900674"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_scapis_pilot_study_sitness_fitness_and_fatness_is_sedentary_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 93,
+    "question": "Please list 6 symptoms of Scarlet fever.",
+    "answer": "Symptoms of scarlet fever include fever, rash, strawberry tongue and sore throat. In some cases other symptoms, angular stomatitis, tonsular exudate, and swollen lymph nodes are seen.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26280141",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26585817"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5aa55b65d6d6b54f7900000e",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 94,
+    "question": "Do 360-degree feedback survey results relate to patient satisfaction measures?",
+    "answer": "The relationship between Quality PULSE 360 feedback scores and measures of patient satisfaction reaffirm that feedback from work team members may provide helpful information into how patients may be perceiving their physicians' behavior and vice versa. Furthermore, the findings provide tentative support for the use of team-based feedback to improve the quality of relationships with both coworkers and patients. The 360-degree survey process may offer an effective tool for physicians to obtain feedback about behavior that could directly impact practice reimbursement and reputation or potentially be used for bonuses to incentivize better team professionalism and patient satisfaction, ie, \"pay-for-professionalism.\" Further research is needed to expand on this line of inquiry, determine which interventions can improve 360-degree and patient satisfaction scores, and explain the shared variance in physician performance that is captured in the perceptions of patients and coworkers.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25287521"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_360_degree_feedback_survey_results_relate_to_patient_sati",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 95,
+    "question": "What is the effect of nocodazole cell treatment?",
+    "answer": "Nocodazole trigger mitotic arrest.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27833610",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27609478",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27177335",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27262873"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "58a8903b38c171fb5b000006",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 96,
+    "question": "What is the mechanism of viroid replication?",
+    "answer": "The replication of many viral and subviral pathogens as well as the amplification of certain cellular genes proceeds via a rolling circle mechanism. Viroid replication occurs via a rolling circle mechanism using either a symmetric or asymmetric pathway in three steps, RNA transcription, processing and ligation. Replication of these minimal genomes, composed exclusively by a circular RNA of 246-401 nt, occurs in the nucleus (family Pospiviroidae) or in the chloroplast (family Avsunviroidae) by an RNA-based rolling-circle mechanism with three steps: (1) synthesis of longer-than-unit strands catalyzed by host DNA-dependent RNA polymerases recruited and redirected to transcribe RNA templates, (2) cleavage to unit-length, which in family Avsunviroidae is mediated by hammerhead ribozymes, and (3) circularization through an RNA ligase or autocatalytically.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25287502"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56f3faed09dd18d46b000002",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 97,
+    "question": "Should we choose between problem-based learning and team-based learning?",
+    "answer": "In this paper we advocate for a joining of forces. By combining elements of PBL and TBL, we could create varied instructional approaches that are in keeping with current instructional design principles, thereby combining the best of both worlds to optimize student learning.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25154342"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_should_we_choose_between_problem_based_learning_and_team_bas",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 98,
+    "question": "List two human monoclonal antibodies against Clostridium difficile toxins.",
+    "answer": "Actoxumab and bezlotoxumab are human monoclonal antibodies against C. difficile toxins A and B, respectively. They were shown to decrease Clostridium difficile recurrence. Bezlotoxumab was approved by the Food and Drug Administration and the European Medicines Agency for Clostridium difficile recurrence.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25451052",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25486992",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27757389",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27905086"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5a7240aa2dc08e987e00000d",
+    "queryType": "list",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "list"
+  },
+  {
+    "id": 99,
+    "question": "Which computational frameworks are available for predicting enhancers?",
+    "answer": "DEEP integrates three components with diverse characteristics that streamline the analysis of enhancer's properties in a great variety of cellular conditions. DEEP uses features derived from histone modification marks or attributes coming from sequence characteristics. Experimental results indicate that DEEP performs better than four state-of-the-art methods on the ENCODE data. The PRISM (predicting regulatory information from single motifs) approach obtains 2543 TF function predictions in a large variety of contexts, at a false discovery rate of 16%. The predictions are highly enriched for validated TF roles, and 45 of 67 (67%) tested binding site regions in five different contexts act as enhancers in functionally matched cells.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25378307"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56ae40110a360a5e45000009",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 100,
+    "question": "Is Solanezumab effective for Alzheimer's Disease?",
+    "answer": "No. Solanezumab, a humanized monoclonal antibody that binds amyloid, failed to improve cognition or functional ability in patients with Alzheimer's Disease.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27239541",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26815584",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26238576",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26990863"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a70e1d999e2c3af26000007",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 101,
+    "question": "Can radiographs of hip fractures predict subsequent hip fractures?",
+    "answer": "Shape modelling is feasible and can be applied in the routine clinical setting. However, we were unable to elucidate any predictive value in this relatively small sample. A reliable radiograph-based method of identifying patients at risk of second fracture would be of value in planning prevention, service provision, and cost analysis. Further work is required and a study with more patients might exclude the type 2 error in our work.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27173091"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_radiographs_of_hip_fractures_predict_subsequent_hip_frac",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 102,
+    "question": "What is the mechanism of the auxin-inducible degron system?",
+    "answer": "Fusion of inducible degradation signals, so-called degrons, to cellular proteins is an elegant method of controlling protein levels in vivo.  The auxin-inducible degron (AID) system allows the rapid and reversible proteolysis of proteins of interest, and enables the generation of conditional mutants of budding yeast. Strategies that use ubiquitin-mediated protein degradation to eliminate the product of a gene of interest, such as heat-inducible degron (td) and auxin-inducible degron (AID), are powerful methods for constructing conditional mutants. Auxin-inducible degron (AID) technology allows rapid depletion of proteins in animal cells and fungi, but its application to human cells has been limited by the difficulties of tagging endogenous proteins. The auxin-inducible degron harbors great potential for dynamic protein depletion in yeast. Here, we thoroughly and quantitatively characterize the auxin-inducible degron in single yeast cells.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27010248",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27052166"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a86bf2efaa1ab7d2e000033",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 103,
+    "question": "Does Lymph Node Metastasis Have a Negative Prognostic Impact in Patients with NSCLC and M1a Disease?",
+    "answer": "These results provide preliminary evidence that lymph node stage may have clinical significance among patients with NSCLC with M1a disease, adding prognostic information.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27567989"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_lymph_node_metastasis_have_a_negative_prognostic_impact",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 104,
+    "question": "Is Apremilast effective for Behcet’s syndrome?",
+    "answer": "Yes. Apremilast was proven to be effective for treatment of Behcet’s syndrome.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25875256",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26487500",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26555450",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27163156"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5a7340962dc08e987e000017",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 105,
+    "question": "Can denosumab cause jaw necrosis?",
+    "answer": "Yes. Denosumab can cause jaw necrosis",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26859582",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27648313"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "65d126d21930410b1300002c",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 106,
+    "question": "Vocal Control: Is It Susceptible to the Negative Effects of Self-Regulatory Depletion?",
+    "answer": "Findings suggest that SRD may present challenges to vocal behavior modification during free speech but not reading. Furthermore, relaxation did not significantly replete self-regulatory resources for vocal modification during free speech. Findings may highlight potential considerations for voice treatment and assessment and support the need for future research focusing on effective methods to test self-regulatory capacity and replete self-regulatory resources in voice patients.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26804788"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_vocal_control_is_it_susceptible_to_the_negative_effects_of_s",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 107,
+    "question": "Can the tandem measurement of age adjusted D-dimer and tissue plasminagen activator improve the clinical utility of a conventional D-dimer in the pulmonary embolism diagnosis?",
+    "answer": "The ADD/tPA combination substantially increased the clinical utility in the PE diagnosis compared with conventional D-dimer, without reducing the security. The ADD/tPA combination could decrease the need for pulmonary vascular imaging for the PE diagnosis in nearly the half. These promising results should be validated prospectively.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25719400"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_the_tandem_measurement_of_age_adjusted_d_dimer_and_tissu",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 108,
+    "question": "Improving influenza vaccination in chronically ill children using a tertiary-care based vaccination clinic: Is there a role for the live-attenuated influenza vaccine (LAIV)?",
+    "answer": "Having an influenza vaccination clinic on site at a tertiary care hospital, where children come for their scheduled visits, facilitates yearly influenza vaccination in children with chronic illnesses. LAIV is preferred by caregivers and patients, when not contraindicated.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26752064"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_improving_influenza_vaccination_in_chronically_ill_children_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 109,
+    "question": "Describe the mechanism of action of Bezlotoxumab?",
+    "answer": "Bezlotoxumab (Zinplava™) is a human monoclonal antibody against Clostridium difficile toxin B (TcdB). It is used for prevention of  recurrent C. difficile infections.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25451052",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25486992",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25385797",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27905086",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27753689",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27757389",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27527088"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "588fa24fed9bbee70d000005",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "summary"
+  },
+  {
+    "id": 110,
+    "question": "What are the targets of blinatumomab?",
+    "answer": "Blinatumomab is a fusion protein which consists of two single-chain variable fragments arranged in tandem: the first binds the CD19 surface antigen of all B cells and the second targets the CD3 antigen of T cells.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27872741",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27209293",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27050240",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26683683"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "67e5749b18b1e36f2e0000b5",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 111,
+    "question": "Multicenter evaluation of the role of UroVysion FISH assay in surveillance of patients with bladder cancer: does FISH positivity anticipate recurrence?",
+    "answer": "Patients with a positive FISH and atypical cytology are more likely to recur even in the absence of visible tumor. FISH positivity may portend a higher risk for progression. These findings require prospective validation.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25420920"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_multicenter_evaluation_of_the_role_of_urovysion_fish_assay_i",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "PROCEDURAL",
+    "question_type": "summary"
+  },
+  {
+    "id": 112,
+    "question": "Which trancription factor activates the betalain pathway?",
+    "answer": "The beet Y locus encodes an anthocyanin MYB-like protein that activates the betalain red pigment pathway.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25436858"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56d138fe3975bb303a000015",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 113,
+    "question": "Comparing the effectiveness of nasal dilator strips: does race play a role?",
+    "answer": "Nasal peak inspiratory flow, minimum cross-sectional area and visual analogue scale values improved from baseline with strip application in both populations. Only Caucasians experienced significant nasal airway resistance improvement with strip application. Both cohorts experienced nasal peak inspiratory flow improvement, with Caucasians experiencing a significantly larger improvement.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25385206"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_comparing_the_effectiveness_of_nasal_dilator_strips_does_rac",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 114,
+    "question": "Which yeast nucleosomes are preferentially marked by H2A.Z?",
+    "answer": "Yeast nucleosomes containing histone variant H2A.Z (Htz1p in yeast) are primarily composed of H4 K12ac and H3 K4me3.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26789756"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a82fc89faa1ab7d2e000028",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 115,
+    "question": "Is ADHD a Risk Factor for High School Dropout?",
+    "answer": "Participants with ADHD were significantly more likely to repeat a grade, adjusting for all other variables indicating the critical importance of early identification of ADHD to help mitigate adverse educational outcomes.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/23382575"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_adhd_a_risk_factor_for_high_school_dropout",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 116,
+    "question": "Was saracatinib being considered as a treatment for Alzheimer's disease in November 2017?",
+    "answer": "Yes, saracatinib is being studied as a treatment against Alzheimer's Disease. A clinical Phase Ib study has been completed, and a clinical Phase IIa study is ongoing.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25874001"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5a772e9dfaa1ab7d2e000001",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 117,
+    "question": "Microvascular reconstruction in elderly oral cancer patients: does diabetes status have a predictive role in free flap complications?",
+    "answer": "Diabetes mellitus increases the risk of the development of free flap complications in elderly patients when dealing with oral reconstruction after tumor removal.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25443379"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_microvascular_reconstruction_in_elderly_oral_cancer_patients",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 118,
+    "question": "Is the frequency of adult strabismus surgery increasing?",
+    "answer": "Although strabismus surgery is still most commonly performed on children, the data show there has been a significant increase in the number of strabismus operations performed on adults. We speculate that this increase is connected to the growing weight of evidence detailing the functional and psychosocial consequences of strabismus and the benefits of correction. These results have potential implications for the delivery of future care.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27350186"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_the_frequency_of_adult_strabismus_surgery_increasing",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "PROCEDURAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 119,
+    "question": "Is the fibrotic parietal thickening a reliable parameter for diagnosing previous asymptomatic deep vein thrombosis?",
+    "answer": "The usefulness of a sign of previous DVT (even if asymptomatic), detected during a routine Doppler ultrasound check of lower limbs, could be a warning bell to investigate thrombophilia status.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26428260"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_the_fibrotic_parietal_thickening_a_reliable_parameter_for",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 120,
+    "question": "Can cytomegalovirus (CMV) be transmitted via breast milk to premature infants?",
+    "answer": "No, cytomegalovirus (CMV) can be transmitted via breast milk to premature infants.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27257513",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26968830"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "661d20b7eac11fad33000016",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 121,
+    "question": "Does prolactinoma increase osteoporosis risk?",
+    "answer": "Yes, prolactinomas increase risk of osteoporosis. Prolactinomas also cause hypogonadism, infertility, and tumor mass effects.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26319389",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26243714",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25472533",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27446618"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5a70d43b99e2c3af26000003",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 122,
+    "question": "Does a tonsillectomy affect the patient's voice?",
+    "answer": "Some patients complaint for dry throat, foreign body sensation or voice change after tonsillectomy. Group B had a better awareness of tooth damage . There were no differences in secondary outcomes  across treatment groups. The incidence rates of voice change, velopharyngeal insufficiency, bleeding, constipation, dehydration, and pain were measured. ",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27554507"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "59bf823b542ba3824b000001",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 123,
+    "question": "Does knee stability in the coronal plane in extension affect function and outcome after total knee arthroplasty?",
+    "answer": "No correlations were found among varus-valgus laxities under static stress in extension, femoral condylar lift-off during walking, or patient-reported outcomes after well-aligned TKA. This study suggests that small variations in coronal laxities do not influence lift-off during walking and the patient-reported outcomes.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24923689"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_knee_stability_in_the_coronal_plane_in_extension_affect",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 124,
+    "question": "What does \"28\" stand for in the Disease Activity Score DAS28?",
+    "answer": "It stands for the Disease Activity Score 28 Joint Index (DAS28). It’s basically a measure of how active a patient is in regards to how active they are in relation to the DAS28. The 28 joint DAS (28 joints) is a way to measure how active the patient is compared to other people with the same disease.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25600850",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26449852",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25173347",
+      "http://www.ncbi.nlm.nih.gov/pubmed/24983407",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25143522"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5fe3130da43ad3127800003f",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 125,
+    "question": "Does mindfulness have potential in eating disorders prevention?",
+    "answer": "These preliminary findings demonstrate the acceptability and short-term efficacy of a mindfulness-based approach to reducing the risk of disordered eating in young women. This provides support for the continued evaluation of mindfulness in the prevention and early intervention of eating disorders, with increased efforts to produce maintenance of intervention gains.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24894735"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_mindfulness_have_potential_in_eating_disorders_preventi",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 126,
+    "question": "Is lumican a secreted protein?",
+    "answer": "Yes, Lumican is a secreted proteoglycan that regulates collagen fibril assembly.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26351669",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27126993"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5ad255210340b9f058000018",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 127,
+    "question": "The metabolic syndrome and cancer: Is the metabolic syndrome useful for predicting cancer risk above and beyond its individual components?",
+    "answer": "We show that the MetS is (inversely) associated with prostate cancer, but is not associated with overall, colorectal or breast cancer. Although, persons with five positive components of the MetS are at a 1.2 and 2.1 increased risk for overall and colorectal cancer, respectively, and these associations appear to be driven, largely, by elevated WC and BP. We also demonstrate that the MetS is only a moderate discriminator of cancer risk.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26037090"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_the_metabolic_syndrome_and_cancer_is_the_metabolic_syndrome_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 128,
+    "question": "Does academic performance or personal growth share a stronger association with learning environment perception?",
+    "answer": "Since supportive learning environments are essential for medical education, future work must determine if enhancing personal growth prior to and during the clerkship year will increase learning environment perception.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27570912"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_academic_performance_or_personal_growth_share_a_stronge",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 129,
+    "question": "What is the function of the dormancy survival regulator (DosR) in Mycobacterium tuberculosis?",
+    "answer": "During this phase, at least 48 genes, collectively named Dormancy survival regulator (DosR) regulon, are important for the long-term survival of bacilli under a non-respiring state.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25659138",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25535276"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58edfaf4eda5a57672000012",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 130,
+    "question": "Nontumorous Enlargement of the Internal Auditory Canal: A Risk Factor for Sensorineural Hearing Loss?",
+    "answer": "A new CT-based definition of normal shape and diameter of the internal auditory canal is presented. There is some evidence that a pathologic transmission of CSF-pressure in case of IAC-enlargement and/or abnormal fistulous communications could play an important role in the pathophysilogy of hearing loss.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25905691"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_nontumorous_enlargement_of_the_internal_auditory_canal_a_ris",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "CAUSAL",
+    "question_type": "summary"
+  },
+  {
+    "id": 131,
+    "question": "Which bacteria cause diphtheria?",
+    "answer": "Diphtheria is caused by the bacteria:\n1) Corynebacterium ulcerans and \n2) Corynebacterium diphtheriae.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25887321",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25578079",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26607400"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58b548d722d3005309000005",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 132,
+    "question": "Gene expression changes in residual advanced cervical cancer after radiotherapy: indicators of poor prognosis and radioresistance?",
+    "answer": "The higher expression of CXCL12 might be informative regarding poor prognosis in patients undergoing radical radiotherapy. The differentially expressed genes identified in our study might provide a new method for diagnosis and treatment of radioresistance in cervical cancer.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25940978"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_gene_expression_changes_in_residual_advanced_cervical_cancer",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 133,
+    "question": "Can the use of variable-angle volar locking plates compensate for suboptimal plate positioning in unstable distal radius fractures?",
+    "answer": "In this experimental model, variable-angle screws provided a leeway of 3 mm in both the sagittal and coronal directions without sacrificing construct strength, which may considerably facilitate fixation of these difficult fractures.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24786734"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_the_use_of_variable_angle_volar_locking_plates_compensat",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 134,
+    "question": "\"Do You Wanna Breathe or Eat?",
+    "answer": "Parents in food insecure households recognize that trade-offs between food and other basic necessities are associated with their personal stress and poor mental health that, in turn, affects their children's health and development. Partnerships between healthcare providers, policymakers, and parents are essential to successfully address and prevent the poor child health outcomes of toxic stress associated with food insecurity and poverty.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26156827"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_you_wanna_breathe_or_eat",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 135,
+    "question": "Do T cells enter the CNS in healthy individuals?",
+    "answer": "T cells can enter the central nervous system (CNS) even in healthy individuals, challenging the prior perception of their exclusively pathogenic role in neuroinflammatory diseases. Recent research highlights their diverse functions in maintaining CNS homeostasis, such as immune surveillance and tissue repair, alongside their involvement in responses to infection and injury. While historically associated with disease progression, these cells now appear to contribute to both protective and regulatory processes in the healthy CNS, underscoring a more nuanced understanding of their physiological roles. This shift emphasizes the complexity of T cell dynamics in the CNS, where their presence and activity are context-dependent, balancing immune defense with tissue integrity.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26942913",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26775912"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "680a084018b1e36f2e00014e",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 136,
+    "question": "Comparative Analysis of Left- Versus Right-sided Resection in Klatskin Tumor Surgery: can Lesion Side be Considered a Prognostic Factor?",
+    "answer": "Lesion side impacts outcome: right resections still cause significant morbidity related to extensive parenchymal sacrifice but are associated with better long-term survival because right hepatic pedicle resection enables better radicality compared with left resections.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25952531"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_comparative_analysis_of_left_versus_right_sided_resection_in",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "COMPARATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 137,
+    "question": "Does RUNX2 inhibit astrocyte differentiation?",
+    "answer": "No, RUNX2 promostes astrocyte differentiation.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27546532"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5c8fe71b0101eac87000000b",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 138,
+    "question": "Is local hypoperfusion the reason for transient neurological deficits after STA-MCA bypass for moyamoya disease?",
+    "answer": "On the basis of the authors' initial observations, an early-onset altered pattern of CBF was identified. These findings suggest local hypoperfusion as the cause of the TNEs. This hypoperfusion may originate from competing blood flows resulting from impaired cerebral autoregulation and a fluctuating flow in cerebral microcirculation.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25343178"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_local_hypoperfusion_the_reason_for_transient_neurological",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 139,
+    "question": "Repair of Paraesophageal Hiatal Hernias—Is a Fundoplication Needed?",
+    "answer": "Laparoscopic repair of PEH should be combined with a fundoplication to avoid postoperative gastroesophageal reflux and resulting esophagitis. Fundoplication-related side effects do not appear to be clinically relevant. Multicenter randomized trials are required to confirm these findings.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25868406"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_repair_of_paraesophageal_hiatal_hernias_is_a_fundoplication_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 140,
+    "question": "What are the side effects during statins administration in patients with atherosclerosis?",
+    "answer": "The side effects during statins administration in patients with atherosclerosis are:\n1) Myopathy\n2) Transaminase elevations\n3) Diabetes mellitus \n4) Renal and neurologic adverse effects.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25644328",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26575138",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25936326",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26490078",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25678839",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27878791"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "589c4c9078275d0c4a000040",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "PROCEDURAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 141,
+    "question": "Does it matter whose opinion we seek regarding the allocation of healthcare resources?",
+    "answer": "While the revealed preferences of seniors were egalitarian, juniors were more willing to differentiate between disease severity and potential to benefit. Differences in opinion between juniors and seniors should be considered in open dialogue regarding healthcare rationing. Insight into the preferences towards health maximization of the former group and the egalitarian beliefs of the latter group could be useful for decision makers in the search for public acceptance of allocation of scarce healthcare resources.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26683840"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_it_matter_whose_opinion_we_seek_regarding_the_allocatio",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 142,
+    "question": "Which receptors are bound by Tasimelteon?",
+    "answer": "Tasimelteon (HETLIOZ™) is an orally bioavailable agonist of the melatonin MT1 and MT2 receptors that has been approved in the US for the treatment of non-24-hour sleep-wake disorder.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25423562",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25534555"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56c1f043ef6e394741000057",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 143,
+    "question": "Are human enhancers or promoters evolving faster?",
+    "answer": "Our data further reveal that recently evolved enhancers can be associated with genes under positive selection, demonstrating the power of this approach for annotating regulatory adaptations in genomic sequences. We report that rapid evolution of enhancers is a universal feature of mammalian genomes. ",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25635462"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5ac3699f0340b9f058000001",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 144,
+    "question": "Long-Term Outcome of Prosthetic Valve Replacement in Japanese Patients Aged 65 Years or Older: Are Guidelines for Prosthetic Valve Selection Based on Overseas Data Appropriate for Japanese Patients?",
+    "answer": "Following revision of the AHA/ACC guidelines for selection of prosthetic valves, it is necessary to investigate whether patients aged 60-70 represent the gray zone for selecting valves as in US and European guidelines, or whether a higher age is more appropriate in view of the longer average life expectancy in Japan. Accordingly, further evaluation of the long-term outcome for mechanical and biological valves in Japanese patients is needed to obtain evidence for preparation of original Japanese guidelines on prosthetic valve selection.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26004117"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_long_term_outcome_of_prosthetic_valve_replacement_in_japanes",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 145,
+    "question": "Time to health-related quality of life score deterioration as a modality of longitudinal analysis for health-related quality of life studies in oncology: do we need RECIST for quality of life to achieve standardization?",
+    "answer": "Currently, the international ARCAD group supports the idea of developing RECIST for HRQoL in pancreatic and colorectal cancer with liver metastasis, with a view to using HRQoL as a co-primary endpoint along with a tumor parameter.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24277234"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_time_to_health_related_quality_of_life_score_deterioration_a",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 146,
+    "question": "Do elderly females have a higher risk of acute myocardial infarction?",
+    "answer": "Compared with the adult AMI group, the elderly AMI group had a higher proportion of females, electrocardiography with NSTEMI and no chest-pain complaints, and a larger proportion of elderly patients with diabetes, ischemic heart disease, heart attacks at home and cardiac shock, which had longer hospital stays, and higher mortality rates.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27590383"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_elderly_females_have_a_higher_risk_of_acute_myocardial_in",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 147,
+    "question": "Neighborhood Racial and Socioeconomic Disparities in the Food and Alcohol Environment: Are There Differences by Commercial Data Sources?",
+    "answer": "Differences in commercial data in the location and numeration of food and alcohol establishments are associated with neighborhood racial and socioeconomic characteristics and may introduce biases concerning neighborhood food and alcohol environments, racial and socioeconomic disparities, and health.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26896110"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_neighborhood_racial_and_socioeconomic_disparities_in_the_foo",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 148,
+    "question": "Is disruption of immune regulation mechanisms associated with adverse pregnancy outcomes, including preeclampsia (PE)?",
+    "answer": "Inflammation and oxidative stress at the maternal-fetal interface characterize the placental dysfunction that underlies the pregnancy disorder preeclampsia.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27108670"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "622632483a8413c653000081",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 149,
+    "question": "Does Severe Maternal Morbidity Affect Female Sexual Activity and Function?",
+    "answer": "FSFI scores were not different in both groups. However, they were lower than expected. SMM delayed resumption of sexual activity after delivery, beyond postpartum period. However, the proportion of women in both groups having sex at 3 months after delivery was similar. Altered sexual response may be evaluated as one of possible long-term consequences after SMM episodes. Further studies on the growing population of women surviving severe maternal conditions might be worth for improvement of care for women.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26629897"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_severe_maternal_morbidity_affect_female_sexual_activity",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 150,
+    "question": "What is the functional role of the protein Drp1?",
+    "answer": "Drp1 is involved in the regulation of mitochondrial fission.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26038571",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25332205",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25658204",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25348719",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25192600"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5717dbfe7de986d80d000001",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 151,
+    "question": "High-risk HPV platforms and test of cure: should specific HPV platforms more suited to screening in a 'test of cure' scenario be recommended?",
+    "answer": "As far as we are aware, this is the first study reporting potential differences between different HPV platforms currently available in the English programme. The immediate impact of this increase in rates of hrHPV detection with cobas4800 is an increased number of colposcopy referrals to our service. The NHSCSP needs to assess whether this increase is acceptable and, if not, whether specific HPV platforms more suited to screening in a ToC scenario should be recommended.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25412857"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_high_risk_hpv_platforms_and_test_of_cure_should_specific_hpv",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 152,
+    "question": "Anesthesia and organic aciduria: is the use of lactated Ringer's solution absolutely contraindicated?",
+    "answer": "Our patients with various forms of metabolically compensated OAs tolerated anesthetics for surgical procedures without metabolic decompensation, even when lactated Ringer's solution was used for hydration. Measures to prevent protein catabolism and intraoperative events that may precipitate metabolic acidosis, in addition to close monitoring of acid-base status during more extensive procedures, must be part of perioperative treatment of these patients.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25943188"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_anesthesia_and_organic_aciduria_is_the_use_of_lactated_ringe",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 153,
+    "question": "Does Axitinib prolong survival of Pancreatic Cancer patients?",
+    "answer": "No. The addition of axitinib to gemcitabine does not improve overall survival in advanced pancreatic cancer.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25647781"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5c73ad347c78d69471000098",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 154,
+    "question": "Can radiotherapy cause radiation induced osteosarcoma?",
+    "answer": "Yes, Radiation-induced osteosarcomas are a recognized complication of radiation therapy.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26009571",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26605276",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27906102"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5e3247f1fbd6abf43b00005b",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 155,
+    "question": "Is SARS virus interacting with ACE2 encoded protein?",
+    "answer": "Yes,\nThe infection of target cells by the SARS CoV is mediated through the interaction of the viral Spike (S) protein (1255 amino acids) and its cellular receptor, angiotensin-converting enzyme 2 (ACE2).",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26487711",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27082314"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5e80675d835f4e4777000026",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 156,
+    "question": "Can Intrapartum Cardiotocography Predict Uterine Rupture among Women with Prior Caesarean Delivery?",
+    "answer": "A pathological cardiotocogram should lead to particular attention on threatening uterine rupture but cannot be considered a strong predictor as it is common in all women with trial of labour after caesarean delivery.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26872018"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_intrapartum_cardiotocography_predict_uterine_rupture_amo",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 157,
+    "question": "Does the chromatin remodeling complex, RSC target H2A.Z nucleosomes?",
+    "answer": "H2A.Z probably helps RSC in keeping the gene nucleosome-free.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25813039"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5d385f717bc3fee31f00001a",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 158,
+    "question": "Is Kagami-Ogata associated with a deletion in chromosome 14",
+    "answer": "No, Kagami-Ogata is not associated with a deletion in chromosome 14.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27406249",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26377239"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "660812b4fdcbea915f000006",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 159,
+    "question": "Are Drosophila ultraconserved elements candidate ncRNAs?",
+    "answer": "Yes. Highly constrained intergenic Drosophila ultraconserved elements are candidate ncRNAs.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25618141"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56d1accb67f0cb3d66000001",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 160,
+    "question": "What is the most likely age of diagnosis of Crohn's disease (CD)?",
+    "answer": "Crohn's disease has a bimodal age distribution of disease onset diagnosis. The peaks (20 and 50 years) may represent different phenotypes or different genetic and/or environmental influences between younger- and older-onset individuals. When the age-related incidence of Crohn's disease was plotted for all countries from which such data were available, the peaks of greatest case frequency occurred at ages 15 to 25 years and paralleled a similar peak representing the number of Peyer's patches as a function of age. For those with biologic use, average age at time of diagnosis of Crohn's disease was 32.3 ± 12.2 years, compared with 43.7 ± 16.3 years for those who had not received biologics (P = 0.005).",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26089697"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56cae3eb5795f9a73e000021",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 161,
+    "question": "Is autophagy the process where bacteria ingest viral particles?",
+    "answer": "Autophagy, a cellular degradation process",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27027951"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "58dd2cb08acda34529000029",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 162,
+    "question": "Can possible toxic effect of ultraviolet-A after corneal cross-linking be prevented?",
+    "answer": "The narafilcon A and the senofilcon A may be a good options for epithelial healing after CCL procedure to protect the cornea from UVA of sunlight. And also, the hilafilcon B, filcon IV, nelfilcon A, enfilcon A, lotrafilcon A and lotrafilcon B contact lenses that have high-UVA transmittance feature can be a treatment choice for contact lens-assisted CCL technique in thin corneas.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25363069"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_possible_toxic_effect_of_ultraviolet_a_after_corneal_cro",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 163,
+    "question": "What is radiomics?",
+    "answer": "['Radiomics is a field of research that involves extracting quantitative features from medical images using advanced mathematical and statistical algorithms. This process transforms digital images into high-dimensional, minable data, providing unique biological insights that can improve understanding of disease processes and aid in clinical decision-making. The steps in radiomics include image generation, segmentation of regions of interest (such as tumors), image preprocessing, extraction of radiomic features, analysis and selection of features, and development of predictive models.']",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27269645",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27296412"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "680a080b18b1e36f2e00014b",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 164,
+    "question": "Can enhancers act as promoters?",
+    "answer": "Enhancers and promoters are cis-regulatory elements in the genome that regulate target gene transcription. While traditionally considered distinct, recent evidence suggests that there is overlap between their functions. Some enhancers, particularly bidirectional ones, can act as weak promoters, producing overlapping spatio-temporal expression. Conversely, some promoters, especially bidirectional ones, can function as strong enhancers. The balance between enhancer and promoter activity is reflected in the levels and directionality of enhancer RNA (eRNA) transcription, which is likely an inherent sequence property of the elements themselves. These observations suggest that enhancers and promoters may lie on a spectrum of transcriptional regulation, rather than being strictly separate entities. However, more research is needed to fully understand the mechanisms and implications of this relationship.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26948815"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "661c414d48a2c27714000007",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 165,
+    "question": "Is treatment resistant depression related to vitamin B9?",
+    "answer": "Treatment with SAMe, as well as with various formulations of folates and analogues, appears to be efficacious and well tolerated in reducing depressive symptoms in treatment resistant depression.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27655070"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "58a337af60087bc10a000016",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 166,
+    "question": "What is the cause of Fibromyalgia?",
+    "answer": "Fibromyalgia (FM) is a complex, chronic, widespread pain syndrome that can cause significant health and economic burden. Emerging evidence has shown that neuroinflammation is an underlying pathological mechanism in FM, but the actual cause is poorly understood and thus still unknown.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27105483"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "6810db0a353a4a2e6b000014",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 167,
+    "question": "Carbon Dioxide versus Saline Tissue Expanders: Does It Matter?",
+    "answer": "The authors believe that carbon dioxide-based devices may play a significant role in the future of implant-based breast reconstruction, and may be widely applicable to other areas of plastic surgery that also involve tissue expansion.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26710004"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_carbon_dioxide_versus_saline_tissue_expanders_does_it_matter",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "COMPARATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 168,
+    "question": "Does Patella Tendon Tenodesis Improve Tibial Tubercle Distalization in Treating Patella Alta?",
+    "answer": "Cartilage stress appears lower using distalization as opposed to distalization + tenodesis in this finite-element analysis simulation. An Insall-Salvati ratio of 0.95 may be an ideal level for distalization; further distalization does not show additional benefits.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27577067"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_patella_tendon_tenodesis_improve_tibial_tubercle_distal",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 169,
+    "question": "Is a single application soft tissues techniques of spine area may cause increase trunk mobility?",
+    "answer": "The application of soft tissue techniques may favorably influence on increasing mobility of thoracic and trunk flexibility. Confirmation results of the observations in other studies may be part of the improvement in the rehabilitation proceedings.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26608485"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_a_single_application_soft_tissues_techniques_of_spine_are",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "CAUSAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 170,
+    "question": "Is enzastaurin effective treatment of glioblastoma?",
+    "answer": "No. Enzastaurin does not improve prognosis of glioblastoma patients.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26692525",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26643807",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27052640"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5a7612b483b0d9ea6600001d",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 171,
+    "question": "Should the individual preterm birth risk be incorporated into the embryo transfer policy in in vitro fertilisation?",
+    "answer": "In an IVF programme, the optimal embryo transfer strategy is dependent on the singleton and multiple pregnancy chances of a woman, but also on her PTB risk. In women with low PTB risk, DET increases the OPR for a small additional risk of neonatal complications. Our analysis pleads for a tailored management strategy, taking into account the personalised prognosis for (multiple) pregnancy and PTB.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25040556"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_should_the_individual_preterm_birth_risk_be_incorporated_int",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "NORMATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 172,
+    "question": "Does mTOR regulate the translation of MAPKAPK2?",
+    "answer": "Yes. mTOR regulates the translation of the MK2 (also known as MAPKAPK2) kinase through 4EBP1.  In turn, MAPKAPK2 phosphorylates the RNA-binding protein ZFP36L1 during senescence, inhibiting its ability to degrade the transcripts of numerous senescence-associated secretory phenotype (SASP) components. Consequently, mTOR inhibition or constitutive activation of ZFP36L1 impairs the non-cell-autonomous effects of senescent cells in both tumour-suppressive and tumour-promoting contexts.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26269117",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26280535"
+    ],
+    "decision": "yes",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58967c9978275d0c4a000011",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 173,
+    "question": "List of attenuated viral vaccines still in use.",
+    "answer": "Some examples of attenuated viral vaccines still in use include the measles, mumps, and rubella (MMR) vaccine, the oral polio vaccine (OPV), the yellow fever vaccine, the varicella (chickenpox) vaccine, and the rotavirus vaccine.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25864107"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "660d2299fdcbea915f000038",
+    "queryType": "list",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "list"
+  },
+  {
+    "id": 174,
+    "question": "Which disease is associated with mutations in SLC40A1 gene?",
+    "answer": "Mutations in the SLC40A1 gene, which encodes the cellular iron exporter ferroportin, are associated with the autosomal dominant hemochromatosis type 4 or Ferroportin disease. The patients characteristically have hyperferritinemia and iron overload.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26059880",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25744502",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27170390"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58bd6c5802b8c60953000012",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 175,
+    "question": "Is Hydroxyethyl Starch Irrelevant to Hemostasis in Patients Undergoing Liver Transplantation?",
+    "answer": "Fibrinogen supplementation among patients with liver cirrhosis might improve fibrin clot formation during hemodilution. Fibrinogen supplementation might by considered as a possible treatment of coagulopathy during liver transplantation, but further clinical studies need to be performed.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26675095"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_hydroxyethyl_starch_irrelevant_to_hemostasis_in_patients_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 176,
+    "question": "Does the 3D structure of  the genome remain stable during cell differentiation?",
+    "answer": "Many studies have suggested a link between the spatial organization of genomes and fundamental biological processes such as genome reprogramming, gene expression, and differentiation. The open chromatin of embryonic stem cells (ESCs) condenses into repressive heterochromatin as cells exit the pluripotent state. The relation between alterations in chromatin structure and changes in gene expression during cell differentiation has served as a paradigm to understand the link between genome organization and function. Insulators are involved in 3D genome organization at multiple spatial scales and are important for dynamic reorganization of chromatin structure during reprogramming and differentiation. Architectural proteins orchestrate higher-order chromatin organization through the establishment of interactions between regulatory elements across multiple spatial scales. The regulation of these proteins, their interaction with DNA, and their co-occurrence in the genome, may be responsible for the plasticity of 3D chromatin architecture that dictates cell and time-specific blueprints of gene expression.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25693564",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26340639"
+    ],
+    "decision": "no",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56ebfac12ac5ed1459000001",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 177,
+    "question": "What is ESN364?",
+    "answer": "systemic administration of an NK3R antagonist (ESN364) prolongs the LH interpulse interval in ovarectomized ewes and significantly lowers plasma LH and FSH concentrations in castrated nonhuman primates (Macaca fascicularis). Moreover, daily oral dosing of ESN364 throughout the menstrual cycle in M fascicularis lowered plasma estradiol levels in a dose-dependent manner, although nadir levels of estradiol were maintained well above menopausal levels. Nevertheless, estradiol levels during the follicular phase were sufficiently inhibited at all doses to preclude the triggering of ovulation as evidenced by the absence of the LH surge and failure of a subsequent luteal phase rise in plasma progesterone concentrations, consistent with the absence of normal cycle changes in the uterus. Apart from the point at surge, FSH levels were not altered over the course of the menstrual cycle. These effects of ESN364 were reversible upon cessation of drug treatment.\n\nESN364 was well-tolerated and rapidly bioavailable with linear pharmacokinetics and no drug accumulation with repeated, daily oral administration. Drug treatment dose-dependently decreased basal LH, but not FSH, and consequently decreased estradiol and progesterone (in women) as well as testosterone (in men). The hormonal changes in women corresponded to delayed ovulation, decreased endometrial thickening, impeded follicular maturation, and prolongation of the menstrual cycle. Drug effects were rapidly reversible. Oral administration of the NK3R antagonist, ESN364, suppressed the hypothalamic-pituitary-gonadal axis in healthy volunteers by selective modulation of gonadotropin secretion, leading to a restrained decrease in ovarian hormone levels in women. These results suggest that ESN364 may offer therapeutic benefit in the treatment of women's health disorders with a mitigated risk of menopausal-like adverse events.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26305889"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "5e550758b761aafe09000005",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 178,
+    "question": "Five years after the Spanish neonatal resuscitation survey. Are we improving?",
+    "answer": "There is an improvement in some practices of neonatal resuscitation. Significant differences have been found as regards the equipment or practices in the DR, when comparing hospitals of different levels of care.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26589102"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_five_years_after_the_spanish_neonatal_resuscitation_survey_a",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 179,
+    "question": "Which genome browser database for DNA shape annotations is available?",
+    "answer": "The Genome Browser for DNA shape annotations (GBshape; freely available at http://rohslab.cmb.usc.edu/GBshape/) provides minor groove width, propeller twist, roll, helix twist and hydroxyl radical cleavage predictions for the entire genomes of 94 organisms. Additional genomes can easily be added using the GBshape framework. GBshape can be used to visualize DNA shape annotations qualitatively in a genome browser track format, and to download quantitative values of DNA shape features as a function of genomic position at nucleotide resolution.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25326329"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56c8f4615795f9a73e00001a",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 180,
+    "question": "A Meta-analysis of Intraoperative Ventilation Strategies to Prevent Pulmonary Complications: Is Low Tidal Volume Alone Sufficient to Protect Healthy Lungs?",
+    "answer": "Intraoperative LTV ventilation in conjunction with PEEP and intermittent recruitment maneuvers is associated with significantly improved clinical pulmonary outcomes and reduction in length of hospital stay in otherwise healthy patients undergoing general surgery. Providers should consider application of all the 3 elements for a comprehensive protective ventilation strategy.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26720429"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_a_meta_analysis_of_intraoperative_ventilation_strategies_to_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 181,
+    "question": "Does denture-wearing status in edentulous South Korean elderly persons affect their nutritional intakes?",
+    "answer": "Denture wearing was seen to have a significant effect on the level of nutrient intake in edentulous elders.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24641726"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_denture_wearing_status_in_edentulous_south_korean_elder",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 182,
+    "question": "What is the principle of ATAC (Assay for Transposase-Accessible Chromatin) technique?",
+    "answer": "ATAC-seq (Assay for Transposase-Accessible Chromatin) is an assay for transposase-accessible chromatin using sequencing, based on direct in vitro transposition of sequencing adaptors into native chromatin. ATAC is a rapid and sensitive method for integrative epigenomic analysis. ATAC-seq captures open chromatin sites using a simple two-step protocol with 500-50,000 cells and reveals the interplay between genomic locations of open chromatin, DNA-binding proteins, individual nucleosomes and chromatin compaction at nucleotide resolution.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25679813"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56ebee26107309bc2f000002",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "PROCEDURAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 183,
+    "question": "One hundred supracricoid laryngectomies with cricohyoidoepiglottopexy: do we achieve better local control?",
+    "answer": "Our experience convinced us of the clinical potential of supracricoid laryngectomy with cricohyoidoepiglottopexy as one of the effective options for functional larynx preservation. Supracricoid laryngectomy with cricohyoidoepiglottopexy is the most suitable for unfavorable T2 and T3a cases and is applicable for appropriately selected radiation-failed patients. Thorough pre-operative evaluation, proper surgical techniques and careful follow-up are prerequisites for the success of supracricoid laryngectomy with cricohyoidoepiglottopexy.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25981622"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_one_hundred_supracricoid_laryngectomies_with_cricohyoidoepig",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "COMPARATIVE",
+    "question_type": "summary"
+  },
+  {
+    "id": 184,
+    "question": "What is the effect of the direct interaction of Ikaros and Foxp1 in B-lymphocytes?",
+    "answer": "Direct interaction of Ikaros and Foxp1 modulates expression of the G protein-coupled receptor G2A in B-lymphocytes and acute lymphoblastic leukemia.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27588474"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "58853667e56acf5176000015",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "CAUSAL",
+    "question_type": "factoid"
+  },
+  {
+    "id": 185,
+    "question": "Is cathepsin L active in endosomes?",
+    "answer": "yes,\nCathepsin L is found in the Late Endosome/Lysosome.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26953343",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26343556"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5e8101e3835f4e477700002e",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 186,
+    "question": "Is Trifluridine/Tipiracil a preferential treatment over Regorafenib in elderly colorectal cancer patients?",
+    "answer": "There is no definitive answer to this question, as the choice of treatment for elderly colorectal cancer patients should be individualized based on the patient's overall health, comorbidities, and personal preferences. Both Trifluridine/Tipiracil and Regorafenib are approved treatment options for patients with metastatic colorectal cancer who have been previously treated with fluoropyrimidine-, oxaliplatin- and irinotecan-based chemotherapy, an anti-VEGF therapy, and, if RAS wild type, an anti-EGFR therapy.\n\nA phase III clinical trial (RECOURSE) compared Trifluridine/Tipiracil to placebo in patients with metastatic colorectal cancer who had been previously treated with standard chemotherapy and found a significant improvement in overall survival and progression-free survival.\n\nAnother phase III clinical trial (CORRECT) compared Regorafenib to placebo in patients with metastatic colorectal cancer who had been previously treated with standard chemotherapy and found a significant improvement in overall survival.\n\nA retrospective study of 102 elderly patients with metastatic colorectal cancer who received Trifluridine/Tipiracil or Regorafenib as third-line treatment found that Trifluridine/Tipiracil was associated with a trend towards better overall survival compared to Regorafenib (median 7.1 vs 5.3 months, p=0.057). However, this study was not randomized and had a small sample size.\n\nTherefore, it is not possible to say that Trifluridine/Tipiracil is a preferential treatment over Regorafenib in elderly colorectal cancer patients based on the current evidence. It is important to consider the individual patient's characteristics and to discuss the potential benefits and risks of each treatment option with the patient.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27487107",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27900102"
+    ],
+    "decision": "yes",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "65f7778fc4010b4d78000031",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 187,
+    "question": "Does self-certification reflect the cardiac health of UK sport divers?",
+    "answer": "Divers inevitably develop health problems. Some continue to dive with cardiac issues, failing to seek specialised diving advice or fully understand the role of the diving medical. Physicians without appropriate training in diving medicine may inform a diver they are safe to continue diving with their condition without appreciating the potential risks. The current procedure for medical screening for fitness to dive may not be adequate for all divers.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26415070"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_self_certification_reflect_the_cardiac_health_of_uk_spo",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 188,
+    "question": "Are rest intervals between stretching repetitions effective to acutely increase range of motion?",
+    "answer": "Lack of rest between repetitions more efficiently increased the maximal ROM and capacity to tolerate PT during and after stretching. The use of 30 s rest between repetitions potentiates the decrease in PT. Rest intervals should not be used if the aim is to acutely increase maximal ROM and peak passive torque.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25010018"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_are_rest_intervals_between_stretching_repetitions_effective_",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 189,
+    "question": "Rescuing the obese or burned airway: are conventional training manikins adequate?",
+    "answer": "Significantly greater technical difficulty was experienced with our 'morbidly obese' manikin compared with the unmodified manikin. Failure rates and times to completion were considerably more consistent with real-life reports. Modifying a standard manikin to simulate an obese patient is likely to better prepare anaesthetists for this challenging situation. Development of a commercial manikin with such properties would be of value.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25296912"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_rescuing_the_obese_or_burned_airway_are_conventional_trainin",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 190,
+    "question": "Can mean platelet volume and red blood cell distribution width show disease activity in rheumatoid arthritis?",
+    "answer": "MPV and RDW were significantly higher in RA. RDW and MPV were similar to erythrocyte sedimentation rate and C-reactive protein to indicate inflammatory activity. RDW was correlated with pain and DAS28, but MPV was not associated with them.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27564580"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_can_mean_platelet_volume_and_red_blood_cell_distribution_wid",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 191,
+    "question": "Is polyadenylation a process that stabilizes a protein by adding a string of Adenosine residues to the end of the molecule?",
+    "answer": "No, polyadenylation is a process that stabilizes mRNA by adding up to 200 adenosine residues to the 3' end of the trabscript",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26730730"
+    ],
+    "decision": "no",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a8714e261bb38fb24000005",
+    "queryType": "yes/no",
+    "dataset": "BioASQ",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 192,
+    "question": "Evaluation of laparoscopic transperitoneal adrenalectomy: is it feasible for large masses?",
+    "answer": "LA is safe and feasible for both malign and benign adrenal lesions. Good preoperative assessment, surgical skills, team work and adherence to anatomical and surgical principles are the key to success for large adrenal masses.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25877815"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_evaluation_of_laparoscopic_transperitoneal_adrenalectomy_is_",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 193,
+    "question": "Review of otorrhea microbiology: is there a pathogenic role of corynebacter?",
+    "answer": "Corynebacterium spp. may be underestimated in their potential to cause clinically significant otologic infections. Our results indicate a potential need for expanding surveillance for Corynebacterium spp.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25299828"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_review_of_otorrhea_microbiology_is_there_a_pathogenic_role_o",
+    "queryType": "summary",
+    "dataset": "PubMedQA",
+    "dr_type": "CAUSAL",
+    "question_type": "summary"
+  },
+  {
+    "id": 194,
+    "question": "Mutations of which genes have been associated with Catecholaminergic Polymorphic Ventricular Tachycardia (CPVT)?",
+    "answer": "Mutations in five genes – ryanodine receptor 2 (RYR2), calsequestrin 2(CASQ2), triadic (TRDN), calmodulin 1 (CALM1) and potassium channel, inwardly rectifying subfamily J, member 2 (KCNJ2)  – have been found to be associated with CPVT",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25480325"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "54c225bcf693c3b16b000002",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 195,
+    "question": "Do cobalt and chromium levels predict osteolysis in metal-on-metal total hip arthroplasty?",
+    "answer": "The disproportional increase of cobalt over chromium, especially in male patients with large component sizes can not be explained by wear alone and suggests that other processes (corrosion) might contribute to metal ion levels and might be more pronounced in patients with larger component sizes.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27631309"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_do_cobalt_and_chromium_levels_predict_osteolysis_in_metal_on",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 196,
+    "question": "Does pelvic floor muscle training abolish symptoms of urinary incontinence?",
+    "answer": "The study demonstrated that pelvic floor muscle training is effective in reducing the symptoms of stress and mixed urinary incontinence and in increasing pelvic floor muscle strength.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/25142280"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_does_pelvic_floor_muscle_training_abolish_symptoms_of_urinar",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "YESNO",
+    "question_type": "yesno"
+  },
+  {
+    "id": 197,
+    "question": "Which are the best methods for the prediction of circular RNA (circRNA)?",
+    "answer": "A circRNA prediction software for plants . Circular RNA profile in gliomas revealed by identification tool UROBORUS. Numerous algorithms that are used to detect genome-wide circRNA expression from RNA sequencing  data have been developed in the past few years, but there is little overlap in their predictions and no clear gold-standard method to assess the accuracy of these algorithms. MiARma-Seq: a comprehensive tool for miRNA, mRNA and circRNA analysis. Here, we use common RNAseq datasets to scrutinize and compare the output from five different algorithms; circRNA_finder, find_circ, CIRCexplorer, CIRI, and MapSplice and evaluate the levels of bona fide and false positive circRNAs based on RNase R resistance. ",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/27167008",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27493192",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26556385",
+      "http://www.ncbi.nlm.nih.gov/pubmed/27739534",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26657634",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26873924"
+    ],
+    "decision": "",
+    "year": 2016,
+    "sourceFormat": "C",
+    "questionId": "5a43b2d7966455904c00000c",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  },
+  {
+    "id": 198,
+    "question": "Is single-stage revision according to a strict protocol effective in treatment of chronic knee arthroplasty infections?",
+    "answer": "Our data provide preliminary support to the use of a single-stage approach in highly selected patients with chronically infected TKAs as an alternative to a two-stage procedure. However, larger, multicenter, prospective trials are called for to validate our findings.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/24923669"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "A",
+    "questionId": "fmt_a_is_single_stage_revision_according_to_a_strict_protocol_effe",
+    "queryType": "yes/no",
+    "dataset": "PubMedQA",
+    "dr_type": "PROCEDURAL",
+    "question_type": "yesno"
+  },
+  {
+    "id": 199,
+    "question": "Hy's law measures failure for what organ?",
+    "answer": "Hy's law correlates enzyme elevations with liver injury ad subsequent failure.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26122767",
+      "http://www.ncbi.nlm.nih.gov/pubmed/25683797",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26116527",
+      "http://www.ncbi.nlm.nih.gov/pubmed/26159259"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "58f4b25e70f9fc6f0f000011",
+    "queryType": "summary",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "summary"
+  },
+  {
+    "id": 200,
+    "question": "What is the minimal genome build?",
+    "answer": "The identification of the essential genes of bacteria and the minimal genome for the free-living cellular life could provide insights into the origin, evolution, and essence of life forms. The field of Synthetic Biology seeks to apply engineering principles to biology in order to produce novel biological systems. One approach to accomplish this goal is the genome-driven cell engineering approach, which searches for functioning minimal genomes in naturally occurring microorganisms, which can then be used as a template for future systems. Currently a prototypical minimal genome has not been discovered.",
+    "Documents": [
+      "http://www.ncbi.nlm.nih.gov/pubmed/26539175"
+    ],
+    "decision": "",
+    "year": 2015,
+    "sourceFormat": "C",
+    "questionId": "56f82f9acf1c325851000002",
+    "queryType": "factoid",
+    "dataset": "BioASQ",
+    "dr_type": "FACTOID",
+    "question_type": "factoid"
+  }
+]

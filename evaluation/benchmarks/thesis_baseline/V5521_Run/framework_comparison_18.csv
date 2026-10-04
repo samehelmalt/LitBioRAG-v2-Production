@@ -1,0 +1,15 @@
+# per-framework faithfulness
+framework,scope,n,mean,std
+"NLI(DeBERTa,inline)",all,4488,0.2649,0.3566
+EAE(inline),all,4080,0.5524,0.3254
+KedaRag(inline),all,4488,0.3781,0.1727
+"RAGAS(GPT,inline)",deep,4488,0.3797,0.2528
+biorageval.KedaRag(ext),deep,2040,0.5042,0.1537
+biorageval.EAE(ext),deep,2040,0.5744,0.269
+biorageval.NLI(ext),deep,2040,0.0551,0.1558
+
+# inline-vs-external cross-validation
+method,n,pearson_r,MAE,bias_ext_minus_inl
+KedaRag,2040,0.4137,0.1755,0.1165
+EAE,2040,0.4735,0.2418,0.0108
+NLI,2040,0.0167,0.2263,-0.1724

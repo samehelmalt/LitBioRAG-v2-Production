@@ -1,0 +1,5 @@
+[GATE-SENS] S7 rows: 432
+[GATE-SENS] BASELINE gate Δ=+0.4521  PASS=40.5% WARN=8.3% BLOCK=51.2%
+[GATE-SENS] baseline recompute vs stored composite: max|Δ|=0.000065
+[GATE-SENS] ±0.05 perturbation (12 sweeps): max decision-flip=1.2%  gate Δ range=[+0.4521,+0.4521]
+[GATE-SENS] verdict: gate effect is ROBUST to ±0.05 weight perturbation
