@@ -24,6 +24,28 @@
 
 **Performance**: p50/p95/p99 end-to-end and per stage (retrieval, rerank, generation, verification), peak VRAM, peak RAM, queries per minute, on the stated hardware (12 GB VRAM GPUs, 16 GB RAM).
 
+## How the retrieval baseline is produced (Step 4 code, ready; measurement pending a real bundle)
+
+```bash
+python -m scripts.run_retrieval_baseline \
+    --bundle data/artifacts/<corpus_id> \
+    --encoder hf:ncbi/MedCPT-Query-Encoder \
+    --reranker hf:ncbi/MedCPT-Cross-Encoder \
+    --queries thesis24 --modes bm25 dense hybrid hybrid+rerank \
+    --out evaluation/benchmarks/runs/<run_name>
+```
+
+Each mode writes `rows.jsonl` (per-query metrics, per-stage gold ranks, failure code), `summary.json` and `report.md`. The table below is filled from `summary.json` when the first real bundle exists; until then every cell is NOT YET MEASURED.
+
+| mode | R@1 | R@5 | R@10 | R@20 | MRR | nDCG@10 | pool hit rate | p50 ms |
+|---|---|---|---|---|---|---|---|---|
+| bm25 | — | — | — | — | — | — | — | — |
+| dense | — | — | — | — | — | — | — | — |
+| hybrid (RRF) | — | — | — | — | — | — | — | — |
+| hybrid + single-stage CE | — | — | — | — | — | — | — | — |
+
+Note on comparability with the thesis: the production pipeline retrieves **passages** and aggregates to documents, uses a different BM25 implementation and tokenizer, and scores full passages in the reranker. The thesis-equivalent run therefore reproduces the thesis *algorithm*, not its exact numbers; differences are reported, not hidden.
+
 ## Protocol
 
 1. Reproduce the thesis ladder numbers from the imported CSVs through the harness (sanity check of the metrics code).

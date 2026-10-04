@@ -39,3 +39,20 @@ Three of the seven were found by dense-only retrieval and then lost downstream; 
 - Per query type and per dataset: R@1/5/10/20, MRR, nDCG.
 - Ablations: 512 chars vs full tokens in the reranker; one-stage vs different-model cascade; BM25 analyzer; RRF k and weights; conditional expansion with `retrieval_effect ∈ {positive, neutral, negative}` logged per query.
 - Output: one row per failed query with primary cause code, evidence, and the fix that recovered it (if any).
+
+## Mechanical pre-classification (implemented in `evaluation/runners/retrieval.py`)
+
+`rows.jsonl` carries, for every query, the rank of the best gold document at each stage (`bm25`, `dense`, `fused`, `reranked`, `final`) and a first-pass code:
+
+| Code | Rule |
+|---|---|
+| OK | a gold document is within the top K |
+| COV | no gold document in the corpus |
+| RERANK | gold within K after fusion, outside K after reranking |
+| RRF | gold within K in BM25 or dense, outside K after fusion |
+| BM25 | the BM25 list never retrieved gold; only dense did (lexical side missed it) |
+| DENSE | the dense list never retrieved gold; only BM25 did (dense side missed it) |
+| POOL | both first-stage lists retrieved gold, but only deep (below K); a depth / pool-size problem |
+| MISS | no stage retrieved gold |
+
+`MISS` rows are the ones that need manual classification into QF / TERM / ACR / PRE / IDX / CHUNK from the taxonomy above; the other codes are decided by the audit alone. The seven thesis zero-recall queries will be re-run through this path first.
