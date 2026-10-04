@@ -46,11 +46,12 @@ def fixture_documents() -> Iterator[Document]:
     for doc_id, (title, abstract) in PLANTED.items():
         if doc_id.startswith("pmid:"):
             yield Document(doc_id=doc_id, pmid=doc_id[5:], title=title, abstract=abstract,
-                           source_type=SourceType.JOURNAL_ARTICLE, year=2016)  # fmt: skip
+                           source_type=SourceType.JOURNAL_ARTICLE, year=2016,
+                           url=f"https://pubmed.ncbi.nlm.nih.gov/{doc_id[5:]}/")  # fmt: skip
         else:
             yield Document(doc_id=doc_id, doi=doc_id[4:], title=title, abstract=abstract,
                            source_type=SourceType.PREPRINT, year=2024,
-                           source="biorxiv")  # fmt: skip
+                           source="biorxiv", url=f"https://doi.org/{doc_id[4:]}")  # fmt: skip
     for i in range(56):  # filler on unrelated topics
         yield Document(
             doc_id=f"pmid:{100 + i}", pmid=str(100 + i), year=2015 + i % 10,

@@ -1,0 +1,10 @@
+# Retrieval operating parameters. Thesis-equivalent starting point; every value is a Step 5
+# benchmark parameter, not a design decision. No paths, no model ids here (see models/registry).
+k_bm25: 200           # BM25 candidates per query (passages)
+k_dense: 200          # dense candidates per query (passages)
+rrf_k: 60             # reciprocal-rank-fusion constant (thesis: 60)
+w_bm25: 0.5           # RRF list weights; the thesis's dynamic re-weighting is not ported
+w_dense: 0.5
+rerank_pool: 100      # passages sent to the single-stage cross-encoder (thesis: 100 documents)
+top_docs: 20          # documents returned
+passages_per_doc: 3   # best passages kept per document for evidence selection
