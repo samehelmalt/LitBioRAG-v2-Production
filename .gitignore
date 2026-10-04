@@ -20,6 +20,7 @@ venv/
 # Data, models, indexes (never in git)
 data/*
 !data/README.md
+artifacts/
 models/weights/
 *.safetensors
 *.bin
