@@ -25,6 +25,31 @@ class QueryRequest(BaseModel):
     kb_ids: list[str] | None = Field(default=None, max_length=20,
                                      description="knowledge bases to search; default: all the "
                                                  "caller can read")
+    chat_id: str | None = Field(default=None, max_length=40,
+                                description="append to this chat; earlier questions become "
+                                            "context for the generator")
+
+
+class ChatCreate(BaseModel):
+    title: str = Field("", max_length=120)
+
+
+class KeyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=80)
+
+
+class EntityToolIn(BaseModel):
+    text: str = Field(..., min_length=1, max_length=8000)
+    question: str = Field("", max_length=1000)
+
+
+class VerifyToolIn(BaseModel):
+    claim: str = Field(..., min_length=3, max_length=2000)
+    passage: str = Field(..., min_length=3, max_length=8000)
+
+
+class ProfileSwitch(BaseModel):
+    profile: str = Field(..., min_length=1, max_length=60)
 
 
 class CorpusActivate(BaseModel):
@@ -166,6 +191,7 @@ class QueryResponse(BaseModel):
     trace: list[str]
     scope: str = "indexed"
     kb_ids: list[str] = Field(default_factory=list)
+    chat_id: str | None = None
     disclosure: str = DISCLOSURE
     review: ReviewInfo | None = None
 

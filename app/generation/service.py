@@ -63,6 +63,7 @@ def answer(
     counter: TokenCounter | None = None,
     ledger: UsageLedger | None = None,
     request_id: str = "",
+    history: list[str] | None = None,
 ) -> GeneratedAnswer:
     """Evidence → prompt → model → parsed answer, under a token budget and a spend cap.
 
@@ -82,7 +83,7 @@ def answer(
         fit = rep.__dict__
         if not units:
             return _abstain(ABSTAIN_NO_EVIDENCE, question, generator, evidence_fit=fit)
-    messages = build_messages(question, units)
+    messages = build_messages(question, units, history)
     prompt_tokens = sum(counter.count(m.get("content", "")) for m in messages)
     if ledger is not None:
         try:

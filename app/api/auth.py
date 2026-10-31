@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hmac
 import os
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from app.api.settings import AuthSettings
@@ -49,12 +50,16 @@ def _api_keys(cfg: AuthSettings) -> dict[str, str]:
 
 
 def authenticate(
-    cfg: AuthSettings, *, authorization: str | None, api_key: str | None
+    cfg: AuthSettings, *, authorization: str | None, api_key: str | None,
+    key_lookup: Callable[[str], str | None] | None = None,
 ) -> Principal:
     if api_key:
         for known, subject in _api_keys(cfg).items():
             if hmac.compare_digest(known, api_key):
                 return Principal(sub=subject, via="api_key")
+        owner = key_lookup(api_key) if key_lookup else None
+        if owner:
+            return Principal(sub=owner, via="api_key")
         raise AuthError(401, "invalid API key")
     if authorization:
         scheme, _, token = authorization.partition(" ")

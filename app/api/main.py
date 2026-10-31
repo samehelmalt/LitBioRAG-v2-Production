@@ -17,12 +17,14 @@ from typing import Any
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api import schemas
 from app.api.audit import AuditLog
 from app.api.auth import AuthError, Principal, authenticate, check_entitlement
+from app.api.chats import ChatStore
+from app.api.keys import KeyStore
 from app.api.ratelimit import RateLimiter
 from app.api.settings import ApiSettings
 from app.core.budget import Pricing, ResourceConfig, UsageLedger
@@ -160,6 +162,9 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     audit = AuditLog(st.audit_path, store_question_text=st.audit.store_question_text)
     feedback_path = st.audit_path.parent / "feedback.jsonl" if st.audit_path else None
     feedback_log = AuditLog(feedback_path)
+    data_dir = st.audit_path.parent if st.audit_path else None
+    chats = ChatStore(data_dir / "chats.sqlite" if data_dir else None)
+    keys = KeyStore(data_dir / "api_keys.sqlite" if data_dir else None)
     state: dict[str, Any] = {"pipeline": pipeline, "review": review, "corpus": None}
 
     @asynccontextmanager
@@ -266,7 +271,8 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         authorization: str | None = Header(default=None),
         x_api_key: str | None = Header(default=None),
     ) -> Principal:
-        p = authenticate(st.auth, authorization=authorization, api_key=x_api_key)
+        p = authenticate(st.auth, authorization=authorization, api_key=x_api_key,
+                         key_lookup=keys.lookup)  # fmt: skip
         key = p.sub if not p.anonymous else f"ip:{request.client.host if request.client else '?'}"
         ok, retry = limiter.allow(key)
         if not ok:
@@ -300,11 +306,21 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
               responses={401: {"model": schemas.ErrorOut}, 403: {"model": schemas.ErrorOut},
                          429: {"model": schemas.ErrorOut}})  # fmt: skip
     def query(req: schemas.QueryRequest, request: Request, p: Principal = Auth):
-        rid = request.state.request_id
+        return run_query(req, request.state.request_id, p)
+
+    def run_query(req: schemas.QueryRequest, rid: str, p: Principal,
+                  progress=None) -> schemas.QueryResponse:  # fmt: skip
         if len(req.question) > st.limits.max_question_chars:
             raise HTTPException(422, f"question longer than {st.limits.max_question_chars} chars")
         courses = check_entitlement(p, req.course_ids)
         pl = pipe()
+        history: list[str] = []
+        chat = None
+        if req.chat_id:
+            chat = chats.owned(req.chat_id, p.sub) if not p.anonymous else None
+            if chat is None:
+                raise HTTPException(404, "unknown chat")
+            history = chats.history(req.chat_id)
         scope = req.scope or st.kb.default_scope
         kb_ids: list[str] = []
         if not corpus().indexed_enabled:
@@ -324,9 +340,13 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                                              "files first or choose scope 'indexed'")  # fmt: skip
         out = pl.run(req.question, course_ids=courses, request_id=rid,
                      max_units=min(req.max_units or pl.max_units, st.limits.max_units),
-                     scope=scope, kb_ids=kb_ids)  # fmt: skip
+                     scope=scope, kb_ids=kb_ids, history=history, progress=progress)  # fmt: skip
         resp = to_response(out, rid, pl.versions.as_dict(), bool(pl.gate_cfg.calibrated_on))
         resp.scope, resp.kb_ids = scope, kb_ids
+        if chat is not None:
+            chats.append(req.chat_id, request_id=rid, question=req.question, action=resp.action,
+                         answer=resp.answer, response=resp.model_dump(mode="json"))  # fmt: skip
+            resp.chat_id = req.chat_id
         case = reviews().maybe_enqueue(out, resp.model_dump(mode="json"), sub=p.sub,
                                        course_ids=courses)  # fmt: skip
         if case:
@@ -572,6 +592,198 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         return FileResponse(STATIC / "trust.html")
 
     app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
+
+    @app.get("/api/v1/query/stream")
+    def query_stream(question: str, request: Request, scope: str | None = None,
+                     chat_id: str | None = None, course_ids: str | None = None,
+                     kb_ids: str | None = None, p: Principal = Auth):  # fmt: skip
+        """Server-sent events: progress stages, then the same QueryResponse as POST /query."""
+        import queue
+        import threading
+
+        req = schemas.QueryRequest(
+            question=question, scope=scope, chat_id=chat_id,
+            course_ids=[c for c in (course_ids or "").split(",") if c] or None,
+            kb_ids=[k for k in (kb_ids or "").split(",") if k] or None,
+        )
+        rid = request.state.request_id
+        q: queue.Queue = queue.Queue()
+
+        def progress(stage: str, info: dict) -> None:
+            q.put(("stage", {"stage": stage, **info}))
+
+        def work() -> None:
+            try:
+                resp = run_query(req, rid, p, progress=progress)
+                q.put(("result", resp.model_dump(mode="json")))
+            except HTTPException as e:
+                q.put(("error", {"request_id": rid, "error": str(e.detail),
+                                 "status": e.status_code}))  # fmt: skip
+            except AuthError as e:
+                q.put(("error", {"request_id": rid, "error": e.detail, "status": e.status}))
+            except Exception:  # noqa: BLE001
+                log.exception("stream error request_id=%s", rid)
+                q.put(("error", {"request_id": rid, "error": "internal error", "status": 500}))
+            q.put(None)
+
+        threading.Thread(target=work, daemon=True).start()
+
+        def events():
+            while True:
+                item = q.get()
+                if item is None:
+                    break
+                kind, payload = item
+                yield f"event: {kind}\ndata: {json.dumps(payload, default=str)}\n\n"
+
+        return StreamingResponse(events(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-cache", "X-Request-ID": rid})
+
+    # ---- chats ------------------------------------------------------------------------------
+    def _chat_owner(chat_id: str, p: Principal) -> dict:
+        if p.anonymous:
+            raise HTTPException(401, "sign in to use chats")
+        c = chats.owned(chat_id, p.sub)
+        if c is None:
+            raise HTTPException(404, "unknown chat")
+        return c
+
+    @app.get("/api/v1/chats")
+    def chats_list(p: Principal = Auth):
+        if p.anonymous:
+            return []
+        return chats.list_for(p.sub)
+
+    @app.post("/api/v1/chats", status_code=201)
+    def chats_create(body: schemas.ChatCreate, p: Principal = Auth):
+        if p.anonymous:
+            raise HTTPException(401, "sign in to use chats")
+        return chats.create(p.sub, body.title or "New chat")
+
+    @app.get("/api/v1/chats/{chat_id}")
+    def chats_get(chat_id: str, p: Principal = Auth):
+        c = _chat_owner(chat_id, p)
+        return {**c, "messages": chats.messages(chat_id, with_response=True)}
+
+    @app.delete("/api/v1/chats/{chat_id}")
+    def chats_delete(chat_id: str, p: Principal = Auth):
+        _chat_owner(chat_id, p)
+        chats.delete(chat_id)
+        return {"deleted": chat_id}
+
+    # ---- API keys ---------------------------------------------------------------------------
+    @app.get("/api/v1/keys")
+    def keys_list(p: Principal = Auth):
+        if p.anonymous:
+            raise HTTPException(401, "sign in to manage API keys")
+        return keys.list_for(p.sub)
+
+    @app.post("/api/v1/keys", status_code=201)
+    def keys_issue(body: schemas.KeyCreate, p: Principal = Auth):
+        if p.anonymous or p.via == "api_key":
+            raise HTTPException(401, "sign in with a user token to issue API keys")
+        k = keys.issue(p.sub, body.name)
+        audit.record({"event": "key_issue", "sub": p.sub, "prefix": k["prefix"]})
+        return k  # the full key is shown once
+
+    @app.delete("/api/v1/keys/{prefix}")
+    def keys_revoke(prefix: str, p: Principal = Auth):
+        if p.anonymous:
+            raise HTTPException(401, "sign in to manage API keys")
+        if not keys.revoke(p.sub, prefix):
+            raise HTTPException(404, "unknown or already revoked key")
+        audit.record({"event": "key_revoke", "sub": p.sub, "prefix": prefix})
+        return {"revoked": prefix}
+
+    # ---- research tools ---------------------------------------------------------------------
+    @app.post("/api/v1/tools/entities")
+    def tool_entities(body: schemas.EntityToolIn, p: Principal = Auth):
+        """Entities in a text, and which ones are confusable with the question's entities."""
+        from app.core.symbols import neighbour_reason
+
+        x = pipe().pool.acquire("entity_extractor")
+        mentions = [m.__dict__ for m in x.mentions(body.text)] if hasattr(x, "mentions") else [
+            {"surface": e, "norm": e, "kind": "?"} for e in x.extract(body.text)]
+        asked = [m.__dict__ for m in x.mentions(body.question)] if (
+            body.question and hasattr(x, "mentions")) else []
+        confusable = []
+        for m in mentions:
+            for a in asked:
+                r = neighbour_reason(m["norm"], a["norm"])
+                if r:
+                    confusable.append({"text_entity": m["surface"], "asked_entity": a["surface"],
+                                       "reason": r})  # fmt: skip
+        return {"mentions": mentions, "asked": asked, "confusable": confusable}
+
+    @app.post("/api/v1/tools/verify")
+    def tool_verify(body: schemas.VerifyToolIn, p: Principal = Auth):
+        """Score one claim against one passage with the served verifier and entity check."""
+        from app.verification.entities import entity_consistency
+
+        pl = pipe()
+        s = pl.pool.acquire("verifier").score_pairs([(body.passage, body.claim)])[0]
+        checked, ok, missing = entity_consistency(body.claim, [body.passage],
+                                                  pl.pool.acquire("entity_extractor"))  # fmt: skip
+        return {"nli": s.model_dump(), "entities_checked": checked, "entities_ok": ok,
+                "entities_missing": list(missing), "verifier": pl.versions.models["verifier"]}
+
+    # ---- datasets ---------------------------------------------------------------------------
+    @app.get("/api/v1/datasets")
+    def datasets(p: Principal = Auth):
+        """Split manifest summary and label counts (files only; app/ never imports evaluation/)."""
+        root = Path(__file__).resolve().parents[2]
+        out: dict[str, Any] = {"splits": {}, "labels": {}}
+        man = root / "evaluation" / "datasets" / "splits" / "manifest_v1.json"
+        if man.exists():
+            m = json.loads(man.read_text())
+            counts: dict[str, int] = {}
+            for split in (m.get("assignments") or {}).values():
+                counts[split] = counts.get(split, 0) + 1
+            out["splits"] = {"version": m.get("version"), "seed": m.get("seed"),
+                             "notes": m.get("notes"), "counts": counts,
+                             "pinned": m.get("pinned")}  # fmt: skip
+        for name, path in (("feedback", feedback_path),
+                           ("review_labels", data_dir / "labels_from_review.jsonl"
+                            if data_dir else None)):
+            out["labels"][name] = (sum(1 for _ in open(path, encoding="utf-8"))
+                                   if path and path.exists() else 0)  # fmt: skip
+        return out
+
+    # ---- admin: model profiles --------------------------------------------------------------
+    @app.get("/api/v1/admin/profiles")
+    def admin_profiles(p: Principal = Auth):
+        require_admin(p)
+        import yaml
+
+        from models.registry.loader import DEFAULT_PATH
+
+        raw = yaml.safe_load(Path(DEFAULT_PATH).read_text()) or {}
+        return {"active": pipe().versions.profile, "default": raw.get("default_profile"),
+                "profiles": {k: {"description": (v or {}).get("description", ""),
+                                 "require_calibrated": (v or {}).get("require_calibrated"),
+                                 "models": {r: (m if isinstance(m, str) else
+                                                f"{m.get('kind')}:{m.get('model_id')}")
+                                            for r, m in ((v or {}).get("models") or {}).items()}}
+                             for k, v in (raw.get("profiles") or {}).items()}}  # fmt: skip
+
+    @app.post("/api/v1/admin/profile")
+    def admin_switch_profile(body: schemas.ProfileSwitch, p: Principal = Auth):
+        """Build a new pipeline for the profile (pre-flight first); swap on success only."""
+        require_admin(p)
+        old = pipe()
+        try:
+            new = AnswerPipeline(old.bundle, profile=body.profile, ledger=ledger, resources=res,
+                                 scope_profile=st.scope_profile, kb_root=st.kb_root)  # fmt: skip
+        except Exception as e:  # noqa: BLE001  (registry/preflight errors are reported, not raised)
+            raise HTTPException(409, f"cannot switch profile: {type(e).__name__}: {e}") from e
+        state["pipeline"] = new
+        if state["review"] is not None:
+            state["review"].pipeline = new
+        if state["corpus"] is not None:
+            state["corpus"]._activate = new.swap_bundle
+        audit.record({"event": "profile_switch", "profile": body.profile, "sub": p.sub})
+        return {"active": new.versions.profile, "models": new.versions.models,
+                "preflight": new.preflight}  # fmt: skip
 
     @app.get("/api/v1/sources/{doc_id:path}", response_model=schemas.SourceDocument)
     def source(doc_id: str, p: Principal = Auth):

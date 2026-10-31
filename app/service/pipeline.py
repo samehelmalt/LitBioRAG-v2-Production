@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -157,6 +158,8 @@ class AnswerPipeline:
         max_units: int | None = None,
         scope: str = "indexed",
         kb_ids: list[str] | None = None,
+        history: list[str] | None = None,
+        progress: Callable[[str, dict], None] | None = None,
     ) -> PipelineOutput:
         """``scope``: indexed (served corpus bundle) | uploaded (the caller's knowledge bases
         only) | both. ``kb_ids``: knowledge bases the caller may read (entitlement)."""
@@ -164,6 +167,12 @@ class AnswerPipeline:
             raise ValueError(f"scope must be one of {SCOPES}")
         t: dict[str, float] = {}
         t0 = time.perf_counter()
+
+        def say(stage: str, **info) -> None:
+            if progress is not None:
+                progress(stage, info)
+
+        say("scope_check")
         scope_dec = classify_scope(question, self.scope_profile)
         if not scope_dec.in_scope:
             # out of scope: no retrieval, no model call, no tokens spent
@@ -176,6 +185,7 @@ class AnswerPipeline:
             t["total"] = (time.perf_counter() - t0) * 1000
             return PipelineOutput(question, None, [], gen, report, decision,
                                   {k: round(v, 1) for k, v in t.items()})  # fmt: skip
+        say("retrieving", scope=scope)
         if scope == "indexed":
             res = self.retriever.retrieve(question, mode="hybrid+rerank", course_ids=course_ids)
             store = self.store
@@ -185,19 +195,24 @@ class AnswerPipeline:
             store = m.store
         units = select_evidence(res, store, max_units=max_units or self.max_units)
         t["retrieval"] = (time.perf_counter() - t0) * 1000
+        say("retrieved", documents=len(res.docs), evidence_units=len(units),
+            ms=round(t["retrieval"], 1))  # fmt: skip
         t1 = time.perf_counter()
+        say("generating")
         with self.pool.use("generator") as generator:
             gen = generate_answer(
                 question, units, generator, config=self.gen_cfg, budget=self.budget,
-                ledger=self.ledger, request_id=request_id,
+                ledger=self.ledger, request_id=request_id, history=history,
             )  # fmt: skip
         t["generation"] = (time.perf_counter() - t1) * 1000
+        say("verifying", claims=len(gen.claims))
         t2 = time.perf_counter()
         report = verify(
             gen, units, self.pool.acquire("verifier"), self.pool.acquire("entity_extractor"),
             config=self.ver_cfg, thresholds=self.registry.thresholds("verifier"),
             question=question,
         )  # fmt: skip
+        say("deciding")
         suff = evidence_sufficiency(res, report, self.gate_cfg.sufficiency_model)
         decision = decide(report, gen, sufficiency=suff, config=self.gate_cfg, question=question)
         t["verification"] = (time.perf_counter() - t2) * 1000

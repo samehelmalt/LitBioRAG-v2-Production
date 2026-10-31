@@ -40,7 +40,7 @@ Rules
 
 Abstaining is a correct outcome when evidence is missing, insufficient or conflicting."""
 
-USER_TEMPLATE = """Question:
+USER_TEMPLATE = """{context}Question:
 {question}
 
 Evidence passages:
@@ -64,13 +64,30 @@ def render_evidence(units: Sequence[EvidenceUnit]) -> str:
     return "\n\n".join(lines) if lines else "(none)"
 
 
-def build_messages(question: str, units: Sequence[EvidenceUnit]) -> list[dict[str, str]]:
+CONTEXT_TEMPLATE = """Earlier questions in this conversation (context only; they resolve
+pronouns and abbreviations — answer the current question from the evidence below, not from
+earlier answers):
+{history}
+
+"""
+
+
+def render_history(history: Sequence[str] | None, *, max_items: int = 4,
+                   max_chars: int = 300) -> str:  # fmt: skip
+    items = [h.strip()[:max_chars] for h in (history or []) if h and h.strip()][-max_items:]
+    return "\n".join(f"- {h}" for h in items)
+
+
+def build_messages(question: str, units: Sequence[EvidenceUnit],
+                   history: Sequence[str] | None = None) -> list[dict[str, str]]:  # fmt: skip
+    ctx = render_history(history)
     return [
         {"role": "system", "content": SYSTEM},
         {
             "role": "user",
             "content": USER_TEMPLATE.format(
-                question=question.strip(), evidence=render_evidence(units), schema=schema_text()
+                context=CONTEXT_TEMPLATE.format(history=ctx) if ctx else "",
+                question=question.strip(), evidence=render_evidence(units), schema=schema_text(),
             ),
         },
     ]
