@@ -27,6 +27,19 @@ class QueryRequest(BaseModel):
                                                  "caller can read")
 
 
+class CorpusActivate(BaseModel):
+    corpus_id: str = Field(..., min_length=1, max_length=120)
+
+
+class CorpusEnabled(BaseModel):
+    enabled: bool
+
+
+class CorpusJobIn(BaseModel):
+    type: str = Field(..., pattern="^(fetch|verify|update|fetch_preprints|rebuild)$")
+    params: dict[str, Any] = Field(default_factory=dict)
+
+
 class KBCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     description: str = Field("", max_length=1000)

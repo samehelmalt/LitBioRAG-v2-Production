@@ -80,3 +80,13 @@ users the owner shared with, and admins; the filter is applied inside retrieval,
 knowledge bases only), or `both` (default from `configs/api.yaml`). Uploaded units are tier
 "other" (provenance unknown to the system) and are never shown as peer-reviewed. Scanned PDFs
 yield no text until an OCR hook is configured (`PdfAdapter(ocr=...)`).
+
+## Managing the served indexes (`app/corpus/manager.py`, admin UI tab "Corpus Indexes")
+The serving host never rebuilds the full PubMed index; it **fetches** a bundle built on the build
+host (Drive/URL/path), **verifies** checksums, **activates** it (retrieval swaps in place, models
+stay loaded), and **updates** it incrementally: PubMed daily update files or a bioRxiv/medRxiv
+window are parsed to JSONL and appended with `scripts/update_bundle.py` (store + BM25 + dense
+`add`; replaced documents are counted as `stale_vectors` in the manifest until the next full
+rebuild). A **rebuild** request on the serving host is refused and the exact build-host command is
+shown instead (`allow_build_on_serve: true` on a build host). The **indexed corpus can be disabled**
+so that every query is answered from uploaded knowledge bases only; the default scope is `both`.

@@ -76,3 +76,12 @@ response echoes `scope` and the `kb_ids` searched. Uploaded sources carry `kb_id
 | POST | `/api/v1/kb/{id}/upload` | multipart `file` (PDF/DOCX/XLSX/PPTX/TXT/MD; size limit from api.yaml), `background=true` for async indexing |
 | POST | `/api/v1/kb/{id}/share` | `{subs: [...]}` read access for other users |
 | DELETE | `/api/v1/kb/{id}/files/{file_id}` · `/api/v1/kb/{id}` | remove a file / the whole base (units leave the index immediately) |
+
+## Corpus indexes (admin role)
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/corpus` | bundles on disk (id, created, counts, encoder, updates, active flag), enabled switch, jobs |
+| POST | `/api/v1/corpus/activate` | `{corpus_id}` verify + swap the served bundle |
+| POST | `/api/v1/corpus/enabled` | `{enabled}` serve the indexed corpus or uploads only |
+| POST | `/api/v1/corpus/jobs` | `{type: fetch|verify|update|fetch_preprints|rebuild, params}` background job |
+| GET | `/api/v1/corpus/jobs/{id}` | status, result, log tail |

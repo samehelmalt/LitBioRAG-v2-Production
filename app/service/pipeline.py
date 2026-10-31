@@ -119,6 +119,26 @@ class AnswerPipeline:
             prompt_id=PROMPT_ID, gate_calibrated_on=self.gate_cfg.calibrated_on or "",
         )  # fmt: skip
 
+    def swap_bundle(self, bundle: Path) -> dict:
+        """Point retrieval at another verified bundle without reloading models."""
+        bundle = Path(bundle)
+        encoder = self.pool.acquire("dense_encoder")
+        store = MetadataStore(bundle / "metadata.sqlite", read_only=True)
+        retriever = HybridRetriever(store, BM25Index(bundle / "bm25"),
+                                    DenseIndex(bundle / "dense", encoder),
+                                    self.pool.acquire("reranker"), self.ret_cfg)  # fmt: skip
+        manifest: dict = {}
+        if (bundle / "manifest.json").exists():
+            manifest = json.loads((bundle / "manifest.json").read_text())
+        self.bundle, self.store, self.retriever = bundle, store, retriever
+        self.versions = Versions(
+            profile=self.versions.profile, models=self.versions.models,
+            bundle_id=str(manifest.get("corpus_id", bundle.name)),
+            bundle_created_at=str(manifest.get("created_at", "")),
+            prompt_id=self.versions.prompt_id, gate_calibrated_on=self.versions.gate_calibrated_on,
+        )  # fmt: skip
+        return {"bundle_id": self.versions.bundle_id, "counts": store.counts()}
+
     def multi(self) -> MultiRetriever:
         """Fresh per call: the uploads dense index is rebuilt after every upload."""
         uploads = None

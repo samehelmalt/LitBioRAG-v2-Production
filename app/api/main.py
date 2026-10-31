@@ -27,6 +27,7 @@ from app.api.ratelimit import RateLimiter
 from app.api.settings import ApiSettings
 from app.core.budget import Pricing, ResourceConfig, UsageLedger
 from app.core.documents import Document, SourceType
+from app.corpus.manager import CorpusConfig, CorpusManager
 from app.evidence.selector import EvidenceUnit
 from app.review.service import ReleaseNeedsConfirmation, ReviewConfig, ReviewService
 from app.service.pipeline import AnswerPipeline, PipelineOutput
@@ -142,7 +143,8 @@ def _case_out(case: dict, *, full: bool) -> schemas.ReviewCaseOut:
 
 def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline | None = None,
                ledger: UsageLedger | None = None, review: ReviewService | None = None,
-               review_config: ReviewConfig | None = None) -> FastAPI:  # fmt: skip
+               review_config: ReviewConfig | None = None,
+               corpus_config: CorpusConfig | None = None) -> FastAPI:  # fmt: skip
     st = settings or ApiSettings.load()
     res = ResourceConfig.from_yaml()
     api_cfg = res.api or {}
@@ -158,7 +160,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     audit = AuditLog(st.audit_path, store_question_text=st.audit.store_question_text)
     feedback_path = st.audit_path.parent / "feedback.jsonl" if st.audit_path else None
     feedback_log = AuditLog(feedback_path)
-    state: dict[str, Any] = {"pipeline": pipeline, "review": review}
+    state: dict[str, Any] = {"pipeline": pipeline, "review": review, "corpus": None}
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -173,6 +175,10 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             state["review"] = ReviewService(state["pipeline"], review_config, audit=audit)
         elif state["review"].audit.path is None:
             state["review"].audit = audit  # one audit trail for queries and review decisions
+        pl = state["pipeline"]
+        enc_name = pl.pool.acquire("dense_encoder").name
+        state["corpus"] = CorpusManager(corpus_config, activate=pl.swap_bundle,
+                                        active_bundle=pl.bundle, encoder_name=enc_name)  # fmt: skip
         log.info("startup: %s", state["pipeline"].versions.as_dict())
         yield
 
@@ -193,6 +199,16 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         if r is None:
             raise HTTPException(503, "service starting")
         return r
+
+    def corpus() -> CorpusManager:
+        c = state["corpus"]
+        if c is None:
+            raise HTTPException(503, "service starting")
+        return c
+
+    def require_admin(p: Principal) -> None:
+        if not p.is_admin:
+            raise HTTPException(403, "admin role required")
 
     def require_reviewer(p: Principal) -> None:
         if not (p.is_admin or "reviewer" in p.roles):
@@ -291,6 +307,11 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         pl = pipe()
         scope = req.scope or st.kb.default_scope
         kb_ids: list[str] = []
+        if not corpus().indexed_enabled:
+            if scope == "indexed":
+                raise HTTPException(422, "the indexed corpus is disabled on this server; "
+                                         "use scope 'uploaded'")  # fmt: skip
+            scope = "uploaded"
         if scope != "indexed":
             if pl.kb is None:
                 if scope == "uploaded":
@@ -421,6 +442,52 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         n = ix.remove_kb(kb_id)
         audit.record({"event": "kb_delete", "kb_id": kb_id, "sub": p.sub})
         return {"removed_units": n}
+
+    # ---- corpus indexes (admin) ------------------------------------------------------------
+    @app.get("/api/v1/corpus")
+    def corpus_status(p: Principal = Auth):
+        require_admin(p)
+        return corpus().status()
+
+    @app.post("/api/v1/corpus/activate")
+    def corpus_activate(body: schemas.CorpusActivate, p: Principal = Auth):
+        require_admin(p)
+        try:
+            info = corpus().activate(body.corpus_id)
+        except LookupError as e:
+            raise HTTPException(404, str(e)) from e
+        except ValueError as e:
+            raise HTTPException(409, str(e)) from e
+        audit.record({"event": "corpus_activate", "corpus_id": body.corpus_id, "sub": p.sub})
+        return info
+
+    @app.post("/api/v1/corpus/enabled")
+    def corpus_enabled(body: schemas.CorpusEnabled, p: Principal = Auth):
+        require_admin(p)
+        corpus().indexed_enabled = body.enabled
+        audit.record({"event": "corpus_enabled", "enabled": body.enabled, "sub": p.sub})
+        return {"indexed_enabled": body.enabled}
+
+    @app.post("/api/v1/corpus/jobs", status_code=202)
+    def corpus_job(body: schemas.CorpusJobIn, p: Principal = Auth):
+        require_admin(p)
+        try:
+            job = corpus().start_job(body.type, body.params, by=p.sub)
+        except PermissionError as e:
+            raise HTTPException(409, str(e)) from e
+        except (ValueError, KeyError) as e:
+            raise HTTPException(422, f"bad job: {e}") from e
+        audit.record({"event": "corpus_job", "job_id": job["job_id"], "type": body.type,
+                      "params": body.params, "sub": p.sub})  # fmt: skip
+        return {k: v for k, v in job.items() if k != "log"}
+
+    @app.get("/api/v1/corpus/jobs/{job_id}")
+    def corpus_job_status(job_id: str, p: Principal = Auth):
+        require_admin(p)
+        j = corpus().job(job_id)
+        if j is None:
+            raise HTTPException(404, "unknown job")
+        return {k: v for k, v in j.items() if k != "log"}
 
     # ---- human review -----------------------------------------------------------------------
     @app.get("/api/v1/review/queue", response_model=list[schemas.ReviewCaseOut])

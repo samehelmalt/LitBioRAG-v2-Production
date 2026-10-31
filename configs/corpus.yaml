@@ -1,0 +1,8 @@
+# Corpus index management (served bundles). The serving host fetches, verifies, activates and
+# incrementally updates bundles; full rebuilds run on the build host (DEPLOYMENT.md).
+artifacts_dir: data/artifacts
+jobs_dir: data/jobs
+staging_dir: data/staging          # fetched update files (PubMed daily / preprint windows)
+allow_build_on_serve: false        # true only on a build host or a dev box
+indexed_enabled: true              # false = answer from uploaded knowledge bases only
+encoder_spec: ""                   # hf:<model> used for updates; must equal the bundle's encoder
