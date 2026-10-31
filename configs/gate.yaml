@@ -1,0 +1,21 @@
+# Gate v2 operating point. Thresholds and the two small models below are WRITTEN by
+# scripts/calibrate_gate.py from the `calibration` split; hand edits are a smell.
+# calibrated_on is empty until the first calibration run: everything here is a heuristic default
+# and every report produced with it must say so.
+calibrated_on: ""
+
+unsupported_noncritical_max: 0.34   # share of claims that may be removed before abstaining
+grounding_min: 0.5                  # question entities present in evidence, else CLARIFY
+sufficiency_min: 0.35               # evidence sufficiency, else ABSTAIN
+confidence_answer: 0.70             # ANSWER at/above, ANSWER_WITH_CAUTION below
+
+# expected-cost weights used by calibrate_gate to pick thresholds (owner to confirm)
+costs:
+  false_pass: 10.0
+  false_block: 1.0
+  warn: 0.3
+  abstain: 1.0
+
+# logistic models over runtime features; null = uncalibrated heuristic
+confidence_model: null
+sufficiency_model: null
