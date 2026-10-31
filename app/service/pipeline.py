@@ -16,7 +16,7 @@ from typing import Any
 from app.core.budget import ResourceConfig, UsageLedger
 from app.core.verdicts import VerificationReport
 from app.evidence.selector import EvidenceUnit, select_evidence
-from app.generation.contract import GeneratedAnswer
+from app.generation.contract import ABSTAIN_OUT_OF_SCOPE, GeneratedAnswer
 from app.generation.prompts import PROMPT_ID
 from app.generation.service import GenerationConfig
 from app.generation.service import answer as generate_answer
@@ -25,6 +25,7 @@ from app.retrieval.dense import DenseIndex
 from app.retrieval.pipeline import HybridRetriever, RetrievalConfig, RetrievalResult
 from app.retrieval.store import MetadataStore
 from app.safety.gate import Decision, GateConfig, decide
+from app.safety.scope import classify_scope
 from app.safety.sufficiency import evidence_sufficiency
 from app.verification.pipeline import VerificationConfig, verify
 from models.registry import ModelRegistry
@@ -37,7 +38,7 @@ CONFIGS = ROOT / "configs"
 @dataclass
 class PipelineOutput:
     question: str
-    retrieval: RetrievalResult
+    retrieval: RetrievalResult | None  # None when scope stopped the request before retrieval
     evidence: list[EvidenceUnit]
     generated: GeneratedAnswer
     report: VerificationReport
@@ -74,7 +75,9 @@ class AnswerPipeline:
         ledger: UsageLedger | None = None,
         resources: ResourceConfig | None = None,
         max_units: int = 8,
+        scope_profile: str = "research",
     ):
+        self.scope_profile = scope_profile
         self.bundle = Path(bundle)
         self.registry = ModelRegistry.load(profile=profile)
         self.resources = resources or ResourceConfig.from_yaml()
@@ -115,6 +118,17 @@ class AnswerPipeline:
     ) -> PipelineOutput:
         t: dict[str, float] = {}
         t0 = time.perf_counter()
+        scope = classify_scope(question, self.scope_profile)
+        if not scope.in_scope:
+            # out of scope: no retrieval, no model call, no tokens spent
+            gen = GeneratedAnswer.abstention(ABSTAIN_OUT_OF_SCOPE, prompt_id=PROMPT_ID,
+                                             model="none")  # fmt: skip
+            gen.question = question
+            report = VerificationReport()
+            decision = decide(report, gen, config=self.gate_cfg, scope=scope, question=question)
+            t["total"] = (time.perf_counter() - t0) * 1000
+            return PipelineOutput(question, None, [], gen, report, decision,
+                                  {k: round(v, 1) for k, v in t.items()})  # fmt: skip
         res = self.retriever.retrieve(question, mode="hybrid+rerank", course_ids=course_ids)
         units = select_evidence(res, self.store, max_units=max_units or self.max_units)
         t["retrieval"] = (time.perf_counter() - t0) * 1000

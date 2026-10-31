@@ -132,6 +132,13 @@ class SourceDocument(BaseModel):
     slide: dict[str, Any] | None = None
 
 
+class FeedbackIn(BaseModel):
+    request_id: str = Field(..., min_length=4, max_length=64)
+    claim_id: str = Field(..., min_length=1, max_length=32)
+    label: str = Field(..., pattern="^(correct|incorrect|unsure)$")
+    notes: str = Field("", max_length=2000)
+
+
 class Health(BaseModel):
     status: str
     bundle_id: str

@@ -62,3 +62,11 @@ deck diff report before re-index.
 ## Build order
 Step 9 API first (the UI is a thin client over `/api/v1/query`); Step 10 implements the two screens
 above from the API response only — no UI logic recomputes a verdict.
+
+## Status (2026-10-31)
+Implemented as a thin client in `app/web/static/` served by the API (`/`, `/trust`): requirements
+1–7 and 10 render directly from the `/api/v1/query` response (no client-side decisions, asserted by
+`tests/api/test_web.py`); 8 (Model Settings) and 9 (Evaluations) are read-only via
+`/api/v1/models` and `/api/v1/metrics` on the trust page; an admin profile switcher is deferred to
+the faculty console. Out-of-scope questions are stopped before retrieval, so an ESCALATE screen
+shows no sources and spends no tokens.

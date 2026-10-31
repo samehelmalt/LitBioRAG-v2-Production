@@ -7,6 +7,7 @@ log line; errors never leak stack traces; entitlement is applied before retrieva
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 import uuid
@@ -16,7 +17,8 @@ from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api import schemas
 from app.api.audit import AuditLog
@@ -29,6 +31,8 @@ from app.evidence.selector import EvidenceUnit
 from app.service.pipeline import AnswerPipeline, PipelineOutput
 
 log = logging.getLogger("litbiorag.api")
+STATIC = Path(__file__).resolve().parents[1] / "web" / "static"
+RUNS = Path(__file__).resolve().parents[2] / "evaluation" / "benchmarks" / "runs"
 
 
 def _tier(source_type: SourceType, peer_reviewed: bool) -> str:
@@ -135,6 +139,8 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         )
     limiter = RateLimiter(st.limits.rate_per_minute, st.limits.burst)
     audit = AuditLog(st.audit_path, store_question_text=st.audit.store_question_text)
+    feedback_path = st.audit_path.parent / "feedback.jsonl" if st.audit_path else None
+    feedback_log = AuditLog(feedback_path)
     state: dict[str, Any] = {"pipeline": pipeline}
 
     @asynccontextmanager
@@ -143,7 +149,8 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             if not st.bundle:
                 raise RuntimeError("no bundle configured: set LITBIORAG_BUNDLE or api.yaml bundle")
             state["pipeline"] = AnswerPipeline(
-                st.bundle_path, profile=st.profile or None, ledger=ledger, resources=res
+                st.bundle_path, profile=st.profile or None, ledger=ledger, resources=res,
+                scope_profile=st.scope_profile,
             )
         log.info("startup: %s", state["pipeline"].versions.as_dict())
         yield
@@ -244,6 +251,38 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             "versions": {k: v for k, v in resp.versions.items() if k != "models"},
         })  # fmt: skip
         return resp
+
+    @app.post("/api/v1/feedback", status_code=202)
+    def feedback(fb: schemas.FeedbackIn, request: Request, p: Principal = Auth):
+        """Human labels, claim by claim. Written to the feedback JSONL that the labelling protocol
+        in evaluation/labels.py imports; never read at runtime."""
+        feedback_log.record({"event": "feedback", "request_id": fb.request_id,
+                             "claim_id": fb.claim_id, "label": fb.label, "notes": fb.notes,
+                             "rater": p.sub, "via": p.via,
+                             "api_request_id": request.state.request_id})  # fmt: skip
+        return {"status": "recorded"}
+
+    @app.get("/api/v1/metrics")
+    def metrics(_p: Principal = Auth):
+        """Latest recorded benchmark summaries, or NOT YET MEASURED. Never computed live."""
+        out: dict[str, Any] = {}
+        if RUNS.exists():
+            for summary in sorted(RUNS.glob("*/**/summary.json")):
+                try:
+                    out[summary.relative_to(RUNS).as_posix()] = json.loads(summary.read_text())
+                except ValueError:
+                    continue
+        return out or {"status": "NOT YET MEASURED"}
+
+    @app.get("/", include_in_schema=False)
+    def index():
+        return FileResponse(STATIC / "index.html")
+
+    @app.get("/trust", include_in_schema=False)
+    def trust():
+        return FileResponse(STATIC / "trust.html")
+
+    app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 
     @app.get("/api/v1/sources/{doc_id:path}", response_model=schemas.SourceDocument)
     def source(doc_id: str, p: Principal = Auth):

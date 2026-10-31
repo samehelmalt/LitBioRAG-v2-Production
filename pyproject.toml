@@ -51,6 +51,9 @@ ml = [
 [tool.setuptools.packages.find]
 include = ["app*", "models*", "evaluation*"]
 
+[tool.setuptools.package-data]
+app = ["web/static/*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

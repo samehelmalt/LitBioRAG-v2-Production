@@ -41,7 +41,9 @@ def test_patient_specific_question_escalates(client):
     r = client.post("/api/v1/query", json={"question": "My mother takes warfarin 5 mg; what dose "
                                                        "should she take tonight for her INR?"})
     assert r.status_code == 200 and r.json()["action"] == "ESCALATE"
-    assert r.json()["claims"] == [] or all(c["removed"] is False for c in r.json()["claims"])
+    body = r.json()
+    assert body["claims"] == [] and body["sources"] == [] and body["usage"] is None
+    assert "retrieval" not in body["timings_ms"]  # stopped before retrieval: no tokens spent
 
 
 def test_question_limits(client):

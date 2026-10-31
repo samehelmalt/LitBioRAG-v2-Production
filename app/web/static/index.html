@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LitBioRAG Research</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+<header><h1>LitBioRAG</h1><span class="muted">evidence-verified biomedical answers</span>
+<nav><a href="/">Ask</a><a href="/trust">Trust &amp; versions</a><a href="/api/docs">API</a></nav></header>
+<main>
+<section class="card">
+<form class="ask" id="ask">
+<textarea id="q" placeholder="Ask a biomedical question, e.g. What does MAP3K3 do in NF-kappaB signalling?" required minlength="3"></textarea>
+<div class="row">
+<input type="text" id="courses" placeholder="course ids (optional, comma-separated)">
+<input type="password" id="token" placeholder="access token (optional)" autocomplete="off">
+<button id="go" type="submit">Ask</button>
+<span id="status" class="muted"></span>
+</div></form>
+</section>
+<section id="out" hidden>
+<div class="card"><div id="banner" class="banner"></div></div>
+<div class="card"><h3>Answer</h3><div id="answer"></div>
+<div id="removed"></div><div id="entities" class="muted" style="margin-top:8px"></div></div>
+<div class="card" id="conflicts-card" hidden><h3>Evidence is mixed</h3><div id="conflicts" class="two"></div></div>
+<div class="card" id="claims-card"><h3>Claims and verification</h3><div id="claims"></div></div>
+<div class="card" id="sources-card"><h3>Sources</h3><p class="muted">Scores are retrieval relevance, not correctness.</p><div id="sources"></div></div>
+<div class="card"><details><summary>Verification report and decision trace</summary><dl id="report" class="kv"></dl><pre id="trace" class="mono"></pre></details></div>
+<footer class="meta" id="meta"></footer>
+</section>
+</main>
+<script src="/static/app.js"></script>
+</body></html>
