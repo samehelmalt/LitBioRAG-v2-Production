@@ -169,6 +169,7 @@ def verify(
                 ce, qe = qg.substitutions[v.claim_id]
                 v.near_neighbour_substitution = True
                 v.substituted_for = f"{ce}->{qe}"
+                v.substitution_reason = qg.reasons.get(v.claim_id)
                 v.notes = (*v.notes, f"entity substitution: claim names {ce}, question asked {qe}")
                 trace.append(f"{v.claim_id}: ENTITY SUBSTITUTION {ce} for {qe}")
             elif v.claim_id in qg.off_target:
@@ -188,6 +189,7 @@ def verify(
         report.question_entities = qg.question_entities
         report.query_entity_grounding = qg.grounding
         report.question_entities_missing_in_claims = qg.missing_in_critical_claims
+        report.question_entities_missing_in_evidence = qg.missing_in_evidence
         report.substitution_detected = qg.substitution_detected or report.substitution_detected
     report.policy_trace = trace + [f"conflict on {k.claim_id}: {k.description}" for k in conflicts]
     return report

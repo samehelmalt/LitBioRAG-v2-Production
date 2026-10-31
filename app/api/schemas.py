@@ -1,0 +1,146 @@
+"""Request/response models. The response is the trust surface the UI renders (UI_PROTOTYPE_REVIEW
+requirements 1–7): delivery action and deciding rule, per-claim verdicts with evidence spans,
+removed claims, conflicts, question-entity grounding, source provenance with tier flags, usage,
+versions and the AI disclosure. Nothing here is recomputed client-side."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+DISCLOSURE = (
+    "AI-generated summary of retrieved literature. Verified claim by claim against the cited "
+    "passages; not medical advice. Check the sources before acting on any statement."
+)
+
+
+class QueryRequest(BaseModel):
+    question: str = Field(..., min_length=3, max_length=4000)
+    course_ids: list[str] | None = Field(default=None, max_length=20)
+    max_units: int | None = Field(default=None, ge=1, le=50)
+
+
+class Substitution(BaseModel):
+    claim_entity: str
+    asked_entity: str
+    reason: str | None = None
+
+
+class EvidenceSpan(BaseModel):
+    passage_id: str
+    char_start: int
+    char_end: int
+
+
+class ClaimOut(BaseModel):
+    id: str
+    text: str
+    critical: bool
+    label: str  # supported | unsupported | contradicted
+    support: float
+    contradiction: float
+    citations: list[str]
+    supporting_ids: list[str]
+    fabricated_ids: list[str]
+    entity_missing: list[str]
+    numeric_mismatches: list[str]
+    substitution: Substitution | None = None
+    off_target: bool = False
+    removed: bool = False
+    evidence_span: EvidenceSpan | None = None
+    contradicting_span: EvidenceSpan | None = None
+    notes: list[str] = Field(default_factory=list)
+
+
+class SourceOut(BaseModel):
+    citation_id: str
+    passage_id: str
+    doc_id: str
+    title: str
+    year: int | None
+    journal: str | None
+    source_type: str
+    tier: str  # peer_reviewed | preprint | course_material | other
+    is_peer_reviewed: bool
+    display_source: str
+    url: str | None
+    text: str
+    char_start: int
+    char_end: int
+    retrieval_score: float
+    rank: int
+    course_id: str | None = None
+    lecture_title: str | None = None
+    slide_number: int | None = None
+
+
+class ConflictOut(BaseModel):
+    claim_id: str
+    supporting_ids: list[str]
+    contradicting_ids: list[str]
+    description: str
+
+
+class EntityGrounding(BaseModel):
+    asked: list[str]
+    missing_in_evidence: list[str]
+    missing_in_claims: list[str]
+    grounding: float | None
+    substitution_detected: bool
+
+
+class QueryResponse(BaseModel):
+    request_id: str
+    action: str
+    internal_state: str
+    rule: str
+    reason: str
+    confidence: float | None
+    confidence_calibrated: bool
+    sufficiency: float | None
+    answer: str
+    abstained: bool
+    abstain_reason: str | None
+    claims: list[ClaimOut]
+    removed_claims: list[str]
+    conflicts: list[ConflictOut]
+    entities: EntityGrounding
+    sources: list[SourceOut]
+    verification: dict[str, Any]
+    usage: dict[str, Any] | None
+    evidence_fit: dict[str, Any] | None
+    versions: dict[str, Any]
+    timings_ms: dict[str, float]
+    trace: list[str]
+    disclosure: str = DISCLOSURE
+
+
+class SourceDocument(BaseModel):
+    doc_id: str
+    citation_id: str
+    title: str
+    abstract: str
+    year: int | None
+    journal: str | None
+    source_type: str
+    tier: str
+    is_peer_reviewed: bool
+    url: str | None
+    pmid: str | None
+    doi: str | None
+    slide: dict[str, Any] | None = None
+
+
+class Health(BaseModel):
+    status: str
+    bundle_id: str
+    profile: str
+    gate_calibrated_on: str
+    preflight: dict[str, Any]
+    ledger_spent_today_usd: float | None
+
+
+class ErrorOut(BaseModel):
+    request_id: str
+    error: str

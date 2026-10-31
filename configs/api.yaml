@@ -1,0 +1,25 @@
+# API service settings. Secrets never live here: they are read from the environment variables
+# named below. Paths are relative to the repository root unless absolute.
+bundle: ""                          # or LITBIORAG_BUNDLE
+profile: ""                         # models.yaml profile; "" = file default (LITBIORAG_MODEL_PROFILE)
+scope_profile: research             # research | education (affects the ESCALATE rules' wording)
+
+auth:
+  required: false                   # true in production: every request needs a JWT or API key
+  jwt_secret_env: LITBIORAG_JWT_SECRET
+  jwt_algorithms: [HS256]
+  jwt_audience: litbiorag
+  api_keys_env: LITBIORAG_API_KEYS  # comma-separated "key:subject" pairs for server-to-server use
+  anonymous_courses: []             # course ids anonymous users may query (none by default)
+
+limits:
+  max_question_chars: 1000
+  max_units: 12
+  rate_per_minute: 30               # per principal (sub / api key / client ip)
+  burst: 10
+
+audit:
+  path: data/audit/requests.jsonl   # one JSON line per request; "" disables
+  store_question_text: true         # false hashes the question (privacy mode)
+
+cors_origins: []                    # the web UI origin(s) in production

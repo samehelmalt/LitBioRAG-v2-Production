@@ -41,6 +41,7 @@ class ClaimVerdict(BaseModel):
     query_entities_missing: tuple[str, ...] = ()  # question entities this claim should name
     near_neighbour_substitution: bool = False  # e.g. MAP3K7 where the question asked MAP3K3
     substituted_for: str | None = None  # "map3k7->map3k3"
+    substitution_reason: str | None = None  # numbered_family | antonym_prefix | drug_class:… | …
     off_target: bool = False  # names a neighbour while other claims do answer the asked entity
     notes: tuple[str, ...] = ()
 
@@ -90,6 +91,7 @@ class VerificationReport(BaseModel):
     question_entities: tuple[str, ...] = ()
     query_entity_grounding: float | None = None  # share of question entities in supporting evidence
     question_entities_missing_in_claims: tuple[str, ...] = ()
+    question_entities_missing_in_evidence: tuple[str, ...] = ()
     substitution_detected: bool = False
     verifier: str = ""
     policy_trace: list[str] = Field(default_factory=list)
