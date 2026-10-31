@@ -23,18 +23,19 @@ class CrossEncoderReranker:
         batch_size: int = 32,
         max_length: int | None = None,
         dtype: str = "float16",
+        revision: str | None = None,
     ):
         import torch
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-        self.name = f"hf:{model_id}"
+        self.name = f"hf_seq_cls:{model_id}" + (f"@{revision}" if revision else "")
         self.batch_size = batch_size
         self._torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
         torch_dtype = getattr(torch, dtype) if self.device != "cpu" else torch.float32
         self.model = AutoModelForSequenceClassification.from_pretrained(
-            model_id, torch_dtype=torch_dtype
+            model_id, torch_dtype=torch_dtype, revision=revision
         )
         self.model.to(self.device).eval()
         model_max = getattr(self.tokenizer, "model_max_length", 512) or 512
@@ -65,14 +66,18 @@ class CrossEncoderReranker:
 
 
 def make_reranker(spec: str):
-    """Resolve 'none' | 'lexical' | 'hf:<model_id>' to a reranker instance (None for 'none')."""
+    """Build a reranker from a registry spec string; 'none' -> None.
+
+    'lexical' is shorthand for 'lexical:overlap', 'hf:<id>' for 'hf_seq_cls:<id>'. Model choice
+    lives in configs/models.yaml; this helper exists for CLIs that take a spec on the command line.
+    """
+    from models.registry import ModelSpec
+    from models.registry.loader import build_spec
+
     if spec in ("none", "", None):
         return None
     if spec == "lexical":
-        from app.reranking.base import LexicalOverlapReranker
-
-        return LexicalOverlapReranker()
-    kind, _, arg = spec.partition(":")
-    if kind == "hf" and arg:
-        return CrossEncoderReranker(arg)
-    raise ValueError(f"unknown reranker spec {spec!r} (use none | lexical | hf:<model_id>)")
+        spec = "lexical:overlap"
+    elif spec.startswith("hf:"):
+        spec = "hf_seq_cls:" + spec[3:]
+    return build_spec(ModelSpec.parse(spec, "reranker"))

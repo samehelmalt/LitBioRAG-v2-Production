@@ -51,10 +51,16 @@ class HashEncoder:
 
 
 class SentenceTransformerEncoder:
-    def __init__(self, model_id: str, device: str | None = None, max_seq_length: int | None = None):
+    def __init__(
+        self,
+        model_id: str,
+        device: str | None = None,
+        max_seq_length: int | None = None,
+        revision: str | None = None,
+    ):
         from sentence_transformers import SentenceTransformer  # lazy: ml extra
 
-        self._model = SentenceTransformer(model_id, device=device)
+        self._model = SentenceTransformer(model_id, device=device, revision=revision)
         if max_seq_length:
             self._model.max_seq_length = max_seq_length
         self.name = f"hf:{model_id}"
@@ -72,12 +78,14 @@ class SentenceTransformerEncoder:
 
 
 def make_encoder(spec: str) -> Encoder:
-    """'hash:<dim>' or 'hf:<model_id>'."""
-    kind, _, arg = spec.partition(":")
-    if kind == "hash":
-        return HashEncoder(int(arg or 256))
-    if kind == "hf":
-        if not arg:
-            raise ValueError("hf: needs a model id")
-        return SentenceTransformerEncoder(arg)
-    raise ValueError(f"unknown encoder spec {spec!r} (use hash:<dim> or hf:<model_id>)")
+    """Build an encoder from a registry spec string ('hash:<dim>', 'sentence_transformers:<id>').
+
+    'hf:<model_id>' is accepted as shorthand for 'sentence_transformers:<model_id>'. Model choice
+    lives in configs/models.yaml; this helper exists for CLIs that take a spec on the command line.
+    """
+    from models.registry import ModelSpec
+    from models.registry.loader import build_spec
+
+    if spec.startswith("hf:"):
+        spec = "sentence_transformers:" + spec[3:]
+    return build_spec(ModelSpec.parse(spec, "dense_encoder"))
