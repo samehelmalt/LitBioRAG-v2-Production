@@ -186,7 +186,8 @@ ANSWER_SCHEMA: dict[str, Any] = {
 
 
 def schema_text() -> str:
-    return json.dumps(ANSWER_SCHEMA, indent=1)
+    """Compact JSON (no indentation): ~40% fewer prompt tokens than pretty-printed, same schema."""
+    return json.dumps(ANSWER_SCHEMA, separators=(", ", ": "))
 
 
 _FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL | re.IGNORECASE)

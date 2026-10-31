@@ -66,7 +66,9 @@ window.AEOS = (function () {
   }
   window.addEventListener("hashchange", route);
   $("signin").addEventListener("click", signin);
-  $("theme").addEventListener("click", () => { const h = document.documentElement; h.dataset.theme = h.dataset.theme === "light" ? "dark" : "light"; });
+  function applyTheme(t) { document.documentElement.dataset.theme = t; $("theme").textContent = t === "light" ? "☾" : "☀"; $("theme").title = t === "light" ? "switch to dark theme" : "switch to light theme"; }
+  (function initTheme() { let t = null; try { t = localStorage.getItem("aeos.theme"); } catch (e) {} if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark"; applyTheme(t); })();
+  $("theme").addEventListener("click", () => { const t = document.documentElement.dataset.theme === "light" ? "dark" : "light"; applyTheme(t); try { localStorage.setItem("aeos.theme", t); } catch (e) {} });
   $("topsearch").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.value.trim()) { location.hash = "#/chat"; setTimeout(() => { const q = $("q"); if (q) { q.value = e.target.value; $("ask").requestSubmit(); } }, 50); } });
   document.addEventListener("DOMContentLoaded", () => { updateWho(); route(); });
 

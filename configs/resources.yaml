@@ -42,4 +42,5 @@ cache:
   ttl_days: 30
   verifier_pairs: true            # (model, premise, hypothesis) -> NLI scores
   query_embeddings: true          # (encoder, query) -> vector
-  generations: false              # never cache generations by default: evidence changes per bundle
+  generations: true               # keyed by model + prompt + question + exact evidence spans, so a
+                                  # changed bundle or evidence set never serves a stale answer

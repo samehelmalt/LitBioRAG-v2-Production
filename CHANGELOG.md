@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.1 — 2026-10-31
+- Light theme (persisted, follows the system preference by default).
+- Token optimization: question-relevant evidence windows with offsets preserved, compact schema,
+  generation cache keyed by exact evidence spans; per-answer token-saving report.
+- Gate: off-topic veto (R6b) when evidence covers the asked entities but no critical claim names
+  them; CLARIFY now judged on all retrieved evidence, not only cited passages.
+- Calibration: `--target-precision` operating point (release automatically only above the
+  confidence at which the calibration split reaches the target); `gate.yaml: operating_point`.
+- docs/QUALITY_PLAYBOOK.md: the three numbers behind "90–98%", the levers in payoff order.
+
 ## 0.9.0 — 2026-10-31
 First packaged pre-release of AEOS RAG (LitBioRAG v2 Production). Code complete for the
 architecture; **no measured accuracy yet** (see docs/STATUS.md).

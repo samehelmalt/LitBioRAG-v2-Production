@@ -154,3 +154,30 @@ def test_no_gold_labels_in_runtime_code():
     assert offenders == []
     assert not any("from evaluation" in p.read_text() or "import evaluation" in p.read_text()
                    for p in Path("app").rglob("*.py"))  # fmt: skip
+
+
+def test_off_topic_answer_is_vetoed_not_delivered():
+    """Evidence covers NSCLC, the answer talks only about trifluridine → ABSTAIN (R6-offtopic)."""
+    from app.core.verdicts import ClaimVerdict, VerificationReport
+    from app.generation.contract import Claim, GeneratedAnswer
+    from app.safety.gate import Action, decide
+
+    v = ClaimVerdict(claim_id="C1", text="Trifluridine retained activity in colorectal cancer.",
+                     label="supported", critical=True, support=0.99, cited_ids=("PMID:900003",),
+                     resolved_ids=("PMID:900003",), supporting_ids=("PMID:900003",),
+                     entity_checked=1, entity_ok=1)  # fmt: skip
+    rep = VerificationReport.from_verdicts([v], verifier="overlap")
+    rep.question_entities = ("nonsmallcelllungcancer",)
+    rep.question_entities_missing_in_claims = ("nonsmallcelllungcancer",)
+    rep.question_entities_missing_in_evidence = ()
+    rep.query_entity_grounding = 1.0
+    ans = GeneratedAnswer(answer=v.text, claims=[Claim(id="C1", text=v.text,
+                                                       citations=["PMID:900003"], critical=True)],
+                          question="What are the treatment approaches for NSCLC?")  # fmt: skip
+    d = decide(rep, ans, sufficiency=0.9, question=ans.question)
+    assert d.action == Action.ABSTAIN and d.rule == "R6-offtopic"
+    # when the corpus does not contain the entity at all, it is CLARIFY (retrieval), not a veto
+    rep.question_entities_missing_in_evidence = ("nonsmallcelllungcancer",)
+    rep.query_entity_grounding = 0.0
+    d = decide(rep, ans, sufficiency=0.9, question=ans.question)
+    assert d.action == Action.CLARIFY and d.rule == "R8-grounding"

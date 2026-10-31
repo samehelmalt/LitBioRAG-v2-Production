@@ -24,6 +24,7 @@ from app.core.budget import (
     UsageLedger,
     fit_evidence,
 )
+from app.evidence.compress import compress_evidence
 from app.evidence.selector import EvidenceUnit
 from app.generation.base import Generator
 from app.generation.contract import (
@@ -39,6 +40,9 @@ class GenerationConfig(BaseModel):
     max_tokens: int = Field(1024, ge=64)
     temperature: float = Field(0.0, ge=0.0, le=1.0)
     max_evidence_units: int = Field(10, ge=1)
+    compress_evidence: bool = True
+    max_sentences_per_unit: int = Field(4, ge=1)
+    cache_generations: bool = True
 
     @classmethod
     def from_yaml(cls, path: Path | str) -> GenerationConfig:
@@ -64,6 +68,7 @@ def answer(
     ledger: UsageLedger | None = None,
     request_id: str = "",
     history: list[str] | None = None,
+    cache=None,
 ) -> GeneratedAnswer:
     """Evidence → prompt → model → parsed answer, under a token budget and a spend cap.
 
@@ -77,14 +82,40 @@ def answer(
     units = list(evidence)[: cfg.max_evidence_units]
     if not units:
         return _abstain(ABSTAIN_NO_EVIDENCE, question, generator)
+    full_tokens = sum(counter.count(u.text) for u in units)
+    if cfg.compress_evidence:
+        units = compress_evidence(units, question, max_sentences=cfg.max_sentences_per_unit)
     fit = None
     if budget is not None:
         units, rep = fit_evidence(units, budget, counter)
         fit = rep.__dict__
         if not units:
             return _abstain(ABSTAIN_NO_EVIDENCE, question, generator, evidence_fit=fit)
+    fit = fit or {}
+    fit["evidence_tokens_full"] = full_tokens
+    fit["evidence_tokens_sent"] = sum(counter.count(u.text) for u in units)
     messages = build_messages(question, units, history)
     prompt_tokens = sum(counter.count(m.get("content", "")) for m in messages)
+    cache_key = None
+    if cache is not None and cfg.cache_generations:
+        import hashlib
+
+        h = hashlib.sha256()
+        for part in (generator.name, PROMPT_ID, question.strip().lower(),
+                     *(f"{u.passage_id}:{u.char_start}:{u.char_end}" for u in units),
+                     *(history or [])):
+            h.update(part.encode("utf-8"))
+            h.update(b"\x1f")
+        cache_key = h.hexdigest()
+        hit = cache.get("gen", cache_key)
+        if hit is not None:
+            parsed = parse_answer(hit["raw"], prompt_id=PROMPT_ID, model=generator.name)
+            known = {u.citation_id for u in units}
+            parsed.unknown_citations = [c for c in parsed.all_citations() if c not in known]
+            parsed.question = question
+            parsed.usage = {**hit["usage"], "cached": True, "cost_usd": 0.0}
+            parsed.evidence_fit = fit
+            return parsed
     if ledger is not None:
         try:
             ledger.check_affordable(
@@ -103,6 +134,8 @@ def answer(
     )
     if ledger is not None:
         ledger.record(usage, request_id=request_id, role="generator")
+    if cache_key is not None:
+        cache.put("gen", cache_key, {"raw": raw, "usage": usage.to_dict()})
     parsed = parse_answer(raw, prompt_id=PROMPT_ID, model=generator.name)
     known = {u.citation_id for u in units}
     parsed.unknown_citations = [c for c in parsed.all_citations() if c not in known]

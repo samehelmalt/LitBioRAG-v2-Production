@@ -159,8 +159,11 @@ def verify(
         )
     # question-level grounding: the answer must be about the entities the question asked about
     if question:
+        # coverage is judged on everything retrieved (CLARIFY only when the corpus lacks the
+        # entity); whether the *answer* addresses it is judged on the critical claims (R6b)
         qg = query_entity_grounding(
-            question, [(c.id, c.text, c.critical) for c in claims], all_supporting_texts, extractor
+            question, [(c.id, c.text, c.critical) for c in claims],
+            [u.text for u in evidence] or all_supporting_texts, extractor,
         )
         for v in verdicts:
             if v.critical:
@@ -177,6 +180,9 @@ def verify(
                 v.off_target = True
                 v.notes = (*v.notes, f"off-target: names {ce}, question asked {qe}")
                 trace.append(f"{v.claim_id}: off-target ({ce}, question asked {qe})")
+        if qg.missing_in_critical_claims and not qg.missing_in_evidence and claims:
+            trace.append("question entities present in evidence but absent from critical claims: "
+                         + ", ".join(qg.missing_in_critical_claims))
         if qg.missing_in_evidence:
             trace.append(
                 "question entities not in supporting evidence: "

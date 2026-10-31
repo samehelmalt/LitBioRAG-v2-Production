@@ -108,6 +108,13 @@ class AnswerPipeline:
         self.gate_cfg = GateConfig.from_yaml(configs / "gate.yaml")
         self.budget = self.resources.generator_budget()
         self.ledger = ledger
+        self.gen_cache = None
+        cache_cfg = self.resources.cache or {}
+        if cache_cfg.get("enabled") and cache_cfg.get("generations"):
+            from app.core.cache import DiskCache
+
+            self.gen_cache = DiskCache(cache_cfg.get("path", "data/cache/litbiorag.sqlite"),
+                                       ttl_days=float(cache_cfg.get("ttl_days", 30)))  # fmt: skip
         self.max_units = max_units
         manifest: dict[str, Any] = {}
         mpath = self.bundle / "manifest.json"
@@ -203,6 +210,7 @@ class AnswerPipeline:
             gen = generate_answer(
                 question, units, generator, config=self.gen_cfg, budget=self.budget,
                 ledger=self.ledger, request_id=request_id, history=history,
+                cache=self.gen_cache,
             )  # fmt: skip
         t["generation"] = (time.perf_counter() - t1) * 1000
         say("verifying", claims=len(gen.claims))

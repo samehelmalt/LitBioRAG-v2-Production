@@ -28,6 +28,15 @@ until BASELINE_RESULTS.md says so.
    model's token limit (`HFNLIVerifier`), with max-entailment across chunks.
 4. **The prompt is versioned** (`answer-json-v1`); `prompt_overhead` is re-measured when it changes.
 
+5. **Evidence compression** (`app/evidence/compress.py`, `generation.yaml: compress_evidence`):
+   the generator sees the question-relevant window of each passage (≤ `max_sentences_per_unit`
+   sentences, offsets preserved); the verifier still sees the full passage. `evidence_fit`
+   reports `evidence_tokens_full` vs `evidence_tokens_sent` on every answer.
+6. **Compact schema** in the prompt (~250 instead of ~420 tokens) and **generation cache**
+   keyed by model + prompt id + question + exact evidence spans (`resources.yaml: cache`), so a
+   repeated question costs zero generator tokens and a changed bundle never serves a stale answer.
+   See QUALITY_PLAYBOOK.md §5 for the full table.
+
 ## Spend control (`UsageLedger`)
 - Before each hosted call the service estimates the cost (prompt tokens + `max_tokens` output at
   the configured price) and asks the ledger whether it is affordable under the per-request and

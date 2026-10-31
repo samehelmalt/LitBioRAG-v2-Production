@@ -69,12 +69,37 @@ def choose_threshold(conf: list[float], labels: list[bool], costs: dict[str, flo
     return min(max(best_t, 0.0), 1.0)
 
 
+def choose_threshold_for_precision(conf: list[float], labels: list[bool], target: float,
+                                   *, min_released: int = 10) -> tuple[float, dict]:  # fmt: skip
+    """Lowest confidence threshold whose released answers reach ``target`` precision on the
+    calibration rows (maximum coverage at that precision). Returns (threshold, point) where point
+    reports the achieved precision and coverage; threshold 1.01 (release nothing automatically)
+    when the target is unreachable — then every answer goes to ANSWER_WITH_CAUTION / review."""
+    order = sorted(zip(conf, labels, strict=True), key=lambda t: -t[0])
+    n = len(order)
+    best = (1.01, {"precision": None, "coverage": 0.0, "released": 0, "target": target})
+    ok = 0
+    for i, (c, a) in enumerate(order, start=1):
+        ok += 1 if a else 0
+        if i < min_released or (i < n and order[i][0] == c):
+            continue
+        precision = ok / i
+        if precision >= target:
+            best = (c, {"precision": precision, "coverage": i / n, "released": i,
+                        "target": target})  # fmt: skip
+    return best
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--rows", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=ROOT / "configs" / "gate.yaml")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--min-rows", type=int, default=50)
+    ap.add_argument("--target-precision", type=float, default=None,
+                    help="operating point: release automatically only above the confidence at "
+                         "which released answers reach this precision (e.g. 0.95); default: "
+                         "expected-cost threshold")
     a = ap.parse_args(argv)
 
     rows = [json.loads(line) for line in a.rows.read_text().splitlines() if line.strip()]
@@ -89,7 +114,12 @@ def main(argv: list[str] | None = None) -> int:
     conf_model = fit_logistic([r["features"] for r in rows], labels)
     suff_model = fit_logistic([r["sufficiency_features"] for r in rows], labels)
     conf = [predict(conf_model, r["features"]) for r in rows]
-    t = choose_threshold(conf, labels, costs)
+    operating_point: dict = {"mode": "expected_cost"}
+    if a.target_precision is not None:
+        t, point = choose_threshold_for_precision(conf, labels, a.target_precision)
+        operating_point = {"mode": "target_precision", **point}
+    else:
+        t = choose_threshold(conf, labels, costs)
 
     cfg.update(
         {
@@ -98,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
             "confidence_model": conf_model,
             "sufficiency_model": suff_model,
             "costs": costs,
+            "operating_point": operating_point,
         }
     )
     a.out.write_text(yaml.safe_dump(cfg, sort_keys=False))
@@ -106,6 +137,7 @@ def main(argv: list[str] | None = None) -> int:
         "n_rows": len(rows),
         "labels": "proxy" if all("proxy_acceptable" in r for r in rows) else "human",
         "confidence_answer": t,
+        "operating_point": operating_point,
         "ece": ece(conf, labels),
         "brier": brier(conf, labels),
         "coverage_risk": coverage_risk_curve(conf, labels),

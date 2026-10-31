@@ -65,6 +65,7 @@ class GateConfig(BaseModel):
         }  # fmt: skip
     )
     calibrated_on: str = ""  # run id of the calibration job; empty = heuristic defaults
+    operating_point: dict | None = None  # written by calibrate_gate: mode, target, precision…
 
     @classmethod
     def from_yaml(cls, path: Path | str) -> GateConfig:
@@ -172,6 +173,16 @@ def decide(
                    ("entity substitution on " if subs else "entity mismatch on ") + ", ".join(bad),
                    ABSTENTION_TEXT["insufficient_evidence"])  # fmt: skip
     trace.append("R6-entity: consistent")
+    # 6b off-topic: the evidence covers the asked entities but no critical claim names any of
+    # them — the answer is about something else (trifluridine for an NSCLC question). A wrong-
+    # topic answer is a false PASS, so this is a veto, not a caution.
+    asked = set(report.question_entities)
+    if crit and asked and set(report.question_entities_missing_in_claims) >= asked \
+            and not set(report.question_entities_missing_in_evidence) >= asked:
+        return out(Action.ABSTAIN, "R6-offtopic",
+                   "no critical claim addresses the asked entities: " + ", ".join(sorted(asked)),
+                   ABSTENTION_TEXT["insufficient_evidence"])  # fmt: skip
+    trace.append("R6-offtopic: addressed")
     # 7 critical numeric mismatch
     bad = [v.claim_id for v in crit if v.numeric_consistent is False]
     if bad:
@@ -181,7 +192,7 @@ def decide(
     # 8 question entities absent from evidence → ask the user to clarify / reformulate
     g = report.query_entity_grounding
     if g is not None and g < cfg.grounding_min:
-        missing = ", ".join(report.question_entities_missing_in_claims) or "question entities"
+        missing = ", ".join(report.question_entities_missing_in_evidence) or "question entities"
         return out(Action.CLARIFY, "R8-grounding",
                    f"the retrieved evidence does not cover: {missing}",
                    "The retrieved literature does not cover all entities in the question. "

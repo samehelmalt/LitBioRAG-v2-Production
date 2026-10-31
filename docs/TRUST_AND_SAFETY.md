@@ -57,6 +57,7 @@ R4  critical claim uncited, or its citation does not support it       → ABSTAI
 R5  critical claim contradicted                                       → ABSTAIN ("conflicting" wording if sources disagree)
 R6  entity substitution (near-neighbour of a question entity) or
     critical-claim entity mismatch                                    → ABSTAIN  (never WARN)
+R6b evidence covers the asked entities but no critical claim names any → ABSTAIN (off-topic)
 R7  critical numeric mismatch                                         → ABSTAIN
 R8  question entities absent from the evidence                        → CLARIFY
 R9  evidence sufficiency below threshold                              → ABSTAIN

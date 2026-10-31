@@ -2,3 +2,6 @@
 max_tokens: 1024
 temperature: 0.0        # deterministic by default; sampling is a benchmark variable
 max_evidence_units: 10  # evidence units rendered into the prompt
+compress_evidence: true # keep the question-relevant window of each passage (offsets preserved)
+max_sentences_per_unit: 4
+cache_generations: true # reuse the raw answer when question + evidence set + model are identical
