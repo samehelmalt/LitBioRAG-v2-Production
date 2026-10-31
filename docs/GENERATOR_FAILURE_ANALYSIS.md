@@ -19,6 +19,8 @@
 | ABS+ | unnecessary abstention | evidence sufficient ∧ abstained |
 | FMT | contract violation (schema, polarity line, missing citations) | parser |
 
+Implemented detectors (Step 7, `app/verification/`): HAL/UNS → `ClaimVerdict.label == unsupported` with `n_supporting == 0` / `> 0`; CON → `label == contradicted`; ENT → `entity_missing`; NUM → `numeric_mismatches`; CIT → `fabricated_ids` or `supporting_ids == ()` with citations present; CTX → `best_passage_id` not among the cited passages; FMT → `GeneratedAnswer.format_ok == False`; ABS± → gate (Step 8) against evidence sufficiency. GEN and CAUS need study-type and population fields and are Step 8 work. Adversarial tests for CIT, ENT, NUM, CON and injection live in `tests/verification` and `tests/security`.
+
 ## Seed observations from the thesis run (★ recomputed from the CSVs)
 
 - Yes/no accuracy at S3a: Llama-3.2-3B 0.76, DeepSeek-R1-Distill-Llama-3B 0.71, DeepSeek-1.5B 0.52, Qwen2.5-3B 0.24, Qwen2-1.5B 0.24, LitRag 0.10; NoRAG Qwen2.5-3B 0.29. Retrieval lowered the structured models' accuracy → candidate causes FMT and CTX (format-forcing prompt, whole-abstract context).
