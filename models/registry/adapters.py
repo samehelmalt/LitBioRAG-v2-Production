@@ -93,6 +93,13 @@ def _nli_verifier(spec: ModelSpec):
     )
 
 
+@adapter("regex", "entity_extractor")
+def _regex_entities(spec: ModelSpec):
+    from app.verification.entities import RegexBiomedEntityExtractor
+
+    return RegexBiomedEntityExtractor()
+
+
 @adapter("lexical", "reranker")
 def _lexical_reranker(spec: ModelSpec):
     from app.reranking.base import LexicalOverlapReranker
