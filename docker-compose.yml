@@ -1,0 +1,14 @@
+# Serving host: API + UI on :8000. Bundles live in ./data/artifacts (fetched from the build host).
+# Secrets come from .env (never committed): LITBIORAG_JWT_SECRET, OPENAI_API_KEY, ...
+services:
+  aeos:
+    build: .
+    ports: ["8000:8000"]
+    env_file: .env
+    environment:
+      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:-fixture_v1}
+      LITBIORAG_MODEL_PROFILE: ${PROFILE:-hosted}
+    volumes:
+      - ./data:/srv/aeos/data
+    # GPU serving: uncomment and use the ml image
+    # deploy: { resources: { reservations: { devices: [ { driver: nvidia, count: 1, capabilities: [gpu] } ] } } }

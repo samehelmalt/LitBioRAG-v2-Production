@@ -184,3 +184,9 @@ Risks:
 4. **Preprint handling**: non-peer-reviewed sources must never be presented as equivalent to journal articles; evidence hierarchy and UI labelling are part of Step 7–10 acceptance.
 5. **Benchmark distribution**: BioASQ/PubMedQA questions are not production questions; the held-out sets must include free-form literature questions.
 6. **No improvement is claimed until measured.** `BASELINE_RESULTS.md` carries "NOT YET MEASURED" until Step 4 runs.
+
+
+## 20. Status after the production build (2026-10-31)
+Every item in sections 12–19 now has code and tests; see `STATUS.md` for the done / missing
+table. The two statements that still hold unchanged from the start of this audit: **no
+improvement is claimed until measured**, and **the thesis repository was never written to**.

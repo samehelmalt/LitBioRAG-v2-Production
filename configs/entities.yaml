@@ -38,6 +38,36 @@ synonyms:                      # surface -> canonical (normalized forms); never 
   asa: aspirin
   acetylsalicylicacid: aspirin
   paracetamol: acetaminophen
+  # disease / condition abbreviations (unambiguous ones only)
+  nsclc: nonsmallcelllungcancer
+  sclc: smallcelllungcancer
+  crc: colorectalcancer
+  hcc: hepatocellularcarcinoma
+  aml: acutemyeloidleukemia
+  acutemyeloidleukaemia: acutemyeloidleukemia
+  cll: chroniclymphocyticleukemia
+  cml: chronicmyeloidleukemia
+  dvt: deepveinthrombosis
+  aki: acutekidneyinjury
+  ards: acuterespiratorydistresssyndrome
+  sle: systemiclupuserythematosus
+  ibd: inflammatoryboweldisease
+  ibs: irritablebowelsyndrome
+  gerd: gastroesophagealrefluxdisease
+  ra: rheumatoidarthritis
+  rheumatoidarthritis: rheumatoidarthritis
+  oa: osteoarthritis
+  ms: multiplesclerosis
+  pah: pulmonaryarterialhypertension
+  hfref: heartfailurewithreducedejectionfraction
+  hfpef: heartfailurewithpreservedejectionfraction
+  stemi: stsegmentelevationmyocardialinfarction
+  nstemi: nonstsegmentelevationmyocardialinfarction
+  tia: transientischemicattack
+  uti: urinarytractinfection
+  hiv: humanimmunodeficiencyvirus
+  hpv: humanpapillomavirus
+  tnf: tnfalpha
 
 antonym_prefixes:              # pairs; a swap between the two with the same remainder is a neighbour
   - [hypo, hyper]

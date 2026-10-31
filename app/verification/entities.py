@@ -101,7 +101,7 @@ class RegexBiomedEntityExtractor:
             rf"\b(?P<fam>{typed})[-\s]?{num}\s(?P<head>{heads})(?:\smellitus)?", re.I
         )
         self._headed = re.compile(
-            rf"\b(?P<pre>(?:[A-Za-z][A-Za-z'’-]{{2,}}\s){{1,2}})(?P<head>{heads})\b", re.I
+            rf"\b(?P<pre>(?:[A-Za-z][A-Za-z'’-]{{2,}}\s){{1,3}})(?P<head>{heads})\b", re.I
         )
         self._cond_suffix = re.compile(rf"\b[a-z]{{3,}}(?:{csuf})\b", re.I)
         self._drug = re.compile(
@@ -124,8 +124,11 @@ class RegexBiomedEntityExtractor:
             kind = "condition" if m.group("fam").lower() in _CONDITION_FAMILIES else "gene"
             add(m.group(0).strip(), m.start(), kind)
         for m in self._headed.finditer(text):
-            words = [w for w in m.group("pre").split()
-                     if w.lower().strip("'’") not in _STOP and not _NUMERAL.match(w)]  # fmt: skip
+            raw_words = m.group("pre").split()
+            nums = [i for i, w in enumerate(raw_words) if _NUMERAL.match(w)]
+            if nums:  # "stage III colon cancer" → "colon cancer" (the stage is its own entity)
+                raw_words = raw_words[nums[-1] + 1 :]
+            words = [w for w in raw_words if w.lower().strip("'’") not in _STOP]
             if not words:
                 continue
             surface = " ".join(words + [m.group("head")])

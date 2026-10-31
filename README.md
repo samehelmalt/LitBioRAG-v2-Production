@@ -1,50 +1,58 @@
-# LitBioRAG v2 Production
+# AEOS RAG — evidence-gated biomedical question answering
 
-Evidence-gated biomedical literature question answering.
-
-LitBioRAG v2 is the production successor of the MSc thesis system [samehelmalt/LitBioRAG](https://github.com/samehelmalt/LitBioRAG). It retrieves from PubMed and biomedical preprints, generates answers only from retrieved evidence, verifies every important claim against that evidence, and routes each answer to **PASS / WARN / BLOCK**. Abstaining is a valid outcome.
+AEOS RAG (repository: LitBioRAG v2 Production) answers biomedical questions from retrieved
+evidence only, verifies every claim against the cited passage, decides whether to deliver the
+answer (**ANSWER / ANSWER WITH CAUTION / CLARIFY / ABSTAIN / ESCALATE**), and sends withheld
+answers to a human reviewer. Users can search the indexed corpus (PubMed, bioRxiv/medRxiv), their
+own uploaded files (PDF, Word, Excel, PowerPoint, text), or both.
 
 > Not a clinical tool. Nothing produced by this system is medical advice.
 
-## Success criterion
+It is the production successor of the MSc thesis system
+[samehelmalt/LitBioRAG](https://github.com/samehelmalt/LitBioRAG) (read-only reference; see
+`docs/REPOSITORY_BOUNDARY.md`). The thesis audit is in `docs/PRODUCTION_AUDIT.md`.
 
-The system is judged by one statement:
+## Status in one paragraph
+Architecture and product are code-complete and tested (CI runs lint, 220+ tests and the adversarial
+substitution suite). **No accuracy number has been measured yet**: every benchmark needs a real
+model profile (an API key for the hosted generator, or a GPU host) and a real corpus bundle. Until
+then the trust page says NOT YET MEASURED and the gate runs with heuristic, uncalibrated defaults.
+`docs/STATUS.md` lists exactly what is done and what is missing.
 
-> It generates answers only when the evidence justifies them, provides verifiable provenance for important claims, detects unsupported or contradictory claims, and abstains safely when evidence is insufficient.
+## Quick start (serving host)
+```bash
+pip install -e ".[dev,eval,index,api,kb,pptx]"      # add ml for local GPU models
+cp .env.example .env                                 # fill LITBIORAG_JWT_SECRET, OPENAI_API_KEY …
+python -m scripts.build_indexes --docs docs.jsonl --out data/artifacts/demo --corpus-id demo \
+    --encoder hash:128                                # tiny demo bundle; real bundles: docs/CORPUS.md
+python -m scripts.serve --bundle data/artifacts/demo --profile test --port 8000
+# open http://localhost:8000  (UI)   http://localhost:8000/api/docs  (OpenAPI)
+```
+Docker: `docker compose up --build` (reads `.env`, serves `./data/artifacts/$CORPUS_ID` with
+profile `$PROFILE`, default `hosted`).
 
-The primary safety metric is the **false-PASS rate**: the share of released answers that contain unsupported, contradicted or mis-cited claims. Coverage is secondary to it.
-
-## Relationship to the thesis
-
-The thesis repository is a read-only reference; see [`docs/REPOSITORY_BOUNDARY.md`](docs/REPOSITORY_BOUNDARY.md). Nothing is copied without review. The audit of what to reuse, rewrite and discard is in [`docs/PRODUCTION_AUDIT.md`](docs/PRODUCTION_AUDIT.md); the thesis architecture and historical numbers are recorded in [`docs/THESIS_BASELINE.md`](docs/THESIS_BASELINE.md).
+Tokens: the UI accepts a JWT (HS256 by default, claims `sub`, `roles`, `courses`, `aud=litbiorag`)
+signed with `LITBIORAG_JWT_SECRET`, or an API key issued on the API Access page.
 
 ## Layout
-
 ```text
-app/            service code: api, core, retrieval, reranking, evidence, generation,
-                verification, routing, evaluation, safety, observability
-models/         model registry and adapters (no weights)
-evaluation/     offline harness: datasets, benchmarks, diagnostics, calibration, adversarial
-tests/          unit, retrieval, generation, verification, integration, regression, security
-configs/        YAML configs (no paths, no secrets)
-scripts/        corpus, index and benchmark scripts
-deployment/     docker and CI
-docs/           architecture, audit, evaluation, trust and safety, API, deployment
-data/           local corpus and indexes (git-ignored)
-frontend/       thin client over the API
+app/        api (FastAPI), service (one pipeline), retrieval, reranking, evidence, generation,
+            verification, safety (gate), review (human queue), kb (uploads), corpus (index
+            management), web (UI)
+models/     registry and adapters (no weights)
+evaluation/ offline harness: datasets, splits, metrics, adversarial suites, runners
+configs/    models, retrieval, generation, verification, gate, entities, resources, api, review,
+            corpus, pricing (no secrets)
+scripts/    corpus builders, index build/update, artifacts, baselines, calibration, serve, release
+tests/      unit, retrieval, generation, verification, safety, security, api, kb, review, corpus
+docs/       audit, architecture, evaluation, trust & safety, API, security, governance, status
 ```
 
 ## Development
-
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-cp .env.example .env            # fill in locally, never commit
-ruff check . && pytest
+set -o pipefail && ruff check . && python3 -m pytest -q
+python -m scripts.demo_pipeline --bundle data/artifacts/demo --profile test --question "…"
+python -m scripts.run_adversarial --bundle data/artifacts/demo --profile test --out runs/adv
+python -m scripts.release --version 0.9.0        # checks + dist/aeos-rag-0.9.0.zip
 ```
-
-Heavy ML dependencies are optional extras (`pip install -e ".[ml]"`) so the test suite and documentation build on any machine.
-
-## Status
-
-Phase 0 (repository bootstrap and audit). No production behaviour has been measured yet; `docs/BASELINE_RESULTS.md` says so explicitly. No improvement over the thesis is claimed until the evaluation harness in `evaluation/` reports it.
+Change models in `configs/models.yaml` or with `LITBIORAG_MODEL__<ROLE>=kind:model`; never in code.
