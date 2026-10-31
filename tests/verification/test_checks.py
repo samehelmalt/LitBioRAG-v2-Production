@@ -12,7 +12,7 @@ C_SWAP = "MAP3K7 is required for NF-kappaB signalling."
 def test_entity_extraction_and_consistency():
     x = RegexBiomedEntityExtractor()
     ents = x.extract(EV)
-    assert {"map3k3", "mekk3", "nfkappab", "atorvastatin"} <= ents
+    assert {"map3k3", "nfkappab", "atorvastatin"} <= ents  # MEKK3 normalizes to its alias
     assert "the" not in ents and "dna" not in ents and "nf" not in ents
     assert entity_consistency(C_OK, [EV], x) == (2, 2, ())
     checked, ok, missing = entity_consistency(C_SWAP, [EV], x)

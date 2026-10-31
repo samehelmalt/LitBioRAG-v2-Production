@@ -26,7 +26,11 @@ from app.verification.base import Verifier
 from app.verification.citations import index_by_citation, resolve
 from app.verification.claims import prepare_claims
 from app.verification.conflict import detect_conflict
-from app.verification.entities import EntityExtractor, entity_consistency
+from app.verification.entities import (
+    EntityExtractor,
+    entity_consistency,
+    query_entity_grounding,
+)
 from app.verification.evidence_map import PassageScore, score_claims
 from app.verification.numeric import numeric_consistency
 
@@ -75,8 +79,10 @@ def verify(
     *,
     config: VerificationConfig | None = None,
     thresholds: Mapping[str, float] | None = None,
+    question: str | None = None,
 ) -> VerificationReport:
     cfg = (config or VerificationConfig()).with_thresholds(thresholds)
+    question = question if question is not None else answer.question
     trace: list[str] = []
     if answer.abstained:
         trace.append(f"generator abstained: {answer.abstain_reason}")
@@ -87,6 +93,7 @@ def verify(
     scored = score_claims(claims, evidence, verifier, max_pairs=cfg.max_pairs_per_claim)
     verdicts: list[ClaimVerdict] = []
     conflicts: list[ConflictRecord] = []
+    all_supporting_texts: list[str] = []
     for c in claims:
         ps = scored.get(c.id, [])
         resolved, fabricated = resolve(c.citations, by_cit)
@@ -98,6 +105,7 @@ def verify(
         sup_texts = [p.unit.text for p in supporting_passages] or (
             [best_sup.unit.text] if best_sup else []
         )
+        all_supporting_texts.extend(sup_texts)
         e_checked, e_ok, e_missing = entity_consistency(c.text, sup_texts, extractor)
         n_checked, n_ok, n_mism = numeric_consistency(
             c.text, sup_texts, rel_tol=cfg.numeric_rel_tolerance, abs_tol=cfg.numeric_abs_tolerance
@@ -149,6 +157,32 @@ def verify(
             + (f", {'; '.join(notes)}" if notes else "")
             + ")"
         )
+    # question-level grounding: the answer must be about the entities the question asked about
+    if question:
+        qg = query_entity_grounding(
+            question, [(c.id, c.text, c.critical) for c in claims], all_supporting_texts, extractor
+        )
+        for v in verdicts:
+            if v.critical:
+                v.query_entities_missing = qg.missing_in_critical_claims
+            if v.claim_id in qg.substitutions:
+                ce, qe = qg.substitutions[v.claim_id]
+                v.near_neighbour_substitution = True
+                v.substituted_for = f"{ce}->{qe}"
+                v.notes = (*v.notes, f"entity substitution: claim names {ce}, question asked {qe}")
+                trace.append(f"{v.claim_id}: ENTITY SUBSTITUTION {ce} for {qe}")
+        if qg.missing_in_evidence:
+            trace.append(
+                "question entities not in supporting evidence: "
+                + ", ".join(qg.missing_in_evidence)
+            )
+    else:
+        qg = None
     report = VerificationReport.from_verdicts(verdicts, conflicts, verifier=verifier.name)
+    if qg is not None:
+        report.question_entities = qg.question_entities
+        report.query_entity_grounding = qg.grounding
+        report.question_entities_missing_in_claims = qg.missing_in_critical_claims
+        report.substitution_detected = qg.substitution_detected or report.substitution_detected
     report.policy_trace = trace + [f"conflict on {k.claim_id}: {k.description}" for k in conflicts]
     return report

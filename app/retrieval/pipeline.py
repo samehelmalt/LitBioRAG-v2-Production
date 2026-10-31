@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
+from app.core.symbols import symbol_like_tokens
 from app.reranking.base import Candidate, Reranker
 from app.retrieval.bm25 import BM25Index
 from app.retrieval.dense import DenseIndex
@@ -34,6 +35,10 @@ class RetrievalConfig(BaseModel):
     rerank_pool: int = Field(100, ge=1)
     top_docs: int = Field(20, ge=1)
     passages_per_doc: int = Field(3, ge=1)
+    entity_boost: float = Field(
+        1.0, ge=0, description="RRF weight of the exact-symbol list (0 disables it)"
+    )
+    k_entity: int = Field(200, ge=1)
 
     @classmethod
     def from_yaml(cls, path: Path | str) -> RetrievalConfig:
@@ -52,8 +57,9 @@ class RetrievalAudit:
     mode: str
     list_sizes: dict[str, int] = field(default_factory=dict)
     timings_ms: dict[str, float] = field(default_factory=dict)
-    # doc_id -> {stage: 1-based rank}; stages: bm25, dense, fused, reranked, final
+    # doc_id -> {stage: 1-based rank}; stages: bm25, dense, entity, fused, reranked, final
     doc_ranks: dict[str, dict[str, int]] = field(default_factory=dict)
+    query_symbols: list[str] = field(default_factory=list)  # exact-match tokens found in the query
 
     def rank_of(self, doc_id: str, stage: str) -> int | None:
         return self.doc_ranks.get(doc_id, {}).get(stage)
@@ -107,6 +113,15 @@ class HybridRetriever:
             hits = self.dense.search(query, k=cfg.k_dense)
             lists["dense"] = [RankedItem(h.passage_id, h.score) for h in hits]
             audit.timings_ms["dense"] = (time.perf_counter() - t) * 1000
+        # exact-symbol channel: gene symbols / codes in the query must match literally; a document
+        # mentioning a near neighbour (MAP3K7 for MAP3K3) gets nothing from this list
+        if mode in ("hybrid", "hybrid+rerank") and cfg.entity_boost > 0 and self.bm25 is not None:
+            audit.query_symbols = symbol_like_tokens(query)
+            if audit.query_symbols:
+                t = time.perf_counter()
+                hits = self.bm25.search_must(audit.query_symbols, k=cfg.k_entity)
+                lists["entity"] = [RankedItem(h.passage_id, h.score) for h in hits]
+                audit.timings_ms["entity"] = (time.perf_counter() - t) * 1000
         for name, items in lists.items():
             audit.list_sizes[name] = len(items)
             for d, r in _doc_rank_map(items).items():
@@ -116,7 +131,8 @@ class HybridRetriever:
             fused_items = lists[mode]
         else:
             t = time.perf_counter()
-            fused = rrf(lists, k=cfg.rrf_k, weights={"bm25": cfg.w_bm25, "dense": cfg.w_dense})
+            weights = {"bm25": cfg.w_bm25, "dense": cfg.w_dense, "entity": cfg.entity_boost}
+            fused = rrf(lists, k=cfg.rrf_k, weights=weights)
             fused_items = [RankedItem(f.id, f.score) for f in fused]
             audit.timings_ms["fusion"] = (time.perf_counter() - t) * 1000
             audit.list_sizes["fused"] = len(fused_items)

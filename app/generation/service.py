@@ -41,8 +41,10 @@ def answer(
     cfg = config or GenerationConfig()
     units = list(evidence)[: cfg.max_evidence_units]
     if not units:
-        return GeneratedAnswer.abstention(ABSTAIN_NO_EVIDENCE, prompt_id=PROMPT_ID,
-                                          model=generator.name)  # fmt: skip
+        out = GeneratedAnswer.abstention(ABSTAIN_NO_EVIDENCE, prompt_id=PROMPT_ID,
+                                         model=generator.name)  # fmt: skip
+        out.question = question
+        return out
     messages = build_messages(question, units)
     raw = generator.generate(
         messages, max_tokens=cfg.max_tokens, temperature=cfg.temperature, evidence=units
@@ -50,4 +52,5 @@ def answer(
     parsed = parse_answer(raw, prompt_id=PROMPT_ID, model=generator.name)
     known = {u.citation_id for u in units}
     parsed.unknown_citations = [c for c in parsed.all_citations() if c not in known]
+    parsed.question = question
     return parsed

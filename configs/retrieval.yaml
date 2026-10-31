@@ -8,3 +8,6 @@ w_dense: 0.5
 rerank_pool: 100      # passages sent to the single-stage cross-encoder (thesis: 100 documents)
 top_docs: 20          # documents returned
 passages_per_doc: 3   # best passages kept per document for evidence selection
+entity_boost: 1.0     # RRF weight of the exact-symbol channel (gene symbols / codes in the query
+                      # must match literally; MAP3K7 never scores for a MAP3K3 question). 0 = off.
+k_entity: 200         # candidates from the exact-symbol channel

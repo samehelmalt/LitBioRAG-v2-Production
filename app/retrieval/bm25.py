@@ -114,3 +114,18 @@ class BM25Index:
 
     def search_many(self, queries: Sequence[str], k: int = 100) -> list[list[BM25Hit]]:
         return [self.search(q, k) for q in queries]
+
+    def search_must(self, symbols: Sequence[str], k: int = 100) -> list[BM25Hit]:
+        """Passages containing EVERY given symbol literally (normalized view). Used as the
+        exact-match channel for gene symbols and codes; near neighbours never match."""
+        terms = [normalize_for_bm25(s) for s in symbols if normalize_for_bm25(s)]
+        if not terms:
+            return []
+        q_text = " ".join(f"+text_norm:{t.split()[0]}" for t in terms if t.split())
+        searcher = self._get_searcher()
+        q = self.index.parse_query_lenient(q_text, ["text_norm"])[0]
+        hits: list[BM25Hit] = []
+        for score, addr in searcher.search(q, k).hits:
+            d = searcher.doc(addr)
+            hits.append(BM25Hit(d["passage_id"][0], d["doc_id"][0], float(score)))
+        return hits

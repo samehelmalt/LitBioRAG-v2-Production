@@ -37,6 +37,10 @@ class ClaimVerdict(BaseModel):
     numeric_checked: int = 0
     numeric_ok: int = 0
     numeric_mismatches: tuple[str, ...] = ()
+    # question-level grounding (critical claims only)
+    query_entities_missing: tuple[str, ...] = ()  # question entities this claim should name
+    near_neighbour_substitution: bool = False  # e.g. MAP3K7 where the question asked MAP3K3
+    substituted_for: str | None = None  # "map3k7->map3k3"
     notes: tuple[str, ...] = ()
 
     def model_post_init(self, __context) -> None:  # noqa: D105
@@ -82,6 +86,10 @@ class VerificationReport(BaseModel):
     entity_fidelity: float | None = None
     numeric_fidelity: float | None = None
     retrieval_sufficiency: float | None = None  # filled by the evidence-sufficiency model (Step 8)
+    question_entities: tuple[str, ...] = ()
+    query_entity_grounding: float | None = None  # share of question entities in supporting evidence
+    question_entities_missing_in_claims: tuple[str, ...] = ()
+    substitution_detected: bool = False
     verifier: str = ""
     policy_trace: list[str] = Field(default_factory=list)
 
@@ -120,5 +128,6 @@ class VerificationReport(BaseModel):
                                   sum(v.entity_checked for v in verdicts)),  # fmt: skip
             numeric_fidelity=ratio(sum(v.numeric_ok for v in verdicts),
                                    sum(v.numeric_checked for v in verdicts)),  # fmt: skip
+            substitution_detected=any(v.near_neighbour_substitution for v in verdicts),
             verifier=verifier,
         )

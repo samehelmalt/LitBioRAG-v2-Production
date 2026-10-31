@@ -9,8 +9,11 @@ protocol: ``RegexBiomedEntityExtractor`` is the dependency-free default; a scisp
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from typing import Protocol
+
+from app.core import symbols
 
 
 class EntityExtractor(Protocol):
@@ -34,7 +37,7 @@ _COMMON_UPPER = {"THE", "AND", "FOR", "WITH", "THIS", "THAT", "FROM", "WERE", "W
 
 
 def normalize_entity(e: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", e.lower())
+    return symbols.normalize(e)
 
 
 class RegexBiomedEntityExtractor:
@@ -94,3 +97,61 @@ def _present(ent: str, pool: set[str], texts: Iterable[str]) -> bool:
     if ent in pool:
         return True
     return any(ent in normalize_entity(t) for t in texts)
+
+
+# ------------------------------------------------------------------ query grounding -------------
+@dataclass(frozen=True)
+class QueryGrounding:
+    question_entities: tuple[str, ...]
+    missing_in_evidence: tuple[str, ...]  # question entities absent from all supporting texts
+    missing_in_critical_claims: tuple[str, ...]  # question entities no critical claim mentions
+    substitutions: dict[str, tuple[str, str]]  # claim_id -> (claim entity, question entity)
+
+    @property
+    def grounding(self) -> float | None:
+        n = len(self.question_entities)
+        return None if n == 0 else (n - len(self.missing_in_evidence)) / n
+
+    @property
+    def substitution_detected(self) -> bool:
+        return bool(self.substitutions)
+
+
+def query_entity_grounding(
+    question: str,
+    claims: Sequence[tuple[str, str, bool]],  # (claim_id, text, critical)
+    supporting_texts: Iterable[str],
+    extractor: EntityExtractor,
+) -> QueryGrounding:
+    """Ground the *question's* entities, not only the claims'.
+
+    Catches the case the per-claim check cannot: a claim about MAP3K7, correctly cited to a
+    MAP3K7 passage, answering a MAP3K3 question. Every entity of a critical claim that is a near
+    neighbour of a question entity (same stem, small edit distance, or same drug class suffix)
+    while the question entity itself is absent from that claim is a substitution.
+    """
+    q_ents = {symbols.normalize(e) for e in extractor.extract(question)}
+    q_ents |= {symbols.normalize(t) for t in symbols.symbol_like_tokens(question)}
+    q_ents.discard("")
+    if not q_ents:
+        return QueryGrounding((), (), (), {})
+    texts = list(supporting_texts)
+    pool: set[str] = set()
+    for t in texts:
+        pool |= {symbols.normalize(e) for e in extractor.extract(t)}
+    missing_ev = tuple(sorted(e for e in q_ents if not _present(e, pool, texts)))
+
+    critical_ents: set[str] = set()
+    subs: dict[str, tuple[str, str]] = {}
+    for cid, text, critical in claims:
+        if not critical:
+            continue
+        c_ents = {symbols.normalize(e) for e in extractor.extract(text)}
+        c_ents |= {symbols.normalize(t) for t in symbols.symbol_like_tokens(text)}
+        critical_ents |= c_ents
+        for ce in c_ents:
+            for qe in q_ents:
+                if qe not in c_ents and symbols.is_near_neighbour(ce, qe):
+                    subs[cid] = (ce, qe)
+    missing_cc = tuple(sorted(e for e in q_ents if e not in critical_ents)) if claims else ()
+    return QueryGrounding(tuple(sorted(q_ents)), missing_ev, missing_cc, subs)

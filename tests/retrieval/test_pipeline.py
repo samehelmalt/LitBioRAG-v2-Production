@@ -40,7 +40,7 @@ def test_planted_documents_rank_first_in_every_mode(retriever, mode):
 def test_audit_ranks_cover_every_stage(retriever):
     res = retriever.retrieve("What does MAP3K3 do in NF-kappaB signalling?", mode="hybrid+rerank")
     ranks = res.audit.doc_ranks["pmid:900001"]
-    assert set(ranks) == {"bm25", "dense", "fused", "reranked", "final"}
+    assert set(ranks) == {"bm25", "dense", "entity", "fused", "reranked", "final"}
     assert ranks["final"] == 1
     assert res.audit.list_sizes["reranked"] <= 30
     # the near-miss gene is present but ranked below the true hit

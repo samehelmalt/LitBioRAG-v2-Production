@@ -93,6 +93,7 @@ class GeneratedAnswer(BaseModel):
     raw: str = ""
     prompt_id: str = ""
     model: str = ""
+    question: str = ""
 
     def all_citations(self) -> list[str]:
         seen: list[str] = []
