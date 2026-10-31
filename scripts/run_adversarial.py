@@ -35,10 +35,11 @@ def main(argv: list[str] | None = None) -> int:
     reg = ModelRegistry.load(profile=a.profile)
     store = MetadataStore(a.bundle / "metadata.sqlite", read_only=True)
     docs = [store.get_document(r[0]) for r in store.conn.execute("SELECT doc_id FROM documents")]
-    cases = build_cases(docs, max_cases=a.max_cases)
+    extractor = reg.build("entity_extractor")
+    cases = build_cases(docs, extractor, max_cases=a.max_cases)
     by_id = {d.doc_id: d for d in docs}
     results = run_cases(
-        cases, by_id, reg.build("verifier"), reg.build("entity_extractor"),
+        cases, by_id, reg.build("verifier"), extractor,
         ver_cfg=VerificationConfig.from_yaml(ROOT / "configs" / "verification.yaml"),
     )  # fmt: skip
     s = write_run(cases, results, a.out)

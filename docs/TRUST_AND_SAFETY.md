@@ -23,7 +23,7 @@ The evidence is authoritative; the generator is not. An answer is released only 
 | Citation resolution | ids not in the evidence set (fabricated PMIDs/DOIs); cited passages that do not entail the claim | a real passage cited for the wrong sentence of a multi-sentence claim when both sentences are in it |
 | Entailment / contradiction (verifier) | unsupported claims; claims contradicted by a passage; a confident NEUTRAL no longer hides an ENTAILMENT in another chunk | paraphrases the verifier model misjudges; depends on verifier quality → benchmark in Step 7, calibration in Step 8 |
 | Entity consistency | entities in a claim absent from its supporting evidence | relation errors between correct entities (A inhibits B vs B inhibits A); synonyms the regex extractor does not know (scispaCy/UMLS adapter planned) |
-| Question-entity grounding + substitution | a correctly cited claim about the **wrong** entity (MAP3K7 for a MAP3K3 question; simvastatin for atorvastatin): the question's entities must appear in the supporting evidence and in the critical claims; a near neighbour (same stem, edit distance ≤ 2, or same drug-class suffix) in their place is a substitution and a hard veto. Aliases (MEKK3=MAP3K3, TAK1=MAP3K7, heart attack=MI) are normalized, not flagged. Retrieval adds an exact-symbol channel so a near-neighbour document gains nothing from the asked symbol | substitutions between entities with unrelated names (needs ontology typing: Step 5e); relation direction |
+| Question-entity grounding + substitution | a correctly cited claim about the **wrong** entity, for genes, drugs, conditions and numbered families alike (MAP3K7 for MAP3K3, simvastatin for atorvastatin, hyperkalemia for hypokalemia, type 1 for type 2 diabetes, hepatitis C for hepatitis B, hydralazine for hydroxyzine): the question's entities must appear in the supporting evidence and in the critical claims; a near neighbour in their place is a substitution and a hard veto. Six rules decide "near neighbour", all configured in `configs/entities.yaml`: numbered family (digits differ), letter variant, same-stem edit, antonym prefix (hypo/hyper, brady/tachy), shared drug-class suffix (INN stem), explicit confusable group (ISMP-style look-alike list). Aliases (MEKK3=MAP3K3, TAK1=MAP3K7, heart attack=MI, T2DM=type 2 diabetes) are normalized, not flagged; generic vs specific (hepatitis / hepatitis B, COVID / COVID-19) is never flagged. Retrieval adds an exact-symbol channel so a near-neighbour document gains nothing from the asked symbol | substitutions between entities with unrelated names that are not in the confusable list (ontology typing with scispaCy/UMLS extends the list automatically: Step 5e); relation direction |
 | Numeric consistency | altered values, wrong unit class (61 % vs 61 patients), numbers absent from supporting evidence | a correct number attached to the wrong group or outcome (tuple-level role checking is the next refinement) |
 | Conflict detection | one source supports and another contradicts the same claim | conflicts that only emerge across claims, or from evidence that was not retrieved |
 | Contract parser | unparseable or schema-violating output → forced abstention | — |
@@ -38,7 +38,10 @@ Release rule: catch rate 1.0 on attacks and false-alarm rate 0.0 on controls for
 (`tests/security/test_substitution_suite.py`); for every real bundle and verifier the same two numbers
 are reported in MODEL_SELECTION.md via `python -m scripts.run_adversarial --bundle … --profile …`,
 which exits non-zero when the catch rate is below 1.0. A substitution is caught by the entity layer
-alone, so it does not depend on which NLI verifier is configured.
+alone, so it does not depend on which NLI verifier is configured. The summary breaks catch rate down by
+rule (`by_reason`) and by entity kind (`by_kind`: gene / drug / condition), so a regression in one
+class is visible even when the overall rate looks fine. To extend coverage, add a group, synonym,
+prefix pair or suffix to `configs/entities.yaml`; no code changes.
 
 ## Delivery decision (Step 8, not yet implemented)
 

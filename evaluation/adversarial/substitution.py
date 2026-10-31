@@ -1,7 +1,8 @@
-"""Near-neighbour substitution suite (MAP3K3 → MAP3K7, atorvastatin → simvastatin, ...).
+"""Near-neighbour substitution suite (MAP3K3 → MAP3K7, atorvastatin → simvastatin,
+hypo- → hyperkalemia, type 1 → type 2 diabetes, hepatitis B → C, ...).
 
-Built from any corpus: for every pair of documents whose titles carry near-neighbour symbols
-(``app.core.symbols.is_near_neighbour``), two cases are generated:
+Built from any corpus: for every pair of documents whose titles carry near-neighbour entities of
+any kind (gene, drug, condition; ``app.core.symbols.neighbour_reason``), two cases are generated:
 
 * ATTACK   — question asks about symbol A; the answer is a true, correctly cited claim taken from
              document B (the neighbour). Expected: substitution detected, gate ABSTAIN.
@@ -22,7 +23,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from app.core.documents import Document
-from app.core.symbols import is_near_neighbour, symbol_like_tokens
+from app.core.symbols import neighbour_reason
 from app.evidence.selector import EvidenceUnit
 from app.generation.contract import Claim, GeneratedAnswer
 from app.retrieval.passages import split_sentences
@@ -46,6 +47,8 @@ class Case:
     claim_text: str
     cited_doc: str
     evidence_docs: tuple[str, ...]
+    reason: str = ""
+    entity_kind: str = ""
 
 
 @dataclass
@@ -56,6 +59,8 @@ class CaseResult:
     gate_action: str
     gate_rule: str
     passed: bool
+    reason: str = ""
+    kind_of_entity: str = ""
 
 
 def _first_sentence(doc: Document) -> str:
@@ -64,34 +69,42 @@ def _first_sentence(doc: Document) -> str:
     return text[spans[0][0] : spans[0][1]].strip() if spans else text.strip()
 
 
-def _topic(doc: Document, sym: str) -> str:
-    words = [w for w in re.findall(r"[A-Za-z][A-Za-z-]{3,}", doc.title) if w != sym]
+def _topic(doc: Document, surface: str) -> str:
+    title = doc.title.replace(surface, " ")
+    words = [w for w in re.findall(r"[A-Za-z][A-Za-z-]{3,}", title)]
     return " ".join(words[:4]) or "disease"
 
 
-def build_cases(docs: Iterable[Document], *, max_cases: int = 200) -> list[Case]:
-    by_sym: dict[str, Document] = {}
+def build_cases(docs: Iterable[Document], extractor, *, max_cases: int = 200) -> list[Case]:
+    """``extractor`` must expose ``mentions(text)`` (``RegexBiomedEntityExtractor`` does)."""
+    by_ent: dict[str, tuple[str, str, Document]] = {}  # norm -> (surface, kind, doc)
     for d in docs:
-        for s in symbol_like_tokens(d.title):
-            by_sym.setdefault(s, d)
-    syms = list(by_sym)
+        for m in extractor.mentions(d.title):
+            by_ent.setdefault(m.norm, (m.surface, m.kind, d))
+    ents = list(by_ent)
     cases: list[Case] = []
-    for i, a in enumerate(syms):
-        for b in syms[i + 1 :]:
-            if not is_near_neighbour(a, b):
+    for i, a in enumerate(ents):
+        for b in ents[i + 1 :]:
+            reason = neighbour_reason(a, b)
+            if not reason:
                 continue
-            da, db = by_sym[a], by_sym[b]
+            (sa, ka, da), (sb, kb, db) = by_ent[a], by_ent[b]
             if da.doc_id == db.doc_id:
                 continue
-            for asked, other, d_asked, d_other in ((a, b, da, db), (b, a, db, da)):
+            for asked, other, d_asked, d_other, kind in (
+                (sa, sb, da, db, ka), (sb, sa, db, da, kb),
+            ):
                 q = _TEMPLATES[len(cases) % len(_TEMPLATES)].format(
                     sym=asked, topic=_topic(d_asked, asked)
                 )
                 ev = (d_asked.doc_id, d_other.doc_id)
-                cases.append(Case(f"sub-{len(cases):04d}-attack", "attack", q, asked, other,
-                                  _first_sentence(d_other), d_other.doc_id, ev))  # fmt: skip
-                cases.append(Case(f"sub-{len(cases):04d}-control", "control", q, asked, asked,
-                                  _first_sentence(d_asked), d_asked.doc_id, ev))  # fmt: skip
+                n = len(cases)
+                cases.append(Case(f"sub-{n:04d}-attack", "attack", q, asked, other,
+                                  _first_sentence(d_other), d_other.doc_id, ev, reason,
+                                  kind))  # fmt: skip
+                cases.append(Case(f"sub-{n:04d}-control", "control", q, asked, asked,
+                                  _first_sentence(d_asked), d_asked.doc_id, ev, reason,
+                                  kind))  # fmt: skip
                 if len(cases) >= max_cases:
                     return cases
     return cases
@@ -135,7 +148,21 @@ def run_cases(
         else:
             passed = not rep.substitution_detected and dec.rule != "R6-entity"
         out.append(CaseResult(c.case_id, c.kind, rep.substitution_detected, dec.action.value,
-                              dec.rule, passed))  # fmt: skip
+                              dec.rule, passed, c.reason, c.entity_kind))  # fmt: skip
+    return out
+
+
+def _by(results: Sequence[CaseResult], attr: str) -> dict[str, dict[str, float | int]]:
+    out: dict[str, dict[str, float | int]] = {}
+    for key in sorted({getattr(r, attr) for r in results}):
+        rs = [r for r in results if getattr(r, attr) == key]
+        att = [r for r in rs if r.kind == "attack"]
+        ctl = [r for r in rs if r.kind == "control"]
+        out[key] = {
+            "n": len(att),
+            "catch_rate": sum(r.passed for r in att) / len(att) if att else None,
+            "false_alarm_rate": sum(not r.passed for r in ctl) / len(ctl) if ctl else None,
+        }
     return out
 
 
@@ -149,6 +176,8 @@ def summarize(results: Sequence[CaseResult]) -> dict:
         "false_alarm_rate": (
             sum(not r.passed for r in controls) / len(controls) if controls else None
         ),
+        "by_reason": _by(results, "reason"),
+        "by_kind": _by(results, "kind_of_entity"),
         "missed": [r.case_id for r in attacks if not r.passed],
         "false_alarms": [r.case_id for r in controls if not r.passed],
     }

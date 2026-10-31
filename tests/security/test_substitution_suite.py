@@ -21,21 +21,52 @@ def extra_docs():
                    title="MAPK3 phosphorylation in cardiac hypertrophy",
                    abstract="MAPK3 (ERK1) phosphorylation increased threefold after overload.",
                    source_type=SourceType.JOURNAL_ARTICLE)  # fmt: skip
+    yield Document(doc_id="pmid:910004", pmid="910004", year=2021,
+                   title="Hypokalemia and QT prolongation in heart failure",
+                   abstract="Hypokalemia prolonged the QT interval in 23% of admissions.",
+                   source_type=SourceType.OBSERVATIONAL)  # fmt: skip
+    yield Document(doc_id="pmid:910005", pmid="910005", year=2021,
+                   title="Hyperkalemia management in chronic kidney disease",
+                   abstract="Hyperkalemia was treated with patiromer in 61% of patients.",
+                   source_type=SourceType.OBSERVATIONAL)  # fmt: skip
+    yield Document(doc_id="pmid:910006", pmid="910006", year=2022,
+                   title="Type 2 diabetes remission after bariatric surgery",
+                   abstract="Type 2 diabetes remitted in 54% of patients at two years.",
+                   source_type=SourceType.RCT)  # fmt: skip
+    yield Document(doc_id="pmid:910007", pmid="910007", year=2022,
+                   title="Type 1 diabetes and closed-loop insulin delivery",
+                   abstract="Type 1 diabetes time-in-range improved by 11 percentage points.",
+                   source_type=SourceType.RCT)  # fmt: skip
+    yield Document(doc_id="pmid:910008", pmid="910008", year=2019,
+                   title="Hepatitis B vaccination coverage in newborns",
+                   abstract="Hepatitis B birth-dose coverage reached 87% nationally.",
+                   source_type=SourceType.OBSERVATIONAL)  # fmt: skip
+    yield Document(doc_id="pmid:910009", pmid="910009", year=2019,
+                   title="Hepatitis C cure rates with direct-acting antivirals",
+                   abstract="Hepatitis C sustained virologic response was 96% at 12 weeks.",
+                   source_type=SourceType.RCT)  # fmt: skip
 
 
 def test_fixture_suite_is_fully_caught_without_false_alarms(tmp_path):
     docs = list(fixture_documents()) + list(extra_docs())
-    cases = build_cases(docs)
-    pairs = {(c.asked_symbol, c.answer_symbol) for c in cases if c.kind == "attack"}
-    assert ("MAP3K3", "MAP3K7") in pairs and ("MAP3K7", "MAP3K3") in pairs
-    assert ("MAP3K3", "MAPK3") in pairs
-    assert len(cases) >= 8 and len([c for c in cases if c.kind == "control"]) == len(cases) // 2
+    x = RegexBiomedEntityExtractor()
+    cases = build_cases(docs, x)
+    pairs = {(c.asked_symbol.lower(), c.answer_symbol.lower()) for c in cases if c.kind == "attack"}
+    assert ("map3k3", "map3k7") in pairs and ("map3k7", "map3k3") in pairs
+    assert ("map3k3", "mapk3") in pairs
+    assert ("atorvastatin", "simvastatin") in pairs
+    assert ("hypokalemia", "hyperkalemia") in pairs
+    assert ("type 2 diabetes", "type 1 diabetes") in pairs
+    assert ("hepatitis b", "hepatitis c") in pairs
+    reasons = {c.reason for c in cases}
+    assert {"numbered_family", "drug_class:statin", "antonym_prefix", "letter_variant"} <= reasons
+    assert len(cases) >= 20 and len([c for c in cases if c.kind == "control"]) == len(cases) // 2
 
-    results = run_cases(cases, {d.doc_id: d for d in docs}, OverlapVerifier(),
-                        RegexBiomedEntityExtractor())  # fmt: skip
+    results = run_cases(cases, {d.doc_id: d for d in docs}, OverlapVerifier(), x)
     s = summarize(results)
     assert s["catch_rate"] == 1.0, s["missed"]
     assert s["false_alarm_rate"] == 0.0, s["false_alarms"]
+    assert set(s["by_kind"]) >= {"gene", "drug", "condition"}
     written = write_run(cases, results, tmp_path / "adv")
     assert written["n_attacks"] == written["n_controls"]
     assert (tmp_path / "adv" / "cases.jsonl").exists()

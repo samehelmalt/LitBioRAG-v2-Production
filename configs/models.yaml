@@ -19,7 +19,7 @@ profiles:
       reranker: lexical:overlap
       generator: template:evidence-extractive
       verifier: overlap:negation-aware
-      entity_extractor: regex:biomed-v1
+      entity_extractor: regex:biomed-v2
 
   thesis-baseline:
     description: >
@@ -46,7 +46,7 @@ profiles:
         kind: hf_seq_cls
         model_id: MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli
         max_tokens: 512
-      entity_extractor: regex:biomed-v1
+      entity_extractor: regex:biomed-v2
 
   default:
     description: >
@@ -78,7 +78,7 @@ profiles:
           thresholds: {}          # written by scripts/calibrate_gate.py (Step 8)
           validated_on: ""
           date: ""
-      entity_extractor: regex:biomed-v1
+      entity_extractor: regex:biomed-v2
       offline_judge:
         kind: openai_compatible
         model_id: gpt-4o-mini                         # evaluation only; never at runtime

@@ -1,0 +1,183 @@
+# Entity normalization and confusable-entity rules. Edit HERE to extend coverage; no code change.
+# Override path with LITBIORAG_ENTITIES_CONFIG. Everything is lower-cased and stripped of
+# non-alphanumerics before matching ("Type 2 Diabetes" -> "type2diabetes").
+#
+# A *near neighbour* is a different entity that is easy to confuse with the one the question asked
+# about. If a critical claim names a near neighbour and no critical claim names the asked entity,
+# the answer is a substitution and the gate abstains. Rules (all applied, any hit counts):
+#   1. numbered family: same text once digits are removed, digits differ   (MAP3K3/MAP3K7, IL6/IL17,
+#      CD4/CD8, HER2/HER3, type1diabetes/type2diabetes, trisomy21/trisomy18, COX1/COX2, BRCA1/BRCA2)
+#   2. letter variant: edit distance 1 on names of 4+ chars              (hepatitisb/hepatitisc)
+#   3. small edit on the same alphabetic stem (distance <= 2)             (MAPK3/MAP3K3)
+#   4. antonym prefix swap                                                (hypo/hyper, brady/tachy)
+#   5. shared drug-class suffix (INN stem)                                (atorvastatin/simvastatin)
+#   6. explicit confusable group below                                    (hydroxyzine/hydralazine)
+
+synonyms:                      # surface -> canonical (normalized forms); never flagged as neighbours
+  heartattack: myocardialinfarction
+  mi: myocardialinfarction
+  acutemi: myocardialinfarction
+  nfkb: nfkappab
+  "nfκb": nfkappab
+  tak1: map3k7
+  mekk3: map3k3
+  t2dm: type2diabetes
+  type2diabetesmellitus: type2diabetes
+  t1dm: type1diabetes
+  type1diabetesmellitus: type1diabetes
+  hbv: hepatitisb
+  hcv: hepatitisc
+  afib: atrialfibrillation
+  af: atrialfibrillation
+  copd: chronicobstructivepulmonarydisease
+  chf: heartfailure
+  congestiveheartfailure: heartfailure
+  ckd: chronickidneydisease
+  htn: hypertension
+  tb: tuberculosis
+  asa: aspirin
+  acetylsalicylicacid: aspirin
+  paracetamol: acetaminophen
+
+antonym_prefixes:              # pairs; a swap between the two with the same remainder is a neighbour
+  - [hypo, hyper]
+  - [brady, tachy]
+  - [intra, extra]
+  - [pre, post]
+  - [micro, macro]
+  - [oligo, poly]
+  - [endo, exo]
+  - [sub, supra]
+  - [hemi, pan]
+  - [uni, bi]
+  - [anti, pro]
+
+drug_suffixes:                 # INN stems; two different names sharing one are a neighbour
+  - mab
+  - nib
+  - pril
+  - sartan
+  - statin
+  - olol
+  - azole
+  - cillin
+  - mycin
+  - cycline
+  - vir
+  - tide
+  - parin
+  - prazole
+  - dipine
+  - triptan
+  - afil
+  - oxetine
+  - gliptin
+  - gliflozin
+  - glitazone
+  - setron
+  - zepam
+  - zolam
+  - barbital
+  - caine
+  - floxacin
+  - penem
+  - cept
+  - lukast
+  - terol
+  - semide
+  - thiazide
+  - formin
+  - ximab
+  - zumab
+  - tinib
+  - rafenib
+  - ciclib
+
+disease_suffixes:              # tokens ending in these are extracted as condition entities
+  - itis
+  - emia
+  - aemia
+  - uria
+  - oma
+  - pathy
+  - osis
+  - iasis
+  - algia
+  - plegia
+  - trophy
+  - penia
+  - cytosis
+  - sclerosis
+  - thyroidism
+  - tension
+  - glycemia
+  - kalemia
+  - natremia
+  - calcemia
+  - cardia
+
+disease_heads:                 # "<word> <head>" phrases are extracted as condition entities
+  - disease
+  - syndrome
+  - disorder
+  - cancer
+  - carcinoma
+  - lymphoma
+  - leukemia
+  - leukaemia
+  - infection
+  - deficiency
+  - failure
+  - anemia
+  - anaemia
+  - fibrillation
+  - stenosis
+  - embolism
+  - thrombosis
+  - infarction
+  - sepsis
+  - pneumonia
+  - hepatitis
+  - diabetes
+
+numbered_families:             # "<word> <number|letter|roman>" phrases kept as one entity
+  - type
+  - stage
+  - grade
+  - class
+  - factor
+  - trisomy
+  - hepatitis
+  - influenza
+  - hpv
+  - herpes
+  - cd
+  - il
+  - cox
+  - her
+  - brca
+  - vitamin
+
+confusable_groups:             # explicit look-alike / sound-alike groups (ISMP-style); extend freely
+  - [hydroxyzine, hydralazine]
+  - [dopamine, dobutamine]
+  - [clonidine, clozapine, klonopin]
+  - [lamivudine, lamotrigine]
+  - [celecoxib, citalopram, celebrex]
+  - [glipizide, glyburide]
+  - [hydromorphone, morphine]
+  - [vinblastine, vincristine]
+  - [cisplatin, carboplatin]
+  - [doxorubicin, daunorubicin]
+  - [tramadol, trazodone]
+  - [zantac, zyrtec, xanax]
+  - [metformin, metronidazole]
+  - [prednisone, prednisolone, methylprednisolone]
+  - [epinephrine, ephedrine, norepinephrine]
+  - [cyclosporine, cycloserine]
+  - [bupropion, buspirone]
+  - [crohnsdisease, celiacdisease, ulcerativecolitis]
+  - [hodgkinlymphoma, nonhodgkinlymphoma]
+  - [systemiclupuserythematosus, discoidlupus]
+  - [primarybiliarycholangitis, primarysclerosingcholangitis]
+  - [guillainbarresyndrome, millerfishersyndrome]
