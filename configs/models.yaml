@@ -1,0 +1,86 @@
+# Model registry. Change models HERE (or with LITBIORAG_MODEL__<ROLE>=kind:model[@rev]?k=v),
+# never in code. Each role is built by an adapter keyed by `kind`; see models/registry/README.md.
+#
+# Rules enforced at load time:
+#   * generator, verifier and offline_judge must come from different model families;
+#   * thresholds are valid only for the model id they were calibrated on (calibration.for_model);
+#     a swapped model has no thresholds until the calibration job records new ones.
+# The dense encoder is pinned by the bundle: changing it means re-embedding on the build host.
+
+default_profile: test
+
+profiles:
+
+  test:
+    description: Deterministic doubles so CI and the demo pipeline run without model weights.
+    require_calibrated: false
+    models:
+      dense_encoder: hash:128
+      reranker: lexical:overlap
+      generator: template:evidence-extractive
+      verifier: overlap:negation-aware
+      entity_extractor: regex:biomed-v1
+
+  thesis-baseline:
+    description: >
+      The thesis models, reimplemented behind the v2 pipeline (single-stage reranker, token-level
+      truncation). Used only for the thesis-equivalent production baseline in BASELINE_RESULTS.md.
+      Generator/verifier families differ (qwen vs deberta), so the independence rule holds.
+    require_calibrated: false   # baseline run reports raw signals; no delivery decisions
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+      reranker:
+        kind: hf_seq_cls
+        model_id: ncbi/MedCPT-Cross-Encoder
+        max_tokens: 512
+        params: {batch_size: 32, dtype: float16}
+      generator:
+        kind: hf_causal
+        model_id: Qwen/Qwen2.5-3B-Instruct
+        quantization: 4bit
+        max_tokens: 512
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli
+        max_tokens: 512
+      entity_extractor: regex:biomed-v1
+
+  default:
+    description: >
+      Production candidates sized for 12 GB VRAM. Every entry is a candidate until
+      docs/MODEL_SELECTION.md records the benchmark that chose it; thresholds are empty until the
+      calibration job writes them.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder        # candidate; Step 5a benchmark decides
+        max_tokens: 512
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3             # candidate; Step 5b
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16}
+      generator:
+        kind: hf_causal
+        model_id: Qwen/Qwen3-8B                       # candidate; Step 6 benchmark
+        quantization: 4bit
+        max_tokens: 1024
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli   # candidate; Step 7
+        max_tokens: 512
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}          # written by scripts/calibrate_gate.py (Step 8)
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v1
+      offline_judge:
+        kind: openai_compatible
+        model_id: gpt-4o-mini                         # evaluation only; never at runtime
+        endpoint: https://api.openai.com/v1
+        api_key_env: OPENAI_API_KEY
