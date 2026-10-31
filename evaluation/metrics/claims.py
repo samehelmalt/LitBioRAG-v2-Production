@@ -10,24 +10,11 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
-LABELS = ("supported", "unsupported", "contradicted")
+# One definition of a verdict for runtime and evaluation (app/core/verdicts.py). Evaluation may
+# import from app; app never imports from evaluation.
+from app.core.verdicts import LABELS, ClaimVerdict
 
-
-@dataclass(frozen=True)
-class ClaimVerdict:
-    label: str  # supported | unsupported | contradicted
-    cited_ids: tuple[str, ...] = ()  # PMIDs/DOIs the generator attached to the claim
-    resolved_ids: tuple[str, ...] = ()  # subset of cited_ids present in the retrieved set
-    supporting_ids: tuple[str, ...] = ()  # subset of resolved_ids whose evidence entails the claim
-    numeric_checked: int = 0  # numeric values found in the claim
-    numeric_ok: int = 0  # of those, found consistent with evidence
-    entity_checked: int = 0
-    entity_ok: int = 0
-    critical: bool = False  # claim carries the answer (dose, polarity, effect direction)
-
-    def __post_init__(self) -> None:
-        if self.label not in LABELS:
-            raise ValueError(f"unknown label {self.label!r}")
+__all__ = ["LABELS", "ClaimSummary", "ClaimVerdict", "summarize"]
 
 
 @dataclass(frozen=True)

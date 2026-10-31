@@ -1,0 +1,9 @@
+# Claim verification operating parameters. Thresholds below are STARTING points; the registry
+# attaches calibrated values to the verifier model (models.yaml -> calibration) and those win.
+entail_threshold: 0.60        # claim supported when max entailment over evidence >= this
+contradict_threshold: 0.55    # claim contradicted when max contradiction over evidence >= this
+max_pairs_per_claim: 12       # evidence passages scored per claim (cited first, then best lexical)
+numeric_rel_tolerance: 0.02   # 2% relative tolerance when matching numbers
+numeric_abs_tolerance: 0.5    # absolute tolerance for small integers/percentages
+conflict_min_support: 0.60    # a claim is 'in conflict' when some passage supports it >= this
+conflict_min_contra: 0.55     # ... and another passage contradicts it >= this

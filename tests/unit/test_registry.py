@@ -79,8 +79,9 @@ def test_build_test_doubles_and_missing_adapter(cfg):
     assert enc.name == "hash:64" and enc.dim == 64 and reg.build("dense_encoder") is enc
     assert reg.build("reranker").name == "lexical-overlap"
     assert ("hash", "dense_encoder") in registered_adapters()
+    no_adapter = ModelRegistry.load(cfg, env={"LITBIORAG_MODEL__VERIFIER": "minicheck:x"})
     with pytest.raises(RegistryError, match="no adapter registered"):
-        reg.build("verifier")  # hf_seq_cls verifier adapter arrives with app/verification
+        no_adapter.build("verifier")  # 'minicheck' is a valid kind with no adapter yet
 
 
 def test_shipped_models_yaml_profiles_load():

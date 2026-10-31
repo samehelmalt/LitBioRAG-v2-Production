@@ -13,11 +13,13 @@ from evaluation.metrics.trust import (
 
 def test_claim_summary():
     vs = [
-        ClaimVerdict("supported", ("1",), ("1",), ("1",), numeric_checked=2, numeric_ok=2),
-        ClaimVerdict("unsupported", ("9",), (), ()),
-        ClaimVerdict("contradicted", (), (), (), critical=True, entity_checked=1, entity_ok=0),
-        ClaimVerdict("supported", ("1", "2"), ("1", "2"), ("1",)),
-    ]
+        ClaimVerdict(label="supported", cited_ids=("1",), resolved_ids=("1",),
+                     supporting_ids=("1",), numeric_checked=2, numeric_ok=2),
+        ClaimVerdict(label="unsupported", cited_ids=("9",)),
+        ClaimVerdict(label="contradicted", critical=True, entity_checked=1, entity_ok=0),
+        ClaimVerdict(label="supported", cited_ids=("1", "2"), resolved_ids=("1", "2"),
+                     supporting_ids=("1",)),
+    ]  # fmt: skip
     s = summarize(vs)
     assert s.n_claims == 4
     assert s.entailment_rate == 0.5 and s.unsupported_rate == 0.25 and s.contradiction_rate == 0.25
@@ -31,7 +33,7 @@ def test_claim_summary():
 
 def test_claim_label_validation():
     with pytest.raises(ValueError):
-        ClaimVerdict("maybe")
+        ClaimVerdict(label="maybe")
 
 
 def test_gate_confusion_hand_computed():

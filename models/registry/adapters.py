@@ -72,6 +72,27 @@ def _anthropic_generator(spec: ModelSpec):
     return AnthropicGenerator(spec.model_id, api_key_env=spec.api_key_env or "ANTHROPIC_API_KEY")
 
 
+@adapter("overlap", "verifier")
+def _overlap_verifier(spec: ModelSpec):
+    from app.verification.base import OverlapVerifier
+
+    return OverlapVerifier(min_overlap=float(spec.params.get("min_overlap", 0.6)))
+
+
+@adapter("hf_seq_cls", "verifier")
+def _nli_verifier(spec: ModelSpec):
+    from app.verification.base import HFNLIVerifier
+
+    return HFNLIVerifier(
+        spec.model_id,
+        revision=spec.revision,
+        device=spec.device,
+        batch_size=int(spec.params.get("batch_size", 16)),
+        max_length=spec.max_tokens,
+        dtype=str(spec.params.get("dtype", "float16")),
+    )
+
+
 @adapter("lexical", "reranker")
 def _lexical_reranker(spec: ModelSpec):
     from app.reranking.base import LexicalOverlapReranker
