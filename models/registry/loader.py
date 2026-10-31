@@ -135,7 +135,7 @@ class ModelRegistry:
         if cache and role in self._cache:
             return self._cache[role]
         spec = self.spec(role)
-        obj = build_spec(spec)
+        obj = wrap_with_cache(role, build_spec(spec))
         if cache:
             self._cache[role] = obj
         return obj
@@ -164,3 +164,25 @@ def build_spec(spec: ModelSpec) -> Any:
             f"registered: {registered_adapters()}"
         ) from e
     return factory(spec)
+
+
+def wrap_with_cache(role: str, obj: Any) -> Any:
+    """Wrap verifier / dense_encoder in the on-disk cache when configs/resources.yaml enables it.
+    Cache keys include the model name, so a swapped model never reads another model's results."""
+    try:
+        from app.core.budget import ResourceConfig
+
+        cfg = ResourceConfig.from_yaml().cache or {}
+    except Exception:  # noqa: BLE001  (no config → no cache)
+        return obj
+    if not cfg.get("enabled"):
+        return obj
+    from app.core.cache import CachedEncoder, CachedVerifier, DiskCache
+
+    store = DiskCache(cfg.get("path", "data/cache/litbiorag.sqlite"),
+                      ttl_days=float(cfg.get("ttl_days", 30)))  # fmt: skip
+    if role == "verifier" and cfg.get("verifier_pairs", True):
+        return CachedVerifier(obj, store)
+    if role == "dense_encoder" and cfg.get("query_embeddings", True):
+        return CachedEncoder(obj, store)
+    return obj

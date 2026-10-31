@@ -15,9 +15,23 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
+from app.core.budget import (
+    BudgetExceeded,
+    GeneratorBudget,
+    HeuristicCounter,
+    TokenCounter,
+    Usage,
+    UsageLedger,
+    fit_evidence,
+)
 from app.evidence.selector import EvidenceUnit
 from app.generation.base import Generator
-from app.generation.contract import ABSTAIN_NO_EVIDENCE, GeneratedAnswer, parse_answer
+from app.generation.contract import (
+    ABSTAIN_NO_EVIDENCE,
+    ABSTAIN_RESOURCE,
+    GeneratedAnswer,
+    parse_answer,
+)
 from app.generation.prompts import PROMPT_ID, build_messages
 
 
@@ -31,26 +45,67 @@ class GenerationConfig(BaseModel):
         return cls.model_validate(yaml.safe_load(Path(path).read_text()) or {})
 
 
+def _abstain(reason: str, question: str, generator: Generator, **extra) -> GeneratedAnswer:
+    out = GeneratedAnswer.abstention(reason, prompt_id=PROMPT_ID, model=generator.name)
+    out.question = question
+    for k, v in extra.items():
+        setattr(out, k, v)
+    return out
+
+
 def answer(
     question: str,
     evidence: Sequence[EvidenceUnit],
     generator: Generator,
     *,
     config: GenerationConfig | None = None,
+    budget: GeneratorBudget | None = None,
+    counter: TokenCounter | None = None,
+    ledger: UsageLedger | None = None,
+    request_id: str = "",
 ) -> GeneratedAnswer:
+    """Evidence → prompt → model → parsed answer, under a token budget and a spend cap.
+
+    * ``budget`` trims evidence to the generator's context (rank order; sentence-boundary cuts);
+    * ``ledger`` is asked *before* the call whether the estimated cost is affordable, and records
+      the real usage afterwards. A cap that would be crossed yields an abstention with reason
+      ``resource_limit`` — never a silent failure, never a partial answer.
+    """
     cfg = config or GenerationConfig()
+    counter = counter or HeuristicCounter()
     units = list(evidence)[: cfg.max_evidence_units]
     if not units:
-        out = GeneratedAnswer.abstention(ABSTAIN_NO_EVIDENCE, prompt_id=PROMPT_ID,
-                                         model=generator.name)  # fmt: skip
-        out.question = question
-        return out
+        return _abstain(ABSTAIN_NO_EVIDENCE, question, generator)
+    fit = None
+    if budget is not None:
+        units, rep = fit_evidence(units, budget, counter)
+        fit = rep.__dict__
+        if not units:
+            return _abstain(ABSTAIN_NO_EVIDENCE, question, generator, evidence_fit=fit)
     messages = build_messages(question, units)
+    prompt_tokens = sum(counter.count(m.get("content", "")) for m in messages)
+    if ledger is not None:
+        try:
+            ledger.check_affordable(
+                ledger.estimate(generator.name, prompt_tokens, cfg.max_tokens)
+            )
+        except BudgetExceeded as e:
+            usage = Usage(model=generator.name, prompt_tokens=prompt_tokens)
+            blocked = {**usage.to_dict(), "blocked_by": str(e)}
+            return _abstain(ABSTAIN_RESOURCE, question, generator, usage=blocked,
+                            evidence_fit=fit)  # fmt: skip
     raw = generator.generate(
         messages, max_tokens=cfg.max_tokens, temperature=cfg.temperature, evidence=units
     )
+    usage = getattr(generator, "last_usage", None) or Usage(
+        model=generator.name, prompt_tokens=prompt_tokens, completion_tokens=counter.count(raw)
+    )
+    if ledger is not None:
+        ledger.record(usage, request_id=request_id, role="generator")
     parsed = parse_answer(raw, prompt_id=PROMPT_ID, model=generator.name)
     known = {u.citation_id for u in units}
     parsed.unknown_citations = [c for c in parsed.all_citations() if c not in known]
     parsed.question = question
+    parsed.usage = usage.to_dict()
+    parsed.evidence_fit = fit
     return parsed

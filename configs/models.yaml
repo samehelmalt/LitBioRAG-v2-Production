@@ -48,6 +48,46 @@ profiles:
         max_tokens: 512
       entity_extractor: regex:biomed-v2
 
+  hosted:
+    description: >
+      Hosted generator behind an API key (owner decision 2026-10-31), local small models for the
+      rest so no GPU is needed for the generator. Any /v1/chat/completions server works: set
+      endpoint + api_key_env, or override with
+      LITBIORAG_MODEL__GENERATOR="openai_compatible:<model>?endpoint=<url>&api_key_env=<VAR>".
+      Spend is capped by configs/resources.yaml (api.max_usd_per_request / max_usd_per_day) and
+      every call is written to the usage ledger. Candidate model ids are placeholders until
+      docs/MODEL_SELECTION.md records the benchmark.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16}
+      generator:
+        kind: openai_compatible
+        model_id: gpt-4o-mini                          # placeholder candidate; owner's key
+        endpoint: https://api.openai.com/v1
+        api_key_env: OPENAI_API_KEY
+        max_tokens: 1024
+        params: {timeout_s: 60, max_retries: 3, backoff_s: 2.0, json_mode: "true"}
+      # alternative (same role, swap by config only):
+      #   generator: {kind: anthropic, model_id: claude-sonnet-5-5, api_key_env: ANTHROPIC_API_KEY}
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+        max_tokens: 512
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v2
+
   default:
     description: >
       Production candidates sized for 12 GB VRAM. Every entry is a candidate until

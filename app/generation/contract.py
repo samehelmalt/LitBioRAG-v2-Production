@@ -22,6 +22,7 @@ ABSTAIN_NO_EVIDENCE = "no_evidence"
 ABSTAIN_INSUFFICIENT = "insufficient_evidence"
 ABSTAIN_CONFLICT = "conflicting_evidence"
 ABSTAIN_OUT_OF_SCOPE = "out_of_scope"
+ABSTAIN_RESOURCE = "resource_limit"
 
 _CIT_RE = re.compile(r"^(PMID|DOI|SLIDE):\s*(\S.*)$", re.IGNORECASE)
 
@@ -94,6 +95,8 @@ class GeneratedAnswer(BaseModel):
     prompt_id: str = ""
     model: str = ""
     question: str = ""
+    usage: dict | None = Field(default=None, description="token/cost accounting for this call")
+    evidence_fit: dict | None = Field(default=None, description="what the token budget kept/cut")
 
     def all_citations(self) -> list[str]:
         seen: list[str] = []
@@ -127,6 +130,10 @@ ABSTENTION_TEXT = {
         "cannot be established."
     ),
     ABSTAIN_FORMAT: "The system could not produce a verifiable answer for this question.",
+    ABSTAIN_RESOURCE: (
+        "The system paused answering because a resource limit (API spend or model availability) "
+        "was reached. No answer was generated."
+    ),
     ABSTAIN_OUT_OF_SCOPE: (
         "This question is outside the scope of literature support that this system provides."
     ),

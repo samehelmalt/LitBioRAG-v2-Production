@@ -1,0 +1,45 @@
+# Resource controls: tokens, API spend, GPU residency, caching. Operating parameters only; model
+# choice stays in models.yaml. Every value here is a knob, not a promise: the measured numbers go
+# to docs/BASELINE_RESULTS.md and docs/COST_AND_RESOURCES.md.
+
+budgets:
+  generator:
+    context_window: 8192          # tokens the configured generator accepts (set per model)
+    reserve_output: 768           # kept free for the JSON answer
+    prompt_overhead: 600          # system prompt + schema + question (measured, re-check per prompt id)
+    max_evidence_tokens: 3500     # evidence rendered into the prompt is trimmed to this
+    max_tokens_per_unit: 450      # a single passage longer than this is cut at a sentence boundary
+  verifier:
+    max_pairs: 60                 # (claim, passage) pairs scored per answer
+    max_premise_tokens: 512
+
+api:                              # hosted generators (openai_compatible / anthropic kinds)
+  timeout_s: 60
+  max_retries: 3
+  backoff_s: 2.0                  # exponential: 2, 4, 8
+  max_usd_per_request: 0.05       # the service abstains with reason resource_limit above this
+  max_usd_per_day: 20.0           # ledger-enforced; 0 disables the cap
+  ledger_path: data/usage/ledger.jsonl
+
+gpu:
+  vram_gb: 12                     # per device, owner hardware
+  devices: [cuda:0]
+  dtype: float16
+  residency:                      # resident = loaded once and kept; on_demand = loaded per request,
+    dense_encoder: resident       #   released afterwards (VRAM freed) so the generator fits
+    reranker: resident
+    verifier: resident
+    generator: on_demand
+  vram_estimate_gb:               # used by the pre-flight check; override per model in models.yaml
+    dense_encoder: 0.5
+    reranker: 1.2
+    verifier: 1.0
+    generator: 6.0                # 8B at 4-bit incl. KV cache; 14B at 4-bit ~9.5
+
+cache:
+  enabled: false                  # true in production; CI and tests run without a cache
+  path: data/cache/litbiorag.sqlite
+  ttl_days: 30
+  verifier_pairs: true            # (model, premise, hypothesis) -> NLI scores
+  query_embeddings: true          # (encoder, query) -> vector
+  generations: false              # never cache generations by default: evidence changes per bundle

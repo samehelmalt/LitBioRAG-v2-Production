@@ -34,3 +34,10 @@ Set `LITBIORAG_DATA_DIR` on the serving host to the directory that contains `art
 ## Status
 
 API, Docker image and compose file are added in Step 9. This document is updated with measured figures (bundle size, load time, RSS, VRAM) after the first real bundle is built.
+
+
+## Resource controls
+Token budgets, API spend caps, GPU residency and caching are configured in `configs/resources.yaml`
+and described in [COST_AND_RESOURCES.md](COST_AND_RESOURCES.md). The `hosted` profile in
+`configs/models.yaml` runs the generator behind an API key with no generator VRAM; run
+`ModelPool.preflight()` (done by the service at start-up in Step 9) before serving a new profile.

@@ -61,6 +61,9 @@ def _openai_generator(spec: ModelSpec):
         endpoint=spec.endpoint or "http://localhost:8000/v1",
         api_key_env=spec.api_key_env,
         json_mode=str(spec.params.get("json_mode", "true")).lower() == "true",
+        timeout=int(spec.params.get("timeout_s", 60)),
+        max_retries=int(spec.params.get("max_retries", 3)),
+        backoff_s=float(spec.params.get("backoff_s", 2.0)),
     )
 
 

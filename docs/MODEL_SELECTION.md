@@ -37,3 +37,12 @@ Models are configuration, not code: edit `configs/models.yaml` or set `LITBIORAG
 ## Results
 
 None yet. Each benchmark run appends a dated row here with the run directory under `evaluation/benchmarks/runs/`.
+
+
+## Hosted generator profile
+`profiles.hosted` in `configs/models.yaml` routes the generator to any OpenAI-compatible endpoint
+(or Anthropic) using an API key from the environment variable named in `api_key_env`. Nothing else
+changes: the same contract, verifier, gate and ledger apply. The hosted candidates enter the Step 6
+benchmark alongside the local 4-bit candidates with cost per 1,000 answers as an extra column
+(see COST_AND_RESOURCES.md). The verifier stays a local, different-family model so the
+independence rule holds whichever generator is chosen.

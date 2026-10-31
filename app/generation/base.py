@@ -18,10 +18,13 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
+import urllib.error
 import urllib.request
 from collections.abc import Sequence
 from typing import Any, Protocol
 
+from app.core.budget import HeuristicCounter, Usage
 from app.evidence.selector import EvidenceUnit
 
 Messages = Sequence[dict[str, str]]
@@ -163,8 +166,10 @@ class HFCausalGenerator:
             kwargs["torch_dtype"] = getattr(torch, dtype)
             kwargs["device_map"] = device or "auto"
         self.model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs).eval()
+        self.last_usage: Usage | None = None
 
     def generate(self, messages, *, max_tokens=1024, temperature=0.0, evidence=None) -> str:
+        t0 = time.perf_counter()
         ids = self.tokenizer.apply_chat_template(
             list(messages), add_generation_prompt=True, return_tensors="pt"
         ).to(self.model.device)
@@ -178,7 +183,11 @@ class HFCausalGenerator:
             gen.update(do_sample=False)
         with self._torch.inference_mode():
             out = self.model.generate(ids, **gen)
-        return self.tokenizer.decode(out[0][ids.shape[1] :], skip_special_tokens=True)
+        new = out[0][ids.shape[1] :]
+        self.last_usage = Usage(model=self.name, prompt_tokens=int(ids.shape[1]),
+                                completion_tokens=int(new.shape[0]), exact=True,
+                                latency_ms=(time.perf_counter() - t0) * 1000)  # fmt: skip
+        return self.tokenizer.decode(new, skip_special_tokens=True)
 
 
 # ---------------------------------------------------------------------- OpenAI-compatible -------
@@ -189,15 +198,44 @@ class OpenAICompatibleGenerator:
         *,
         endpoint: str = "http://localhost:8000/v1",
         api_key_env: str | None = None,
-        timeout: int = 120,
+        timeout: int = 60,
         json_mode: bool = True,
+        max_retries: int = 3,
+        backoff_s: float = 2.0,
     ):
         self.name = f"openai_compatible:{model_id}"
         self.model_id = model_id
         self.endpoint = endpoint.rstrip("/")
+        self.api_key_env = api_key_env
         self.api_key = os.environ.get(api_key_env, "") if api_key_env else ""
         self.timeout = timeout
         self.json_mode = json_mode
+        self.max_retries = max_retries
+        self.backoff_s = backoff_s
+        self.last_usage: Usage | None = None
+        self._counter = HeuristicCounter()
+
+    def _post(self, body: dict[str, Any]) -> dict[str, Any]:
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        req = urllib.request.Request(
+            f"{self.endpoint}/chat/completions", json.dumps(body).encode(), headers=headers
+        )
+        attempt = 0
+        while True:
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                    return json.loads(r.read().decode())
+            except urllib.error.HTTPError as e:
+                retryable = e.code in (408, 409, 425, 429, 500, 502, 503, 504)
+                if not retryable or attempt >= self.max_retries:
+                    raise
+            except (urllib.error.URLError, TimeoutError):
+                if attempt >= self.max_retries:
+                    raise
+            time.sleep(self.backoff_s * (2**attempt))
+            attempt += 1
 
     def generate(self, messages, *, max_tokens=1024, temperature=0.0, evidence=None) -> str:
         body: dict[str, Any] = {
@@ -208,15 +246,19 @@ class OpenAICompatibleGenerator:
         }
         if self.json_mode:
             body["response_format"] = {"type": "json_object"}
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
-        req = urllib.request.Request(
-            f"{self.endpoint}/chat/completions", json.dumps(body).encode(), headers=headers
-        )
-        with urllib.request.urlopen(req, timeout=self.timeout) as r:
-            data = json.loads(r.read().decode())
-        return data["choices"][0]["message"]["content"] or ""
+        t0 = time.perf_counter()
+        data = self._post(body)
+        text = data["choices"][0]["message"]["content"] or ""
+        u = data.get("usage") or {}
+        self.last_usage = Usage(
+            model=self.name,
+            prompt_tokens=int(u.get("prompt_tokens") or sum(
+                self._counter.count(m.get("content", "")) for m in messages)),
+            completion_tokens=int(u.get("completion_tokens") or self._counter.count(text)),
+            exact=bool(u),
+            latency_ms=(time.perf_counter() - t0) * 1000,
+        )  # fmt: skip
+        return text
 
 
 # ---------------------------------------------------------------------- Anthropic --------------
@@ -227,15 +269,25 @@ class AnthropicGenerator:
         self.name = f"anthropic:{model_id}"
         self.model_id = model_id
         self.client = anthropic.Anthropic(api_key=os.environ.get(api_key_env))
+        self.last_usage: Usage | None = None
 
     def generate(self, messages, *, max_tokens=1024, temperature=0.0, evidence=None) -> str:
         system = "\n".join(m["content"] for m in messages if m.get("role") == "system")
         rest = [m for m in messages if m.get("role") != "system"]
+        t0 = time.perf_counter()
         resp = self.client.messages.create(
             model=self.model_id,
             system=system,
             messages=rest,
             max_tokens=max_tokens,
             temperature=temperature,
+        )
+        u = getattr(resp, "usage", None)
+        self.last_usage = Usage(
+            model=self.name,
+            prompt_tokens=int(getattr(u, "input_tokens", 0) or 0),
+            completion_tokens=int(getattr(u, "output_tokens", 0) or 0),
+            exact=u is not None,
+            latency_ms=(time.perf_counter() - t0) * 1000,
         )
         return "".join(getattr(b, "text", "") for b in resp.content)

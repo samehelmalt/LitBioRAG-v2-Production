@@ -1,0 +1,10 @@
+# USD per 1M tokens, keyed by model id (exact or prefix). Local models cost 0 here; their cost is
+# GPU time, measured separately. VALUES MUST BE CHECKED against the provider price list on the date
+# in `as_of` before a budget is trusted; the ledger records the pricing version it used.
+as_of: ""              # owner fills: YYYY-MM-DD of the price check
+default: {input: 0.0, output: 0.0}
+models: {}
+# example (fill from the provider's current price list):
+#   gpt-4o-mini:        {input: 0.15, output: 0.60}
+#   claude-sonnet-5-5:  {input: 3.00, output: 15.00}
+#   Qwen/Qwen3-8B:      {input: 0.0,  output: 0.0}
