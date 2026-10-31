@@ -103,6 +103,19 @@ def test_rule_order_each_rule_reachable():
     assert d.action == Action.ANSWER_WITH_CAUTION  # weakest check bounds confidence
 
 
+def test_off_target_claim_is_removed_not_abstained():
+    two = ans(("MAP3K3 is required.", ["PMID:1"], True),
+              ("MAP3K7 mediates TLR.", ["PMID:2"], False),
+              ("It acts upstream.", ["PMID:1"], True))  # fmt: skip
+    rep = report(verdict(1, "MAP3K3 is required."),
+                 verdict(2, "MAP3K7 mediates TLR.", critical=False, cited=("PMID:2",),
+                         supporting=("PMID:2",), off_target=True),
+                 verdict(3, "It acts upstream."))  # fmt: skip
+    d = decide(rep, two, sufficiency=0.9, config=GateConfig())
+    assert d.action == Action.ANSWER_WITH_CAUTION and d.rule == "R10-repair"
+    assert d.removed_claims == ["MAP3K7 mediates TLR."] and "MAP3K7" not in d.answer_text
+
+
 def test_fitted_confidence_model_is_used():
     cfg = GateConfig(confidence_model={"weights": {"entailment_rate": 8.0}, "bias": -4.0},
                      confidence_answer=0.9)  # fmt: skip

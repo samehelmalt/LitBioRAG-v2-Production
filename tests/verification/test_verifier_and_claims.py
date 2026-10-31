@@ -65,6 +65,8 @@ def test_prepare_claims_splits_sentences_and_marks_critical():
     assert all(c.citations == ["PMID:900001"] for c in cs[:2])
     assert cs[0].critical and cs[1].critical  # polarity word / number
     assert cs[2].modality == "hedged" and not is_critical("The authors describe a cohort.")
+    assert not is_critical("MAP3K7, also known as TAK1, mediates TLR signalling.")  # symbol digits
+    assert is_critical("Mortality fell by 20%.") and is_critical("MAP3K3 is not required.")
     assert prepare_claims(a, max_claims=1) == cs[:1]
 
 

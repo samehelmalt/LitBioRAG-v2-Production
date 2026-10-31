@@ -13,7 +13,7 @@ gold labels are never available here (a test greps ``app/`` for them).
     7  critical numeric mismatch                                          → ABSTAIN
     8  question entities absent from the evidence                         → CLARIFY
     9  evidence sufficiency below threshold                               → ABSTAIN
-    10 non-critical unsupported claims removed (repair)                   → ANSWER_WITH_CAUTION
+    10 non-critical unsupported and off-target claims removed (repair)    → ANSWER_WITH_CAUTION
     11 conflict recorded on any claim                                     → ANSWER_WITH_CAUTION
     12 calibrated confidence ≥ τ                                          → ANSWER else CAUTION
 
@@ -192,8 +192,13 @@ def decide(
         return out(Action.ABSTAIN, "R9-sufficiency", f"evidence sufficiency {sufficiency:.2f}",
                    ABSTENTION_TEXT["insufficient_evidence"])  # fmt: skip
     trace.append(f"R9-sufficiency: {sufficiency if sufficiency is not None else 'n/a'}")
-    # 10 repair: remove non-critical unsupported claims
-    removable = [v.claim_id for v in report.verdicts if not v.critical and v.label != "supported"]
+    # 10 repair: remove non-critical unsupported claims and off-target claims (a near neighbour
+    # named where the answer does cover the asked entity elsewhere)
+    removable = [
+        v.claim_id
+        for v in report.verdicts
+        if (not v.critical and v.label != "supported") or v.off_target
+    ]
     n = max(report.n_claims, 1)
     if len(removable) / n > cfg.unsupported_noncritical_max:
         return out(Action.ABSTAIN, "R10-too-many-unsupported",

@@ -41,6 +41,7 @@ class ClaimVerdict(BaseModel):
     query_entities_missing: tuple[str, ...] = ()  # question entities this claim should name
     near_neighbour_substitution: bool = False  # e.g. MAP3K7 where the question asked MAP3K3
     substituted_for: str | None = None  # "map3k7->map3k3"
+    off_target: bool = False  # names a neighbour while other claims do answer the asked entity
     notes: tuple[str, ...] = ()
 
     def model_post_init(self, __context) -> None:  # noqa: D105

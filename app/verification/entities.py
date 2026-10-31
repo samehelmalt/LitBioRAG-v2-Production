@@ -106,6 +106,7 @@ class QueryGrounding:
     missing_in_evidence: tuple[str, ...]  # question entities absent from all supporting texts
     missing_in_critical_claims: tuple[str, ...]  # question entities no critical claim mentions
     substitutions: dict[str, tuple[str, str]]  # claim_id -> (claim entity, question entity)
+    off_target: dict[str, tuple[str, str]]  # neighbour named; asked entity covered elsewhere
 
     @property
     def grounding(self) -> float | None:
@@ -126,15 +127,17 @@ def query_entity_grounding(
     """Ground the *question's* entities, not only the claims'.
 
     Catches the case the per-claim check cannot: a claim about MAP3K7, correctly cited to a
-    MAP3K7 passage, answering a MAP3K3 question. Every entity of a critical claim that is a near
-    neighbour of a question entity (same stem, small edit distance, or same drug class suffix)
-    while the question entity itself is absent from that claim is a substitution.
+    MAP3K7 passage, answering a MAP3K3 question. A claim naming a near neighbour of a question
+    entity (same stem, small edit distance, or same drug class suffix) without naming the asked
+    entity is a **substitution** when no critical claim names the asked entity at all, and an
+    **off-target** claim when the answer does cover the asked entity elsewhere (the gate removes
+    it rather than abstaining).
     """
     q_ents = {symbols.normalize(e) for e in extractor.extract(question)}
     q_ents |= {symbols.normalize(t) for t in symbols.symbol_like_tokens(question)}
     q_ents.discard("")
     if not q_ents:
-        return QueryGrounding((), (), (), {})
+        return QueryGrounding((), (), (), {}, {})
     texts = list(supporting_texts)
     pool: set[str] = set()
     for t in texts:
@@ -142,16 +145,19 @@ def query_entity_grounding(
     missing_ev = tuple(sorted(e for e in q_ents if not _present(e, pool, texts)))
 
     critical_ents: set[str] = set()
-    subs: dict[str, tuple[str, str]] = {}
+    neighbours: dict[str, tuple[str, str, bool]] = {}  # cid -> (ce, qe, critical)
     for cid, text, critical in claims:
-        if not critical:
-            continue
         c_ents = {symbols.normalize(e) for e in extractor.extract(text)}
         c_ents |= {symbols.normalize(t) for t in symbols.symbol_like_tokens(text)}
-        critical_ents |= c_ents
+        if critical:
+            critical_ents |= c_ents
         for ce in c_ents:
             for qe in q_ents:
                 if qe not in c_ents and symbols.is_near_neighbour(ce, qe):
-                    subs[cid] = (ce, qe)
+                    neighbours[cid] = (ce, qe, critical)
     missing_cc = tuple(sorted(e for e in q_ents if e not in critical_ents)) if claims else ()
-    return QueryGrounding(tuple(sorted(q_ents)), missing_ev, missing_cc, subs)
+    subs = {
+        cid: (ce, qe) for cid, (ce, qe, crit) in neighbours.items() if crit and qe in missing_cc
+    }
+    off = {cid: (ce, qe) for cid, (ce, qe, _) in neighbours.items() if cid not in subs}
+    return QueryGrounding(tuple(sorted(q_ents)), missing_ev, missing_cc, subs, off)

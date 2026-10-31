@@ -14,7 +14,7 @@ import re
 from app.generation.contract import Claim, GeneratedAnswer
 from app.retrieval.passages import split_sentences
 
-_NUMERIC = re.compile(r"\d")
+_NUMERIC = re.compile(r"(?<![A-Za-z0-9-])\d+(?:\.\d+)?")  # standalone numbers, not MAP3K3
 _POLARITY = re.compile(
     r"\b(yes|no|not|never|increase[sd]?|decrease[sd]?|reduce[sd]?|improve[sd]?|prevent[sd]?|"
     r"cause[sd]?|associated|required|effective|superior|inferior|significant(?:ly)?)\b",

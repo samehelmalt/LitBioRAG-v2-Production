@@ -171,6 +171,11 @@ def verify(
                 v.substituted_for = f"{ce}->{qe}"
                 v.notes = (*v.notes, f"entity substitution: claim names {ce}, question asked {qe}")
                 trace.append(f"{v.claim_id}: ENTITY SUBSTITUTION {ce} for {qe}")
+            elif v.claim_id in qg.off_target:
+                ce, qe = qg.off_target[v.claim_id]
+                v.off_target = True
+                v.notes = (*v.notes, f"off-target: names {ce}, question asked {qe}")
+                trace.append(f"{v.claim_id}: off-target ({ce}, question asked {qe})")
         if qg.missing_in_evidence:
             trace.append(
                 "question entities not in supporting evidence: "

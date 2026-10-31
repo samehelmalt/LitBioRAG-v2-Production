@@ -90,6 +90,24 @@ def test_drug_analogue_substitution():
     assert r.substitution_detected and r.verdicts[0].substituted_for == "simvastatin->atorvastatin"
 
 
+def test_neighbour_claim_beside_a_correct_answer_is_off_target_not_substitution():
+    ans = GeneratedAnswer(
+        answer="...",
+        claims=[
+            Claim(id="C1", text="MAP3K3 is required for NF-kappaB signalling.",
+                  citations=["PMID:900001"], critical=True),
+            Claim(id="C2", text="MAP3K7, also known as TAK1, mediates TLR signalling.",
+                  citations=["PMID:900002"], critical=False),
+        ],  # fmt: skip
+        question="What does MAP3K3 do in NF-kappaB signalling?",
+    )
+    r = verify(ans, EV, V, X)
+    assert not r.substitution_detected
+    by = {v.claim_id: v for v in r.verdicts}
+    assert by["C2"].off_target and not by["C1"].off_target
+    assert any("off-target" in line for line in r.policy_trace)
+
+
 def test_query_grounding_without_question_entities_is_neutral():
     qg = query_entity_grounding("Is fasting before sedation necessary?", [("C1", "x", True)], [], X)
     assert qg.grounding is None and not qg.substitution_detected

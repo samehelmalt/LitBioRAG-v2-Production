@@ -1,11 +1,11 @@
-"""Run retrieval → evidence → generation → verification end to end and print the report.
+"""Run retrieval → evidence → generation → verification → gate end to end and print the result.
 
     python -m scripts.demo_pipeline --bundle data/artifacts/<id> --profile test \
         --question "What does MAP3K3 do in NF-kappaB signalling?"
 
 Models come from configs/models.yaml (profile) or LITBIORAG_MODEL__<ROLE> overrides; nothing
-here names a model. With the `test` profile the whole chain runs without weights. The gate
-(Step 8) is not applied yet: the output is the verification report the gate will consume.
+here names a model. With the `test` profile the whole chain runs without weights. The decision
+comes from configs/gate.yaml; until the calibration job has run it is marked UNCALIBRATED.
 """
 
 from __future__ import annotations
@@ -25,6 +25,8 @@ from app.retrieval.bm25 import BM25Index  # noqa: E402
 from app.retrieval.dense import DenseIndex  # noqa: E402
 from app.retrieval.pipeline import HybridRetriever, RetrievalConfig  # noqa: E402
 from app.retrieval.store import MetadataStore  # noqa: E402
+from app.safety.gate import GateConfig, decide  # noqa: E402
+from app.safety.sufficiency import evidence_sufficiency  # noqa: E402
 from app.verification.pipeline import VerificationConfig, verify  # noqa: E402
 from models.registry import ModelRegistry  # noqa: E402
 
@@ -52,9 +54,14 @@ def run(bundle: Path, question: str, profile: str | None, *, max_units: int = 8)
         thresholds=reg.thresholds("verifier"),
     )  # fmt: skip
     t3 = time.perf_counter()
+    gate_cfg = GateConfig.from_yaml(ROOT / "configs" / "gate.yaml")
+    suff = evidence_sufficiency(res, report, gate_cfg.sufficiency_model)
+    decision = decide(report, gen, sufficiency=suff, config=gate_cfg, question=question)
     return {
         "question": question,
         "models": reg.describe(),
+        "decision": decision.model_dump(),
+        "gate_calibrated_on": gate_cfg.calibrated_on or "UNCALIBRATED (heuristic defaults)",
         "evidence": [
             {"citation": u.citation_id, "rank": u.doc_rank, "peer_reviewed": u.is_peer_reviewed,
              "title": u.title}  # fmt: skip
