@@ -29,6 +29,17 @@ The evidence is authoritative; the generator is not. An answer is released only 
 | Contract parser | unparseable or schema-violating output → forced abstention | — |
 | Prompt boundary | passage text rendered as data; instructions inside passages do not reach the system prompt | a model that follows injected instructions anyway → verification still scores the claims against evidence, so an injected "supported" cannot be asserted by the model |
 
+### Substitution suite (adversarial regression, runs in CI)
+
+`evaluation/adversarial/substitution.py` generates attack/control pairs from any corpus: for every two
+documents whose titles carry near-neighbour symbols (MAP3K3/MAP3K7, MAP3K3/MAPK3, ...), the attack
+answers a question about A with a true, correctly cited claim from B; the control answers it from A.
+Release rule: catch rate 1.0 on attacks and false-alarm rate 0.0 on controls for the fixture suite
+(`tests/security/test_substitution_suite.py`); for every real bundle and verifier the same two numbers
+are reported in MODEL_SELECTION.md via `python -m scripts.run_adversarial --bundle … --profile …`,
+which exits non-zero when the catch rate is below 1.0. A substitution is caught by the entity layer
+alone, so it does not depend on which NLI verifier is configured.
+
 ## Delivery decision (Step 8, not yet implemented)
 
 Ordered vetoes, then one calibrated decision. No composite.
