@@ -12,7 +12,7 @@ import sqlite3
 from collections.abc import Iterable, Iterator
 from pathlib import Path
 
-from app.core.documents import Document, Passage, SlideMeta, SourceType
+from app.core.documents import Document, FileMeta, Passage, SlideMeta, SourceType
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS documents (
@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS documents (
     source      TEXT NOT NULL,
     version     TEXT,
     course_id   TEXT,
-    slide       TEXT
+    slide       TEXT,
+    file        TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_documents_pmid ON documents(pmid);
 CREATE INDEX IF NOT EXISTS idx_documents_doi  ON documents(doi);
@@ -61,7 +62,14 @@ class MetadataStore:
             self.conn = sqlite3.connect(self.path, check_same_thread=False)
             self.conn.executescript(_SCHEMA)
             self.conn.execute("PRAGMA journal_mode=WAL")
+            self._migrate()
         self.conn.row_factory = sqlite3.Row
+
+    def _migrate(self) -> None:
+        cols = {r[1] for r in self.conn.execute("PRAGMA table_info(documents)")}
+        if "file" not in cols:  # bundles built before uploaded-file support
+            with self.conn:
+                self.conn.execute("ALTER TABLE documents ADD COLUMN file TEXT")
 
     # ---- writes -------------------------------------------------------------------------
     def add_documents(self, docs: Iterable[Document]) -> int:
@@ -71,12 +79,13 @@ class MetadataStore:
                 d.journal, json.dumps(d.pub_types), json.dumps(d.mesh_terms),
                 json.dumps(d.authors), d.url, d.source, d.version, d.course_id,
                 d.slide.model_dump_json() if d.slide else None,
+                d.file.model_dump_json() if d.file else None,
             )  # fmt: skip
             for d in docs
         ]
         with self.conn:
             self.conn.executemany(
-                "INSERT OR REPLACE INTO documents VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
+                "INSERT OR REPLACE INTO documents VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
             )
         return len(rows)
 
@@ -116,6 +125,8 @@ class MetadataStore:
             source=row["source"],
             version=row["version"],
             slide=SlideMeta.model_validate_json(row["slide"]) if row["slide"] else None,
+            file=(FileMeta.model_validate_json(row["file"])
+                  if "file" in row.keys() and row["file"] else None),
         )
 
     def course_of(self, doc_ids: Iterable[str]) -> dict[str, str | None]:
@@ -182,6 +193,28 @@ class MetadataStore:
     def pmids(self) -> set[str]:
         rows = self.conn.execute("SELECT pmid FROM documents WHERE pmid IS NOT NULL")
         return {r[0] for r in rows}
+
+    def delete_documents(self, doc_ids: Iterable[str]) -> int:
+        ids = list(doc_ids)
+        with self.conn:
+            for i in range(0, len(ids), 500):
+                chunk = ids[i : i + 500]
+                marks = ",".join("?" * len(chunk))
+                self.conn.execute(f"DELETE FROM passages WHERE doc_id IN ({marks})", chunk)
+                self.conn.execute(f"DELETE FROM documents WHERE doc_id IN ({marks})", chunk)
+        return len(ids)
+
+    def doc_ids_where(
+        self, *, course_id: str | None = None, prefix: str | None = None
+    ) -> list[str]:
+        q, args = "SELECT doc_id FROM documents WHERE 1=1", []
+        if course_id is not None:
+            q += " AND course_id = ?"
+            args.append(course_id)
+        if prefix:
+            q += " AND doc_id LIKE ?"
+            args.append(prefix + "%")
+        return [r[0] for r in self.conn.execute(q, args)]
 
     def counts(self) -> dict[str, int]:
         d = self.conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]

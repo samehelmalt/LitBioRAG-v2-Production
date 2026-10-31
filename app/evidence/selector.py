@@ -35,22 +35,36 @@ class EvidenceUnit(BaseModel):
     lecture_title: str | None = None
     slide_number: int | None = None
     neighbour_of: str | None = None  # passage id of the slide this unit was added next to
+    # uploaded-file provenance (knowledge bases)
+    kb_id: str | None = None
+    file_id: str | None = None
+    file_name: str | None = None
+    locator: str | None = None  # "p3" | "s7" | "Sheet1!A1:D40" | "sec2"
+    locator_label: str | None = None  # "page 3" | "slide 7" | "Sheet1 rows 1–40"
 
     @property
     def is_slide(self) -> bool:
         return self.doc_id.startswith("slide:")
 
     @property
+    def is_file(self) -> bool:
+        return self.doc_id.startswith("file:")
+
+    @property
     def citation_id(self) -> str:
         if self.is_slide:
             return f"SLIDE:{self.lecture_id}:{self.slide_number}"
+        if self.is_file:
+            return f"FILE:{self.file_id}:{self.locator}"
         return f"PMID:{self.pmid}" if self.pmid else f"DOI:{self.doi}"
 
     @property
     def display_source(self) -> str:
-        """Shown next to the citation: 'Lecture title, Slide N' or the article title."""
+        """'Lecture title, Slide N' | 'file name, page N' | the article title."""
         if self.is_slide:
             return f"{self.lecture_title}, Slide {self.slide_number}"
+        if self.is_file:
+            return f"{self.file_name}, {self.locator_label or self.locator}"
         return self.title
 
 
@@ -77,6 +91,7 @@ def select_evidence(
 
     def _unit(doc, p, rank, score, neighbour_of=None) -> EvidenceUnit:
         s = doc.slide
+        f = doc.file
         return EvidenceUnit(
             passage_id=p.passage_id, doc_id=doc.doc_id, pmid=doc.pmid, doi=doc.doi,
             title=doc.title, year=doc.year, journal=doc.journal, source_type=doc.source_type,
@@ -85,6 +100,9 @@ def select_evidence(
             course_id=s.course_id if s else None, lecture_id=s.lecture_id if s else None,
             lecture_title=s.lecture_title if s else None,
             slide_number=s.slide_number if s else None, neighbour_of=neighbour_of,
+            kb_id=f.kb_id if f else None, file_id=f.file_id if f else None,
+            file_name=f.file_name if f else None, locator=f.locator if f else None,
+            locator_label=f.label if f else None,
         )  # fmt: skip
 
     for rank, cand in enumerate(docs, start=1):

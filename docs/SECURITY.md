@@ -32,3 +32,10 @@
 - Redis-backed rate limiting and ledger for multi-replica deployments.
 - Secret rotation runbook and dependency vulnerability scanning in CI.
 - Penetration test of the deployed UI + API before public launch.
+
+## Uploads
+Files are streamed to a temp file with a hard size limit, accepted only by extension from the
+supported list, parsed by pure-Python readers (no macros, no external processes), stored under the
+knowledge base by content hash, and never executed. A parse failure marks the file `failed` with
+the reason and never affects the service. Uploaded text is evidence data in the prompt like any
+other passage: the same injection defences apply.

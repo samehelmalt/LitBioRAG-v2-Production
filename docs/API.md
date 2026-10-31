@@ -62,3 +62,17 @@ privacy mode), action, rule, counts, usage, stage timings and versions. The usag
 | POST | `/api/v1/review/{case_id}/decision` | `{decision: release|block, edited_answer?, kept_claim_ids?, notes, confirm}`; 409 with `reverification` when an edited release has flagged claims and `confirm` is false |
 | GET | `/api/v1/my/cases` | the asker's own cases and released answers (signed-in users) |
 A query whose answer was withheld carries `review: {case_id, status: "under_review", message}`.
+
+## Knowledge bases (uploaded files) and retrieval scope
+`POST /api/v1/query` accepts `scope` (`indexed` | `uploaded` | `both`) and optional `kb_ids`; the
+response echoes `scope` and the `kb_ids` searched. Uploaded sources carry `kb_id`, `file_id`,
+`file_name`, `locator` (`p3`, `s7`, `Sheet1!A2:B41`, `sec2`) and `locator_label`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/kb` | knowledge bases the caller can read, with files |
+| POST | `/api/v1/kb` | create (`{name, description}`) |
+| GET | `/api/v1/kb/{id}` / `/status` | details; file statuses and running index jobs |
+| POST | `/api/v1/kb/{id}/upload` | multipart `file` (PDF/DOCX/XLSX/PPTX/TXT/MD; size limit from api.yaml), `background=true` for async indexing |
+| POST | `/api/v1/kb/{id}/share` | `{subs: [...]}` read access for other users |
+| DELETE | `/api/v1/kb/{id}/files/{file_id}` · `/api/v1/kb/{id}` | remove a file / the whole base (units leave the index immediately) |

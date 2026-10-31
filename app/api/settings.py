@@ -24,6 +24,14 @@ class LimitSettings(BaseModel):
     max_units: int = 12
     rate_per_minute: int = 30
     burst: int = 10
+    max_upload_mb: int = 50
+    max_files_per_kb: int = 500
+
+
+class KBSettings(BaseModel):
+    enabled: bool = True
+    root: str = "data/kb"
+    default_scope: str = "both"  # indexed | uploaded | both
 
 
 class AuditSettings(BaseModel):
@@ -38,6 +46,7 @@ class ApiSettings(BaseModel):
     auth: AuthSettings = Field(default_factory=AuthSettings)
     limits: LimitSettings = Field(default_factory=LimitSettings)
     audit: AuditSettings = Field(default_factory=AuditSettings)
+    kb: KBSettings = Field(default_factory=KBSettings)
     cors_origins: list[str] = Field(default_factory=list)
 
     @classmethod
@@ -53,6 +62,13 @@ class ApiSettings(BaseModel):
     @property
     def bundle_path(self) -> Path:
         p = Path(self.bundle)
+        return p if p.is_absolute() else ROOT / p
+
+    @property
+    def kb_root(self) -> Path | None:
+        if not self.kb.enabled:
+            return None
+        p = Path(self.kb.root)
         return p if p.is_absolute() else ROOT / p
 
     @property

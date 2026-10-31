@@ -19,6 +19,32 @@ class QueryRequest(BaseModel):
     question: str = Field(..., min_length=3, max_length=4000)
     course_ids: list[str] | None = Field(default=None, max_length=20)
     max_units: int | None = Field(default=None, ge=1, le=50)
+    scope: str | None = Field(default=None, pattern="^(indexed|uploaded|both)$",
+                              description="indexed corpus (PubMed, bioRxiv/medRxiv) | uploaded "
+                                          "knowledge bases | both (default from api.yaml)")
+    kb_ids: list[str] | None = Field(default=None, max_length=20,
+                                     description="knowledge bases to search; default: all the "
+                                                 "caller can read")
+
+
+class KBCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    description: str = Field("", max_length=1000)
+
+
+class KBShare(BaseModel):
+    subs: list[str] = Field(default_factory=list, max_length=200)
+
+
+class KBOut(BaseModel):
+    kb_id: str
+    name: str
+    owner: str
+    created_at: float
+    description: str | None
+    shared_with: list[str]
+    version: int
+    files: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class Substitution(BaseModel):
@@ -73,6 +99,11 @@ class SourceOut(BaseModel):
     course_id: str | None = None
     lecture_title: str | None = None
     slide_number: int | None = None
+    kb_id: str | None = None
+    file_id: str | None = None
+    file_name: str | None = None
+    locator: str | None = None
+    locator_label: str | None = None
 
 
 class ConflictOut(BaseModel):
@@ -120,6 +151,8 @@ class QueryResponse(BaseModel):
     versions: dict[str, Any]
     timings_ms: dict[str, float]
     trace: list[str]
+    scope: str = "indexed"
+    kb_ids: list[str] = Field(default_factory=list)
     disclosure: str = DISCLOSURE
     review: ReviewInfo | None = None
 
@@ -138,6 +171,7 @@ class SourceDocument(BaseModel):
     pmid: str | None
     doi: str | None
     slide: dict[str, Any] | None = None
+    file: dict[str, Any] | None = None
 
 
 class ReviewDecisionIn(BaseModel):

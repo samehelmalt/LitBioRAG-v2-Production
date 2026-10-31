@@ -22,6 +22,7 @@ from app.generation.service import GenerationConfig
 from app.generation.service import answer as generate_answer
 from app.retrieval.bm25 import BM25Index
 from app.retrieval.dense import DenseIndex
+from app.retrieval.multi import SCOPES, MultiRetriever
 from app.retrieval.pipeline import HybridRetriever, RetrievalConfig, RetrievalResult
 from app.retrieval.store import MetadataStore
 from app.safety.gate import Decision, GateConfig, decide
@@ -76,6 +77,7 @@ class AnswerPipeline:
         resources: ResourceConfig | None = None,
         max_units: int = 8,
         scope_profile: str = "research",
+        kb_root: Path | None = None,
     ):
         self.scope_profile = scope_profile
         self.bundle = Path(bundle)
@@ -84,13 +86,22 @@ class AnswerPipeline:
         self.pool = ModelPool(self.registry, self.resources)
         self.preflight = self.pool.preflight()
         self.store = MetadataStore(self.bundle / "metadata.sqlite", read_only=True)
+        ret_cfg = RetrievalConfig.from_yaml(configs / "retrieval.yaml")
+        encoder = self.pool.acquire("dense_encoder")
         self.retriever = HybridRetriever(
             self.store,
             BM25Index(self.bundle / "bm25"),
-            DenseIndex(self.bundle / "dense", self.pool.acquire("dense_encoder")),
+            DenseIndex(self.bundle / "dense", encoder),
             self.pool.acquire("reranker"),
-            RetrievalConfig.from_yaml(configs / "retrieval.yaml"),
+            ret_cfg,
         )
+        # uploaded knowledge bases: a second, incrementally indexed source (app/kb)
+        self.kb = None
+        if kb_root is not None:
+            from app.kb.indexer import KBIndexer
+
+            self.kb = KBIndexer(kb_root, encoder)
+        self.ret_cfg = ret_cfg
         self.gen_cfg = GenerationConfig.from_yaml(configs / "generation.yaml")
         self.ver_cfg = VerificationConfig.from_yaml(configs / "verification.yaml")
         self.gate_cfg = GateConfig.from_yaml(configs / "gate.yaml")
@@ -108,6 +119,15 @@ class AnswerPipeline:
             prompt_id=PROMPT_ID, gate_calibrated_on=self.gate_cfg.calibrated_on or "",
         )  # fmt: skip
 
+    def multi(self) -> MultiRetriever:
+        """Fresh per call: the uploads dense index is rebuilt after every upload."""
+        uploads = None
+        if self.kb is not None and self.kb.has_content():
+            uploads = HybridRetriever(self.kb.store, self.kb.bm25, self.kb.dense, None,
+                                      self.ret_cfg)  # fmt: skip
+        return MultiRetriever(self.retriever, uploads, self.pool.acquire("reranker"),
+                              self.ret_cfg)  # fmt: skip
+
     def run(
         self,
         question: str,
@@ -115,22 +135,35 @@ class AnswerPipeline:
         course_ids: list[str] | None = None,
         request_id: str = "",
         max_units: int | None = None,
+        scope: str = "indexed",
+        kb_ids: list[str] | None = None,
     ) -> PipelineOutput:
+        """``scope``: indexed (served corpus bundle) | uploaded (the caller's knowledge bases
+        only) | both. ``kb_ids``: knowledge bases the caller may read (entitlement)."""
+        if scope not in SCOPES:
+            raise ValueError(f"scope must be one of {SCOPES}")
         t: dict[str, float] = {}
         t0 = time.perf_counter()
-        scope = classify_scope(question, self.scope_profile)
-        if not scope.in_scope:
+        scope_dec = classify_scope(question, self.scope_profile)
+        if not scope_dec.in_scope:
             # out of scope: no retrieval, no model call, no tokens spent
             gen = GeneratedAnswer.abstention(ABSTAIN_OUT_OF_SCOPE, prompt_id=PROMPT_ID,
                                              model="none")  # fmt: skip
             gen.question = question
             report = VerificationReport()
-            decision = decide(report, gen, config=self.gate_cfg, scope=scope, question=question)
+            decision = decide(report, gen, config=self.gate_cfg, scope=scope_dec,
+                              question=question)  # fmt: skip
             t["total"] = (time.perf_counter() - t0) * 1000
             return PipelineOutput(question, None, [], gen, report, decision,
                                   {k: round(v, 1) for k, v in t.items()})  # fmt: skip
-        res = self.retriever.retrieve(question, mode="hybrid+rerank", course_ids=course_ids)
-        units = select_evidence(res, self.store, max_units=max_units or self.max_units)
+        if scope == "indexed":
+            res = self.retriever.retrieve(question, mode="hybrid+rerank", course_ids=course_ids)
+            store = self.store
+        else:
+            m = self.multi()
+            res = m.retrieve(question, scope=scope, course_ids=course_ids, kb_ids=kb_ids)
+            store = m.store
+        units = select_evidence(res, store, max_units=max_units or self.max_units)
         t["retrieval"] = (time.perf_counter() - t0) * 1000
         t1 = time.perf_counter()
         with self.pool.use("generator") as generator:

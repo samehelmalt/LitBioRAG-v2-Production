@@ -66,3 +66,17 @@ artifacts/<corpus_id>/
 - Abstract-only: claims that live in full-text results sections cannot be verified from this corpus.
 - PubMed publication types are incomplete for recent records (MEDLINE indexing lag); `source_type` for those falls to `journal_article`.
 - Preprint abstracts from the API occasionally contain JATS markup fragments; the parser keeps text as delivered. Cleaning is a Step 4 item if it shows up in retrieval failures.
+
+## Uploaded knowledge bases (`app/kb/`)
+Besides the served corpus bundle (PubMed, bioRxiv/medRxiv, course decks), users can upload their
+own material: PDF, DOCX, XLSX, PPTX, TXT and Markdown. Each file becomes citable units — a page, a
+heading section, a block of spreadsheet rows (with its cell range), a slide — stored with full
+provenance (`FileMeta`: knowledge base, file id = content hash, locator, label, version). Units
+are indexed incrementally into a per-server *uploads bundle* (SQLite + Tantivy + FAISS Flat) that
+is merged with the main corpus at query time by RRF and reranked once. Entitlement: the owner,
+users the owner shared with, and admins; the filter is applied inside retrieval, before fusion.
+
+**Retrieval scope** on every query: `indexed` (served corpus only), `uploaded` (the caller's
+knowledge bases only), or `both` (default from `configs/api.yaml`). Uploaded units are tier
+"other" (provenance unknown to the system) and are never shown as peer-reviewed. Scanned PDFs
+yield no text until an OCR hook is configured (`PdfAdapter(ocr=...)`).

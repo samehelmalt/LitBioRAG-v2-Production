@@ -24,6 +24,7 @@ class SourceType(str, Enum):
     JOURNAL_ARTICLE = "journal_article"  # peer-reviewed, type not further classified
     PREPRINT = "preprint"  # not peer-reviewed
     COURSE_SLIDE = "course_slide"  # teaching material (lecture slide); not peer-reviewed literature
+    UPLOADED_DOCUMENT = "uploaded_document"  # user-uploaded file (PDF/DOCX/XLSX/PPTX/TXT/MD)
     OTHER = "other"
 
 
@@ -36,6 +37,7 @@ EVIDENCE_RANK: dict[SourceType, int] = {
     SourceType.REVIEW: 4,
     SourceType.CASE_REPORT: 5,
     SourceType.COURSE_SLIDE: 5,  # authoritative *for the course*, not as literature
+    SourceType.UPLOADED_DOCUMENT: 5,  # trusted by its owner; provenance unknown to the system
     SourceType.PREPRINT: 6,
     SourceType.OTHER: 7,
 }
@@ -43,8 +45,28 @@ EVIDENCE_RANK: dict[SourceType, int] = {
 PEER_REVIEWED = frozenset(
     t
     for t in SourceType
-    if t not in (SourceType.PREPRINT, SourceType.COURSE_SLIDE, SourceType.OTHER)
+    if t not in (SourceType.PREPRINT, SourceType.COURSE_SLIDE, SourceType.UPLOADED_DOCUMENT,
+                 SourceType.OTHER)
 )
+
+
+class FileMeta(BaseModel):
+    """Provenance of one unit of an uploaded file: what 'file name, page N' resolves to."""
+
+    kb_id: str
+    file_id: str  # sha256[:16] of the file content
+    file_name: str
+    kind: str  # pdf | docx | xlsx | pptx | text
+    locator_kind: str  # page | section | sheet | slide | text
+    locator: str  # "p3" | "s7" | "Sheet1!A1:D40" | "sec2" | "t1"
+    label: str = ""  # human label: "page 3", "Sheet1 rows 1–40", "slide 7", "section 'Dosing'"
+    page_number: int | None = None
+    sheet_name: str | None = None
+    cell_range: str | None = None
+    heading: str = ""
+    version: str = ""
+    content_hash: str = ""
+    uploaded_by: str = ""
 
 
 class SlideMeta(BaseModel):
@@ -102,10 +124,16 @@ class Document(BaseModel):
     source: str = Field(default="pubmed", description="pubmed | biorxiv | medrxiv | pptx")
     version: str | None = Field(default=None, description="preprint version, e.g. '2'")
     slide: SlideMeta | None = None
+    file: FileMeta | None = None
 
     @property
     def course_id(self) -> str | None:
-        return self.slide.course_id if self.slide else None
+        """Entitlement key: the course for slides, the knowledge base for uploaded files."""
+        if self.slide:
+            return self.slide.course_id
+        if self.file:
+            return self.file.kb_id
+        return None
 
     @field_validator("pmid")
     @classmethod
@@ -143,6 +171,10 @@ class Document(BaseModel):
     @staticmethod
     def make_slide_id(lecture_id: str, slide_number: int) -> str:
         return f"slide:{lecture_id}:{int(slide_number)}"
+
+    @staticmethod
+    def make_file_id(file_id: str, locator: str) -> str:
+        return f"file:{file_id}:{locator}"
 
 
 class Passage(BaseModel):

@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -51,7 +51,9 @@ def _source(u: EvidenceUnit) -> schemas.SourceOut:
         tier=_tier(u.source_type, u.is_peer_reviewed), is_peer_reviewed=u.is_peer_reviewed,
         display_source=u.display_source, url=u.url, text=u.text, char_start=u.char_start,
         char_end=u.char_end, retrieval_score=u.score, rank=u.doc_rank, course_id=u.course_id,
-        lecture_title=u.lecture_title, slide_number=u.slide_number,
+        lecture_title=u.lecture_title, slide_number=u.slide_number, kb_id=u.kb_id,
+        file_id=u.file_id, file_name=u.file_name, locator=u.locator,
+        locator_label=u.locator_label,
     )  # fmt: skip
 
 
@@ -115,12 +117,17 @@ def _doc_out(d: Document) -> schemas.SourceDocument:
               is_peer_reviewed=d.is_peer_reviewed, text="", char_start=0, char_end=0, score=0.0,
               doc_rank=0, url=d.url, course_id=s.course_id if s else None,
               lecture_id=s.lecture_id if s else None, lecture_title=s.lecture_title if s else None,
-              slide_number=s.slide_number if s else None).citation_id  # fmt: skip
+              slide_number=s.slide_number if s else None,
+              kb_id=d.file.kb_id if d.file else None, file_id=d.file.file_id if d.file else None,
+              file_name=d.file.file_name if d.file else None,
+              locator=d.file.locator if d.file else None,
+              locator_label=d.file.label if d.file else None).citation_id  # fmt: skip
     return schemas.SourceDocument(
         doc_id=d.doc_id, citation_id=cit, title=d.title, abstract=d.abstract, year=d.year,
         journal=d.journal, source_type=d.source_type.value,
         tier=_tier(d.source_type, d.is_peer_reviewed), is_peer_reviewed=d.is_peer_reviewed,
         url=d.url, pmid=d.pmid, doi=d.doi, slide=s.model_dump() if s else None,
+        file=d.file.model_dump() if d.file else None,
     )  # fmt: skip
 
 
@@ -160,7 +167,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                 raise RuntimeError("no bundle configured: set LITBIORAG_BUNDLE or api.yaml bundle")
             state["pipeline"] = AnswerPipeline(
                 st.bundle_path, profile=st.profile or None, ledger=ledger, resources=res,
-                scope_profile=st.scope_profile,
+                scope_profile=st.scope_profile, kb_root=st.kb_root,
             )
         if state["review"] is None:
             state["review"] = ReviewService(state["pipeline"], review_config, audit=audit)
@@ -190,6 +197,23 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     def require_reviewer(p: Principal) -> None:
         if not (p.is_admin or "reviewer" in p.roles):
             raise HTTPException(403, "reviewer role required")
+
+    def kb_indexer():
+        pl = pipe()
+        if pl.kb is None:
+            raise HTTPException(404, "uploaded knowledge bases are disabled on this server")
+        return pl.kb
+
+    def readable_kbs(p: Principal, requested: list[str] | None) -> list[str]:
+        """Entitlement for uploads: owner, shared-with, or admin. Unreadable requested → 403."""
+        reg = kb_indexer().registry
+        mine = [k["kb_id"] for k in reg.list_for(p.sub, admin=p.is_admin)]
+        if not requested:
+            return mine
+        bad = [k for k in requested if k not in mine]
+        if bad:
+            raise HTTPException(403, f"not entitled to knowledge base(s): {', '.join(bad)}")
+        return list(requested)
 
     # ---- middleware: request id + structured access log + no stack traces --------------------
     @app.middleware("http")
@@ -235,6 +259,8 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         return p
 
     Auth = Depends(principal)
+    Upload = File(...)
+    BackgroundFlag = Form(False)
 
     # ---- endpoints ----------------------------------------------------------------------------
     @app.get("/health", response_model=schemas.Health)
@@ -263,9 +289,23 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             raise HTTPException(422, f"question longer than {st.limits.max_question_chars} chars")
         courses = check_entitlement(p, req.course_ids)
         pl = pipe()
+        scope = req.scope or st.kb.default_scope
+        kb_ids: list[str] = []
+        if scope != "indexed":
+            if pl.kb is None:
+                if scope == "uploaded":
+                    raise HTTPException(422, "uploaded knowledge bases are disabled on this server")
+                scope = "indexed"
+            else:
+                kb_ids = readable_kbs(p, req.kb_ids)
+                if scope == "uploaded" and not kb_ids:
+                    raise HTTPException(422, "no knowledge base selected or readable; upload "
+                                             "files first or choose scope 'indexed'")  # fmt: skip
         out = pl.run(req.question, course_ids=courses, request_id=rid,
-                     max_units=min(req.max_units or pl.max_units, st.limits.max_units))  # fmt: skip
+                     max_units=min(req.max_units or pl.max_units, st.limits.max_units),
+                     scope=scope, kb_ids=kb_ids)  # fmt: skip
         resp = to_response(out, rid, pl.versions.as_dict(), bool(pl.gate_cfg.calibrated_on))
+        resp.scope, resp.kb_ids = scope, kb_ids
         case = reviews().maybe_enqueue(out, resp.model_dump(mode="json"), sub=p.sub,
                                        course_ids=courses)  # fmt: skip
         if case:
@@ -276,10 +316,111 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             "rule": resp.rule, "n_claims": len(resp.claims), "n_removed": len(resp.removed_claims),
             "substitution": resp.entities.substitution_detected, "sources": len(resp.sources),
             "review_case": case["case_id"] if case else None,
+            "scope": scope, "kb_ids": kb_ids,
             "usage": resp.usage, "timings_ms": resp.timings_ms,
             "versions": {k: v for k, v in resp.versions.items() if k != "models"},
         })  # fmt: skip
         return resp
+
+    # ---- knowledge bases (uploaded files) ---------------------------------------------------
+    def _kb_out(kb: dict, files: list[dict]) -> schemas.KBOut:
+        return schemas.KBOut(**kb, files=[{k: v for k, v in f.items() if k != "path"}
+                                          for f in files])  # fmt: skip
+
+    @app.get("/api/v1/kb", response_model=list[schemas.KBOut])
+    def kb_list(p: Principal = Auth):
+        ix = kb_indexer()
+        return [_kb_out(k, ix.registry.files(k["kb_id"]))
+                for k in ix.registry.list_for(p.sub, admin=p.is_admin)]  # fmt: skip
+
+    @app.post("/api/v1/kb", response_model=schemas.KBOut, status_code=201)
+    def kb_create(body: schemas.KBCreate, p: Principal = Auth):
+        if p.anonymous:
+            raise HTTPException(401, "sign in to create a knowledge base")
+        ix = kb_indexer()
+        kb = ix.registry.create(name=body.name, owner=p.sub, description=body.description)
+        audit.record({"event": "kb_create", "kb_id": kb["kb_id"], "sub": p.sub})
+        return _kb_out(kb, [])
+
+    @app.get("/api/v1/kb/{kb_id}", response_model=schemas.KBOut)
+    def kb_get(kb_id: str, p: Principal = Auth):
+        ix = kb_indexer()
+        if not ix.registry.can_read(kb_id, p.sub, admin=p.is_admin):
+            raise HTTPException(403, "not entitled to this knowledge base")
+        return _kb_out(ix.registry.get(kb_id), ix.registry.files(kb_id))  # type: ignore[arg-type]
+
+    @app.post("/api/v1/kb/{kb_id}/share", response_model=schemas.KBOut)
+    def kb_share(kb_id: str, body: schemas.KBShare, p: Principal = Auth):
+        ix = kb_indexer()
+        if not ix.registry.can_write(kb_id, p.sub, admin=p.is_admin):
+            raise HTTPException(403, "only the owner can share a knowledge base")
+        return _kb_out(ix.registry.share(kb_id, body.subs), ix.registry.files(kb_id))
+
+    @app.post("/api/v1/kb/{kb_id}/upload", status_code=202)
+    def kb_upload(kb_id: str, file: UploadFile = Upload, background: bool = BackgroundFlag,
+                  p: Principal = Auth):  # fmt: skip
+        ix = kb_indexer()
+        if not ix.registry.can_write(kb_id, p.sub, admin=p.is_admin):
+            raise HTTPException(403, "only the owner can upload to this knowledge base")
+        if len(ix.registry.files(kb_id)) >= st.limits.max_files_per_kb:
+            raise HTTPException(422, "knowledge base file limit reached")
+        from app.kb.adapters import SUPPORTED_EXTENSIONS
+
+        name = Path(file.filename or "upload").name
+        if not name.lower().endswith(SUPPORTED_EXTENSIONS):
+            raise HTTPException(415, f"unsupported file type; allowed: "
+                                     f"{', '.join(SUPPORTED_EXTENSIONS)}")  # fmt: skip
+        import tempfile
+
+        limit = st.limits.max_upload_mb * 1024 * 1024
+        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(name).suffix) as tmp:
+            size = 0
+            while chunk := file.file.read(1 << 20):
+                size += len(chunk)
+                if size > limit:
+                    tmp.close()
+                    Path(tmp.name).unlink(missing_ok=True)
+                    raise HTTPException(413, f"file larger than {st.limits.max_upload_mb} MB")
+                tmp.write(chunk)
+        try:
+            rec = ix.add_file(kb_id, Path(tmp.name), file_name=name, uploaded_by=p.sub,
+                              background=background)  # fmt: skip
+        finally:
+            Path(tmp.name).unlink(missing_ok=True)
+        audit.record({"event": "kb_upload", "kb_id": kb_id, "file_id": rec["file_id"],
+                      "file_name": name, "bytes": size, "sub": p.sub,
+                      "status": rec["status"]})  # fmt: skip
+        return {k: v for k, v in rec.items() if k != "path"}
+
+    @app.get("/api/v1/kb/{kb_id}/status")
+    def kb_status(kb_id: str, p: Principal = Auth):
+        ix = kb_indexer()
+        if not ix.registry.can_read(kb_id, p.sub, admin=p.is_admin):
+            raise HTTPException(403, "not entitled to this knowledge base")
+        files = [{k: v for k, v in f.items() if k != "path"} for f in ix.registry.files(kb_id)]
+        jobs = {k: v for k, v in ix.jobs.items() if v.get("kb_id") == kb_id}
+        return {"kb_id": kb_id, "version": ix.registry.get(kb_id)["version"],  # type: ignore
+                "files": files, "jobs": jobs}
+
+    @app.delete("/api/v1/kb/{kb_id}/files/{file_id}")
+    def kb_delete_file(kb_id: str, file_id: str, p: Principal = Auth):
+        ix = kb_indexer()
+        if not ix.registry.can_write(kb_id, p.sub, admin=p.is_admin):
+            raise HTTPException(403, "only the owner can delete files")
+        if ix.registry.get_file(kb_id, file_id) is None:
+            raise HTTPException(404, "unknown file")
+        n = ix.remove_file(kb_id, file_id)
+        audit.record({"event": "kb_delete_file", "kb_id": kb_id, "file_id": file_id, "sub": p.sub})
+        return {"removed_units": n}
+
+    @app.delete("/api/v1/kb/{kb_id}")
+    def kb_delete(kb_id: str, p: Principal = Auth):
+        ix = kb_indexer()
+        if not ix.registry.can_write(kb_id, p.sub, admin=p.is_admin):
+            raise HTTPException(403, "only the owner can delete a knowledge base")
+        n = ix.remove_kb(kb_id)
+        audit.record({"event": "kb_delete", "kb_id": kb_id, "sub": p.sub})
+        return {"removed_units": n}
 
     # ---- human review -----------------------------------------------------------------------
     @app.get("/api/v1/review/queue", response_model=list[schemas.ReviewCaseOut])
@@ -369,10 +510,14 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     def source(doc_id: str, p: Principal = Auth):
         pl = pipe()
         d = pl.store.get_document(doc_id)
+        if d is None and pl.kb is not None:
+            d = pl.kb.store.get_document(doc_id)
         if d is None:
             raise HTTPException(404, "unknown source")
         if d.slide is not None:
             check_entitlement(p, [d.slide.course_id])
+        if d.file is not None:
+            readable_kbs(p, [d.file.kb_id])
         return _doc_out(d)
 
     return app
