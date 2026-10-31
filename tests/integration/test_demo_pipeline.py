@@ -6,7 +6,8 @@ def test_demo_runs_end_to_end_on_fixture_bundle(fixture_bundle):
     assert out["evidence"][0]["citation"] == "PMID:900001"
     assert out["answer"]["abstained"] is False
     v = out["verification"]
-    assert v["n_claims"] >= 1 and v["entailment_rate"] == 1.0 and v["fabricated_citations"] == []
+    assert v["n_claims"] >= 1 and v["entailment_rate"] == 1.0
+    assert not v["fabricated_citations"]
     assert set(out["models"]) >= {"dense_encoder", "reranker", "generator", "verifier"}
     assert all(k in out["timings_ms"] for k in ("retrieval", "generation", "verification"))
 
