@@ -1,14 +1,21 @@
-# Serving host: API + UI on :8000. Bundles live in ./data/artifacts (fetched from the build host).
-# Secrets come from .env (never committed): LITBIORAG_JWT_SECRET, OPENAI_API_KEY, ...
+# AEOS Medical — local test run.  `docker compose up --build`  then open http://localhost:8471
+# First start builds a small demo bundle (test doubles, no real model) and prints demo tokens.
+# For real models: set PROFILE=hosted and OPENAI_API_KEY in .env, and point CORPUS_ID at a fetched
+# bundle under ./data/artifacts (docs/DEPLOYMENT.md). Port 8471 was chosen to avoid 8000/8080/3000.
 services:
   aeos:
     build: .
-    ports: ["8000:8000"]
-    env_file: .env
+    image: aeos-medical:local
+    ports: ["8471:8471"]
+    env_file:
+      - path: .env
+        required: false
     environment:
-      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:-fixture_v1}
-      LITBIORAG_MODEL_PROFILE: ${PROFILE:-hosted}
+      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:-demo}
+      LITBIORAG_MODEL_PROFILE: ${PROFILE:-test}
+      LITBIORAG_API_PORT: "8471"
     volumes:
       - ./data:/srv/aeos/data
-    # GPU serving: uncomment and use the ml image
+    restart: unless-stopped
+    # GPU serving (ml image): uncomment
     # deploy: { resources: { reservations: { devices: [ { driver: nvidia, count: 1, capabilities: [gpu] } ] } } }

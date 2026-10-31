@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.2 — 2026-10-31
+- Product name AEOS Medical; medical-cross logo.
+- Docker local test run: `docker compose up --build` builds a demo bundle on first start, issues
+  demo tokens, serves on port 8471; `scripts/entrypoint.py`; data volume.
+
 ## 0.9.1 — 2026-10-31
 - Light theme (persisted, follows the system preference by default).
 - Token optimization: question-relevant evidence windows with offsets preserved, compact schema,

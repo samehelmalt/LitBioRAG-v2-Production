@@ -1,6 +1,6 @@
 # API (v1)
 
-Run: `python -m scripts.serve --bundle data/artifacts/<id> --profile hosted --port 8000`
+Run: `python -m scripts.serve --bundle data/artifacts/<id> --profile hosted --port 8471`
 (settings in `configs/api.yaml`; secrets only from environment variables; OpenAPI at `/api/docs`).
 The service and the demo script share one code path, `app/service/pipeline.py`, so what the API
 returns is exactly what the evaluation runners measure.

@@ -17,7 +17,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--bundle", type=Path, default=None)
     ap.add_argument("--profile", default=None)
     ap.add_argument("--host", default=os.environ.get("LITBIORAG_API_HOST", "127.0.0.1"))
-    ap.add_argument("--port", type=int, default=int(os.environ.get("LITBIORAG_API_PORT", "8000")))
+    ap.add_argument("--port", type=int, default=int(os.environ.get("LITBIORAG_API_PORT", "8471")))
     a = ap.parse_args(argv)
     if a.bundle:
         os.environ["LITBIORAG_BUNDLE"] = str(a.bundle)

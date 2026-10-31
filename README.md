@@ -25,11 +25,15 @@ pip install -e ".[dev,eval,index,api,kb,pptx]"      # add ml for local GPU model
 cp .env.example .env                                 # fill LITBIORAG_JWT_SECRET, OPENAI_API_KEY …
 python -m scripts.build_indexes --docs docs.jsonl --out data/artifacts/demo --corpus-id demo \
     --encoder hash:128                                # tiny demo bundle; real bundles: docs/CORPUS.md
-python -m scripts.serve --bundle data/artifacts/demo --profile test --port 8000
-# open http://localhost:8000  (UI)   http://localhost:8000/api/docs  (OpenAPI)
+python -m scripts.serve --bundle data/artifacts/demo --profile test --port 8471
+# open http://localhost:8471  (UI)   http://localhost:8471/api/docs  (OpenAPI)
 ```
-Docker: `docker compose up --build` (reads `.env`, serves `./data/artifacts/$CORPUS_ID` with
-profile `$PROFILE`, default `hosted`).
+Docker (local test, no preparation): `docker compose up --build`, then open
+http://localhost:8471 . The first start builds a demo bundle from `scripts/demo/demo_docs.jsonl`
+with deterministic test doubles and prints three demo tokens (user, reviewer, admin) to paste into
+"Sign in". For real models set `PROFILE=hosted` and `OPENAI_API_KEY` in `.env` and point
+`CORPUS_ID` at a fetched bundle under `./data/artifacts`. Port 8471 is used on purpose to avoid
+the usual 8000/8080/3000.
 
 Tokens: the UI accepts a JWT (HS256 by default, claims `sub`, `roles`, `courses`, `aud=litbiorag`)
 signed with `LITBIORAG_JWT_SECRET`, or an API key issued on the API Access page.
