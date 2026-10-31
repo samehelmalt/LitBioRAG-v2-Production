@@ -74,6 +74,18 @@ Modules: `app/core/verdicts.py` (shared with `evaluation/metrics/claims.py`), `a
 
 End-to-end without weights: `python -m scripts.demo_pipeline --bundle <bundle> --profile test --question "..."` (covered by `tests/integration`).
 
+## Question-entity grounding and substitution (E1)
+
+The per-claim entity check cannot see a correctly cited claim about the *wrong* entity. `app/verification/entities.query_entity_grounding` therefore grounds the question's own entities: they must appear in the supporting evidence and in the critical claims; a critical claim naming a near neighbour (same stem and small edit distance, or same drug-class suffix) while no critical claim names the asked entity is a **substitution** (hard veto in the gate); a neighbour claim beside a correct answer is **off-target** (removed by repair). Aliases are normalized (`app/core/symbols.py`). Retrieval adds an exact-symbol channel (`BM25Index.search_must`, weight `entity_boost`) so a near-neighbour document gains nothing from the asked symbol.
+
+## Gate v2 (Step 8)
+
+`app/safety/gate.py: decide` applies twelve ordered rules (scope → generator abstained → fabricated citation → critical uncited → critical contradicted → entity substitution/mismatch → numeric mismatch → question entities absent (CLARIFY) → evidence sufficiency → repair of non-critical unsupported and off-target claims → conflicts → calibrated confidence) and returns an action in {ANSWER, ANSWER_WITH_CAUTION, CLARIFY, ABSTAIN, ESCALATE} with the deciding rule and a trace. No composite score; no constant for abstentions. `app/safety/sufficiency.py` scores evidence sufficiency from runtime features (never score spread). `configs/gate.yaml` holds the operating point and is written by `scripts/calibrate_gate.py` from `evaluation/runners/answer.py` rows on the `calibration` split; until that job runs, every output is marked UNCALIBRATED. Details and limits: `docs/TRUST_AND_SAFETY.md`.
+
+## Course material adapter (Step 3e)
+
+`scripts/corpus/pptx_decks.py` turns each PowerPoint slide into a `Document` (`source_type = course_slide`, `SlideMeta` with course, lecture, slide number, section, version, content hash; `diff` lists changed slides for incremental re-index). Slides cite as `SLIDE:<lecture>:<n>` and display as "Lecture title, Slide N"; adjacent slides are appended as neighbours in evidence selection. **Entitlements are enforced inside retrieval**: `HybridRetriever.retrieve(..., course_ids=...)` filters BM25, the exact-symbol channel and the dense list before fusion; an empty entitlement returns nothing. The rest of the pipeline (generation, verification, gate) is shared with the literature product.
+
 ## Pending sections
 
-Gate v2 and calibration (Step 8) · PPTX content adapter (Step 3e) · API, auth, entitlements, observability, security (Step 9) · Web UI and trust page (Step 10) · Model benchmarks (Step 5, needs the build host) · Performance (Step 11).
+API, auth, entitlements wiring, observability, security (Step 9) · Web UI and trust page (Step 10) · Model benchmarks and the first measured baseline (Step 5 / E4, need the build host or an API endpoint) · Performance (Step 11).

@@ -4,7 +4,8 @@
 
 - **PubMed**: the full annual baseline, abstracts and metadata only. Step 3 starts with the window **2015–present** so a usable bundle exists within hours on the build host; the pre-2015 backfill is the same scripts with `--min-year` removed and runs as a resumable job.
 - **Preprints**: bioRxiv and medRxiv via `api.biorxiv.org`, latest version per DOI, `source_type = preprint`. Preprints rank below every peer-reviewed source class in the evidence hierarchy (`app/core/documents.py: EVIDENCE_RANK`) and are labelled as non-peer-reviewed wherever evidence is shown.
-- Not in scope for Step 3: PMC full text, other databases, non-English records.
+- **Course material (education product)**: PowerPoint decks via `scripts/corpus/pptx_decks.py`, one `Document` per slide with `source_type = course_slide` and slide provenance (`SlideMeta`); ranked as course material, never as peer-reviewed literature; filtered by `course_id` inside retrieval for entitlements. Annual updates: `pptx_decks diff` lists changed slides for incremental re-index.
+- Not in scope for Step 3: PMC full text, other databases, non-English records, OCR of slide images (hook planned).
 
 ## Record model
 
