@@ -1,4 +1,4 @@
-"""Release: run the checks, write dist/aeos-rag-<version>.zip (source only), print a summary.
+"""Release: run the checks, write dist/aeos-medical-<version>.zip (source only), print a summary.
 
     python -m scripts.release --version 0.9.0 [--skip-tests]
 
@@ -36,11 +36,11 @@ def main(argv: list[str] | None = None) -> int:
         run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"])
     dist = ROOT / "dist"
     dist.mkdir(exist_ok=True)
-    out = dist / f"aeos-rag-{a.version}.zip"
-    run(["git", "archive", "--format=zip", f"--prefix=aeos-rag-{a.version}/", "-o", str(out),
+    out = dist / f"aeos-medical-{a.version}.zip"
+    run(["git", "archive", "--format=zip", f"--prefix=aeos-medical-{a.version}/", "-o", str(out),
          "HEAD"])  # fmt: skip
     digest = hashlib.sha256(out.read_bytes()).hexdigest()
-    (dist / f"aeos-rag-{a.version}.sha256").write_text(f"{digest}  {out.name}\n")
+    (dist / f"aeos-medical-{a.version}.sha256").write_text(f"{digest}  {out.name}\n")
     print(f"{out} ({out.stat().st_size / 1e6:.1f} MB) sha256 {digest}")
     return 0
 

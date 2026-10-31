@@ -35,7 +35,7 @@ def test_sidebar_matches_prototype():
                  "Datasets", "Model Settings", "API Access", "Review Queue", "Corpus Indexes",
                  "Recent chats"):
         assert item in html, item
-    assert "AEOS <b>RAG</b>" in html and "logo.svg" in html
+    assert "AEOS <b>Medical</b>" in html and "logo.svg" in html
 
 
 def test_feedback_is_recorded_for_the_labelling_protocol(client):

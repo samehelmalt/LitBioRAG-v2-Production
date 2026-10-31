@@ -187,7 +187,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         log.info("startup: %s", state["pipeline"].versions.as_dict())
         yield
 
-    app = FastAPI(title="AEOS RAG", version="v1", lifespan=lifespan, docs_url="/api/docs",
+    app = FastAPI(title="AEOS Medical", version="v1", lifespan=lifespan, docs_url="/api/docs",
                   redoc_url=None)  # fmt: skip
     if st.cors_origins:
         app.add_middleware(CORSMiddleware, allow_origins=st.cors_origins, allow_methods=["*"],

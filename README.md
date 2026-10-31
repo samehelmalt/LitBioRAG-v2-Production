@@ -1,6 +1,6 @@
-# AEOS RAG — evidence-gated biomedical question answering
+# AEOS Medical — evidence-gated biomedical question answering
 
-AEOS RAG (repository: LitBioRAG v2 Production) answers biomedical questions from retrieved
+AEOS Medical (repository: LitBioRAG v2 Production) answers biomedical questions from retrieved
 evidence only, verifies every claim against the cited passage, decides whether to deliver the
 answer (**ANSWER / ANSWER WITH CAUTION / CLARIFY / ABSTAIN / ESCALATE**), and sends withheld
 answers to a human reviewer. Users can search the indexed corpus (PubMed, bioRxiv/medRxiv), their
@@ -53,6 +53,6 @@ docs/       audit, architecture, evaluation, trust & safety, API, security, gove
 set -o pipefail && ruff check . && python3 -m pytest -q
 python -m scripts.demo_pipeline --bundle data/artifacts/demo --profile test --question "…"
 python -m scripts.run_adversarial --bundle data/artifacts/demo --profile test --out runs/adv
-python -m scripts.release --version 0.9.0        # checks + dist/aeos-rag-0.9.0.zip
+python -m scripts.release --version 0.9.0        # checks + dist/aeos-medical-0.9.0.zip
 ```
 Change models in `configs/models.yaml` or with `LITBIORAG_MODEL__<ROLE>=kind:model`; never in code.

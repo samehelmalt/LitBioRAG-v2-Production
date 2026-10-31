@@ -11,7 +11,7 @@
 - docs/QUALITY_PLAYBOOK.md: the three numbers behind "90–98%", the levers in payoff order.
 
 ## 0.9.0 — 2026-10-31
-First packaged pre-release of AEOS RAG (LitBioRAG v2 Production). Code complete for the
+First packaged pre-release of AEOS Medical (LitBioRAG v2 Production). Code complete for the
 architecture; **no measured accuracy yet** (see docs/STATUS.md).
 - Retrieval v2: Tantivy BM25 (stemmed + normalized + exact-symbol channel), FAISS dense, RRF,
   single-stage cross-encoder at token-level truncation, sentence-aligned passages with offsets.
@@ -32,7 +32,7 @@ architecture; **no measured accuracy yet** (see docs/STATUS.md).
   bioRxiv/medRxiv bundles; indexed-corpus switch.
 - API: FastAPI with JWT and API keys, rate limits, audit log, request ids, SSE progress stream,
   chats, research tools, datasets, admin profile switch.
-- UI: AEOS RAG dashboard (chat, documents, citations, analysis, source panel, all sidebar pages,
+- UI: AEOS Medical dashboard (chat, documents, citations, analysis, source panel, all sidebar pages,
   trust page) rendering only API responses.
 - Resources: token budgets, spend ledger with caps, GPU residency pool with pre-flight, caches.
 - Evaluation harness with thesis baseline reproduction, split manifest, adversarial substitution

@@ -1,4 +1,4 @@
-/* AEOS RAG client. Renders what the API returns; nothing here decides anything — every action,
+/* AEOS Medical client. Renders what the API returns; nothing here decides anything — every action,
    label and number comes from the service (see docs/UI_PROTOTYPE_REVIEW.md). */
 window.AEOS = (function () {
   const $ = (id) => document.getElementById(id);

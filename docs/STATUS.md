@@ -12,7 +12,7 @@
 | Knowledge bases: PDF/DOCX/XLSX/PPTX/TXT/MD upload, incremental index, scope selector | done |
 | Corpus index management: fetch/verify/activate/update, indexed switch | done |
 | API (auth, entitlements, limits, audit, SSE, chats, keys, tools, admin) | done |
-| AEOS RAG UI (all sidebar pages, trust page) | done; rendered from API only |
+| AEOS Medical UI (all sidebar pages, trust page) | done; rendered from API only |
 | Evaluation harness, thesis baseline reproduction, split manifest, adversarial suite | done |
 | Packaging: release script, Dockerfile, docker-compose, CHANGELOG | done |
 
@@ -32,5 +32,5 @@
 7. **Security**: no penetration test yet; secret rotation runbook; dependency scanning in CI.
 8. **Reviewer notifications** (email/webhook) — log-only hook.
 9. **Human labels**: zero until users and reviewers produce them; proxy labels until then.
-10. **Legal/branding**: "AEOS RAG" name and logo are placeholders created for this build; the owner
+10. **Legal/branding**: "AEOS Medical" name and logo are placeholders created for this build; the owner
     must confirm trademark clearance before public launch.
