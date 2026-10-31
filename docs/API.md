@@ -51,3 +51,14 @@ One structured log line per request (`event: access`) and one audit JSON line pe
 (`configs/api.yaml: audit.path`) with request id, principal, courses, question (or its hash in
 privacy mode), action, rule, counts, usage, stage timings and versions. The usage ledger
 (`COST_AND_RESOURCES.md`) records every hosted model call.
+
+
+## Human review (reviewer role)
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/review/queue?status=pending|released|blocked|expired|all` | cases (summary) |
+| GET | `/api/v1/review/stats` | counts by status |
+| GET | `/api/v1/review/{case_id}` | full trust surface of one case |
+| POST | `/api/v1/review/{case_id}/decision` | `{decision: release|block, edited_answer?, kept_claim_ids?, notes, confirm}`; 409 with `reverification` when an edited release has flagged claims and `confirm` is false |
+| GET | `/api/v1/my/cases` | the asker's own cases and released answers (signed-in users) |
+A query whose answer was withheld carries `review: {case_id, status: "under_review", message}`.

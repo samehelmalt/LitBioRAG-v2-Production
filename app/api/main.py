@@ -28,6 +28,7 @@ from app.api.settings import ApiSettings
 from app.core.budget import Pricing, ResourceConfig, UsageLedger
 from app.core.documents import Document, SourceType
 from app.evidence.selector import EvidenceUnit
+from app.review.service import ReleaseNeedsConfirmation, ReviewConfig, ReviewService
 from app.service.pipeline import AnswerPipeline, PipelineOutput
 
 log = logging.getLogger("litbiorag.api")
@@ -124,8 +125,17 @@ def _doc_out(d: Document) -> schemas.SourceDocument:
 
 
 # ----------------------------------------------------------------------------- app ---------------
+def _case_out(case: dict, *, full: bool) -> schemas.ReviewCaseOut:
+    hr = ({"reviewer": case["reviewer"], "decided_at": case["decided_at"]}
+          if case["status"] == "released" else None)  # fmt: skip
+    fields = {k: v for k, v in case.items() if k not in ("evidence", "response")}
+    return schemas.ReviewCaseOut(**fields, response=case["response"] if full else None,
+                                 human_reviewed=hr)  # fmt: skip
+
+
 def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline | None = None,
-               ledger: UsageLedger | None = None) -> FastAPI:  # fmt: skip
+               ledger: UsageLedger | None = None, review: ReviewService | None = None,
+               review_config: ReviewConfig | None = None) -> FastAPI:  # fmt: skip
     st = settings or ApiSettings.load()
     res = ResourceConfig.from_yaml()
     api_cfg = res.api or {}
@@ -141,7 +151,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     audit = AuditLog(st.audit_path, store_question_text=st.audit.store_question_text)
     feedback_path = st.audit_path.parent / "feedback.jsonl" if st.audit_path else None
     feedback_log = AuditLog(feedback_path)
-    state: dict[str, Any] = {"pipeline": pipeline}
+    state: dict[str, Any] = {"pipeline": pipeline, "review": review}
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -152,6 +162,10 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                 st.bundle_path, profile=st.profile or None, ledger=ledger, resources=res,
                 scope_profile=st.scope_profile,
             )
+        if state["review"] is None:
+            state["review"] = ReviewService(state["pipeline"], review_config, audit=audit)
+        elif state["review"].audit.path is None:
+            state["review"].audit = audit  # one audit trail for queries and review decisions
         log.info("startup: %s", state["pipeline"].versions.as_dict())
         yield
 
@@ -166,6 +180,16 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         if p is None:
             raise HTTPException(503, "service starting")
         return p
+
+    def reviews() -> ReviewService:
+        r = state["review"]
+        if r is None:
+            raise HTTPException(503, "service starting")
+        return r
+
+    def require_reviewer(p: Principal) -> None:
+        if not (p.is_admin or "reviewer" in p.roles):
+            raise HTTPException(403, "reviewer role required")
 
     # ---- middleware: request id + structured access log + no stack traces --------------------
     @app.middleware("http")
@@ -242,15 +266,72 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         out = pl.run(req.question, course_ids=courses, request_id=rid,
                      max_units=min(req.max_units or pl.max_units, st.limits.max_units))  # fmt: skip
         resp = to_response(out, rid, pl.versions.as_dict(), bool(pl.gate_cfg.calibrated_on))
+        case = reviews().maybe_enqueue(out, resp.model_dump(mode="json"), sub=p.sub,
+                                       course_ids=courses)  # fmt: skip
+        if case:
+            resp.review = schemas.ReviewInfo(case_id=case["case_id"], status="under_review")
         audit.record({
             "event": "query", "request_id": rid, "sub": p.sub, "via": p.via,
             "courses": courses, "question": req.question, "action": resp.action,
             "rule": resp.rule, "n_claims": len(resp.claims), "n_removed": len(resp.removed_claims),
             "substitution": resp.entities.substitution_detected, "sources": len(resp.sources),
+            "review_case": case["case_id"] if case else None,
             "usage": resp.usage, "timings_ms": resp.timings_ms,
             "versions": {k: v for k, v in resp.versions.items() if k != "models"},
         })  # fmt: skip
         return resp
+
+    # ---- human review -----------------------------------------------------------------------
+    @app.get("/api/v1/review/queue", response_model=list[schemas.ReviewCaseOut])
+    def review_queue(status: str = "pending", limit: int = 50, p: Principal = Auth):
+        require_reviewer(p)
+        rs = reviews()
+        rs.expire()
+        if status not in ("pending", "released", "blocked", "expired", "all"):
+            raise HTTPException(422, "bad status")
+        cases = rs.store.list(status=None if status == "all" else status, limit=min(limit, 200))
+        return [_case_out(c, full=False) for c in cases]
+
+    @app.get("/api/v1/review/stats")
+    def review_stats(p: Principal = Auth):
+        require_reviewer(p)
+        return reviews().store.counts()
+
+    @app.get("/api/v1/review/{case_id}", response_model=schemas.ReviewCaseOut)
+    def review_case(case_id: str, p: Principal = Auth):
+        require_reviewer(p)
+        c = reviews().store.get(case_id)
+        if c is None:
+            raise HTTPException(404, "unknown case")
+        return _case_out(c, full=True)
+
+    @app.post("/api/v1/review/{case_id}/decision", response_model=schemas.ReviewCaseOut)
+    def review_decide(case_id: str, body: schemas.ReviewDecisionIn, p: Principal = Auth):
+        require_reviewer(p)
+        try:
+            c = reviews().decide(
+                case_id, decision=body.decision, reviewer=p.sub, notes=body.notes,
+                edited_answer=body.edited_answer, kept_claim_ids=body.kept_claim_ids,
+                confirm=body.confirm,
+            )
+        except ReleaseNeedsConfirmation as e:
+            return JSONResponse(status_code=409, content={
+                "error": "re-verification flagged claims; resend with confirm=true to release",
+                "reverification": e.reverification})
+        except LookupError as e:
+            raise HTTPException(409 if "pending" in str(e) else 404, str(e)) from e
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from e
+        return _case_out(c, full=True)
+
+    @app.get("/api/v1/my/cases", response_model=list[schemas.ReviewCaseOut])
+    def my_cases(p: Principal = Auth):
+        """The asker's own cases: status and, once released, the human-reviewed answer."""
+        if p.anonymous:
+            raise HTTPException(401, "sign in to see your cases")
+        rs = reviews()
+        rs.expire()
+        return [_case_out(c, full=False) for c in rs.store.list(status=None, sub=p.sub)]
 
     @app.post("/api/v1/feedback", status_code=202)
     def feedback(fb: schemas.FeedbackIn, request: Request, p: Principal = Auth):

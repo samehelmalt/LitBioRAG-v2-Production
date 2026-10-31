@@ -30,3 +30,11 @@
 ## Incident handling
 Any confirmed wrong delivered answer is filed with request id (audit log), versions and the
 claim-level verdicts; a regression case is added to the adversarial suites before the fix ships.
+
+
+## Reviewer duties
+Reviewers decide only on cases the gate blocked; they never see or alter delivered answers. A
+release must be justified in `notes`; an edited release that fails re-verification may be confirmed
+only when the text is generic safety guidance that the evidence cannot and need not support
+(for example "consult your clinician"). Reviewer decisions are sampled weekly against a second
+reviewer; disagreement rate is reported on the trust page once labels exist.

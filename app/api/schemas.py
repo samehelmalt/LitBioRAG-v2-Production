@@ -90,6 +90,13 @@ class EntityGrounding(BaseModel):
     substitution_detected: bool
 
 
+class ReviewInfo(BaseModel):
+    case_id: str
+    status: str  # under_review | released | blocked | expired
+    message: str = ("This answer was withheld by the safety gate and sent to a human reviewer. "
+                    "You will be able to see the reviewer's decision under My cases.")
+
+
 class QueryResponse(BaseModel):
     request_id: str
     action: str
@@ -114,6 +121,7 @@ class QueryResponse(BaseModel):
     timings_ms: dict[str, float]
     trace: list[str]
     disclosure: str = DISCLOSURE
+    review: ReviewInfo | None = None
 
 
 class SourceDocument(BaseModel):
@@ -130,6 +138,36 @@ class SourceDocument(BaseModel):
     pmid: str | None
     doi: str | None
     slide: dict[str, Any] | None = None
+
+
+class ReviewDecisionIn(BaseModel):
+    decision: str = Field(..., pattern="^(release|block)$")
+    edited_answer: str | None = Field(default=None, max_length=8000)
+    kept_claim_ids: list[str] | None = Field(default=None, max_length=50)
+    notes: str = Field("", max_length=4000)
+    confirm: bool = False  # required when re-verification flags claims in an edited release
+
+
+class ReviewCaseOut(BaseModel):
+    case_id: str
+    request_id: str
+    created_at: float
+    sub: str
+    question: str
+    course_ids: list[str]
+    action: str
+    internal_state: str
+    rule: str
+    reason: str
+    status: str
+    reviewer: str | None
+    decided_at: float | None
+    reviewer_notes: str | None
+    released_answer: str | None
+    released_claim_ids: list[str] | None
+    reverification: dict[str, Any] | None
+    response: dict[str, Any] | None = None  # full trust surface; reviewers only
+    human_reviewed: dict[str, Any] | None = None
 
 
 class FeedbackIn(BaseModel):

@@ -81,3 +81,20 @@ Proxy labels (yes/no polarity correct ∧ gold document retrieved ∧ unsupporte
 ## Scope
 
 LitBioRAG supports biomedical learning and literature research. It does not give patient-specific diagnosis, treatment or dosing advice; such questions are routed to ESCALATE with a fixed message. Users are told they are interacting with an AI system and see model and corpus versions with every answer.
+
+
+## Human review of blocked cases (`app/review/`)
+The machine gate decides first and still blocks. A human can only add a release, never bypass the
+gate silently:
+- Every ABSTAIN with internal state BLOCK (except abstentions nobody can fix: no evidence, resource
+  limit) and every ESCALATE creates a review case (`configs/review.yaml`). The asker sees
+  "under review" and finds the outcome under My cases; nothing is delivered until a reviewer acts.
+- Reviewers (JWT role `reviewer` or `admin`) see the full trust surface of the case and choose
+  **release** (the machine's supported claims, a subset of them, or an edited text) or **block**.
+- An edited release is **re-verified against the same evidence** by the served verifier. If any
+  claim is unsupported, contradicted or substitutes an entity, the release is refused (409) with
+  the re-verification shown; the reviewer may then confirm explicitly. The confirmation, the
+  reviewer's identity and the flags are recorded.
+- Every decision is audited and exported as a label record (`labels_from_review.jsonl`,
+  LabelRecord shape) with the machine action and rule, so human decisions feed calibration and the
+  false-PASS / false-BLOCK measurement. Pending cases expire after `expire_hours`.
