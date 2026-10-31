@@ -44,6 +44,7 @@ def _schema() -> tantivy.Schema:
     sb.add_text_field("passage_id", stored=True, tokenizer_name="raw")
     sb.add_text_field("doc_id", stored=True, tokenizer_name="raw")
     sb.add_text_field("source_type", stored=True, tokenizer_name="raw")
+    sb.add_text_field("course_id", stored=True, tokenizer_name="raw")  # entitlement filter
     sb.add_integer_field("year", stored=True, indexed=True, fast=True)
     sb.add_text_field("text", stored=False, tokenizer_name="en_stem")
     sb.add_text_field("text_norm", stored=False, tokenizer_name="default")
@@ -61,20 +62,23 @@ class BM25Index:
     def add(
         self,
         passages: Iterable[Passage],
-        meta: dict[str, tuple[int | None, str]] | None = None,
+        meta: dict[str, tuple] | None = None,
         *,
         heap_mb: int = 256,
         commit_every: int = 50_000,
     ) -> int:
-        """Index passages; ``meta`` maps doc_id -> (year, source_type) for filter fields."""
+        """Index passages; ``meta`` maps doc_id -> (year, source_type[, course_id])."""
         writer = self.index.writer(heap_size=heap_mb * 1024 * 1024)
         n = 0
         for p in passages:
-            year, st = (meta or {}).get(p.doc_id, (None, ""))
+            m = (meta or {}).get(p.doc_id, (None, ""))
+            year, st = m[0], m[1]
+            course = m[2] if len(m) > 2 and m[2] else ""
             fields = {
                 "passage_id": p.passage_id,
                 "doc_id": p.doc_id,
                 "source_type": st or "",
+                "course_id": course or "-",
                 "text": p.text,
                 "text_norm": normalize_for_bm25(p.text),
             }
@@ -100,12 +104,25 @@ class BM25Index:
     def num_docs(self) -> int:
         return self._get_searcher().num_docs
 
-    def search(self, query: str, k: int = 100) -> list[BM25Hit]:
+    @staticmethod
+    def _course_clause(course_ids: Sequence[str] | None) -> str:
+        """'+(course_id:a OR course_id:b) ' — entitlement filter applied inside the engine."""
+        if course_ids is None:
+            return ""
+        ids = [re.sub(r"[^A-Za-z0-9_.-]", "", c) for c in course_ids if c]
+        if not ids:
+            return "+course_id:__none__ "  # entitled to nothing → nothing matches
+        return "+(" + " OR ".join(f"course_id:{c}" for c in ids) + ") "
+
+    def search(
+        self, query: str, k: int = 100, *, course_ids: Sequence[str] | None = None
+    ) -> list[BM25Hit]:
         q_norm = normalize_for_bm25(query)
         if not q_norm:
             return []
         searcher = self._get_searcher()
-        q = self.index.parse_query_lenient(q_norm, ["text", "text_norm"])[0]
+        q_text = self._course_clause(course_ids) + q_norm
+        q = self.index.parse_query_lenient(q_text, ["text", "text_norm"])[0]
         hits: list[BM25Hit] = []
         for score, addr in searcher.search(q, k).hits:
             d = searcher.doc(addr)
@@ -115,13 +132,17 @@ class BM25Index:
     def search_many(self, queries: Sequence[str], k: int = 100) -> list[list[BM25Hit]]:
         return [self.search(q, k) for q in queries]
 
-    def search_must(self, symbols: Sequence[str], k: int = 100) -> list[BM25Hit]:
+    def search_must(
+        self, symbols: Sequence[str], k: int = 100, *, course_ids: Sequence[str] | None = None
+    ) -> list[BM25Hit]:
         """Passages containing EVERY given symbol literally (normalized view). Used as the
         exact-match channel for gene symbols and codes; near neighbours never match."""
         terms = [normalize_for_bm25(s) for s in symbols if normalize_for_bm25(s)]
         if not terms:
             return []
-        q_text = " ".join(f"+text_norm:{t.split()[0]}" for t in terms if t.split())
+        q_text = self._course_clause(course_ids) + " ".join(
+            f"+text_norm:{t.split()[0]}" for t in terms if t.split()
+        )
         searcher = self._get_searcher()
         q = self.index.parse_query_lenient(q_text, ["text_norm"])[0]
         hits: list[BM25Hit] = []

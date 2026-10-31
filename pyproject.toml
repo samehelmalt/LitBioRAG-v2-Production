@@ -30,6 +30,9 @@ index = [
     "faiss-cpu>=1.8",
     "numpy>=1.26",
 ]
+pptx = [
+    "python-pptx>=1.0",
+]
 api = [
     "fastapi>=0.110",
     "uvicorn>=0.29",

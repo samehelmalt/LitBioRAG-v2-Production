@@ -85,8 +85,8 @@ def stage_bm25(out: Path) -> dict:
         return {"skipped": True}
     store = MetadataStore(out / "metadata.sqlite", read_only=True)
     meta = {
-        r["doc_id"]: (r["year"], r["source_type"])
-        for r in store.conn.execute("SELECT doc_id, year, source_type FROM documents")
+        r["doc_id"]: (r["year"], r["source_type"], r["course_id"])
+        for r in store.conn.execute("SELECT doc_id, year, source_type, course_id FROM documents")
     }
     idx = BM25Index(out / "bm25")
     n = idx.add(store.iter_passages(), meta)

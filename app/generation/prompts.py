@@ -57,7 +57,9 @@ def render_evidence(units: Sequence[EvidenceUnit]) -> str:
     for u in units:
         flag = "peer-reviewed" if u.is_peer_reviewed else "PREPRINT, not peer reviewed"
         year = u.year if u.year is not None else "n.d."
-        header = f"[{u.citation_id} | {year} | {u.source_type.value} | {flag}] {u.title}"
+        if u.is_slide:
+            flag = "course material, not peer-reviewed literature"
+        header = f"[{u.citation_id} | {year} | {u.source_type.value} | {flag}] {u.display_source}"
         lines.append(f"{header}\n{u.text}")
     return "\n\n".join(lines) if lines else "(none)"
 

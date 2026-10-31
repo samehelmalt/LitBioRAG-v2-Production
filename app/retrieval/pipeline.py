@@ -60,6 +60,7 @@ class RetrievalAudit:
     # doc_id -> {stage: 1-based rank}; stages: bm25, dense, entity, fused, reranked, final
     doc_ranks: dict[str, dict[str, int]] = field(default_factory=dict)
     query_symbols: list[str] = field(default_factory=list)  # exact-match tokens found in the query
+    course_filter: list[str] | None = None  # entitlement filter applied (None = unfiltered)
 
     def rank_of(self, doc_id: str, stage: str) -> int | None:
         return self.doc_ranks.get(doc_id, {}).get(stage)
@@ -92,25 +93,45 @@ class HybridRetriever:
         self.reranker = reranker
         self.cfg = config or RetrievalConfig()
 
-    def retrieve(self, query: str, mode: str = "hybrid+rerank") -> RetrievalResult:
+    def _dense_filtered(self, query: str, k: int, course_ids: Sequence[str] | None):
+        """Dense search with the entitlement filter applied before fusion (post-filter on ids)."""
+        if course_ids is None:
+            return self.dense.search(query, k=k)
+        allowed = set(course_ids)
+        if not allowed:
+            return []
+        hits = self.dense.search(query, k=k * 4)
+        courses = self.store.course_of({h.passage_id.rsplit("#", 1)[0] for h in hits})
+        return [h for h in hits if courses.get(h.passage_id.rsplit("#", 1)[0]) in allowed][:k]
+
+    def retrieve(
+        self,
+        query: str,
+        mode: str = "hybrid+rerank",
+        *,
+        course_ids: Sequence[str] | None = None,
+    ) -> RetrievalResult:
+        """``course_ids``: entitlement filter (None = no filter; empty = entitled to nothing).
+        Applied inside every retrieval channel, before fusion and reranking."""
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}")
         cfg = self.cfg
         audit = RetrievalAudit(mode=mode)
+        audit.course_filter = list(course_ids) if course_ids is not None else None
         lists: dict[str, list[RankedItem]] = {}
 
         if mode in ("bm25", "hybrid", "hybrid+rerank"):
             if self.bm25 is None:
                 raise RuntimeError("BM25 index not loaded")
             t = time.perf_counter()
-            hits = self.bm25.search(query, k=cfg.k_bm25)
+            hits = self.bm25.search(query, k=cfg.k_bm25, course_ids=course_ids)
             lists["bm25"] = [RankedItem(h.passage_id, h.score) for h in hits]
             audit.timings_ms["bm25"] = (time.perf_counter() - t) * 1000
         if mode in ("dense", "hybrid", "hybrid+rerank"):
             if self.dense is None:
                 raise RuntimeError("dense index not loaded")
             t = time.perf_counter()
-            hits = self.dense.search(query, k=cfg.k_dense)
+            hits = self._dense_filtered(query, cfg.k_dense, course_ids)
             lists["dense"] = [RankedItem(h.passage_id, h.score) for h in hits]
             audit.timings_ms["dense"] = (time.perf_counter() - t) * 1000
         # exact-symbol channel: gene symbols / codes in the query must match literally; a document
@@ -119,7 +140,9 @@ class HybridRetriever:
             audit.query_symbols = symbol_like_tokens(query)
             if audit.query_symbols:
                 t = time.perf_counter()
-                hits = self.bm25.search_must(audit.query_symbols, k=cfg.k_entity)
+                hits = self.bm25.search_must(
+                    audit.query_symbols, k=cfg.k_entity, course_ids=course_ids
+                )
                 lists["entity"] = [RankedItem(h.passage_id, h.score) for h in hits]
                 audit.timings_ms["entity"] = (time.perf_counter() - t) * 1000
         for name, items in lists.items():

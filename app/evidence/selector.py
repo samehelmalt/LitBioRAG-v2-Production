@@ -29,10 +29,29 @@ class EvidenceUnit(BaseModel):
     score: float
     doc_rank: int
     url: str | None
+    # course-material provenance (slides)
+    course_id: str | None = None
+    lecture_id: str | None = None
+    lecture_title: str | None = None
+    slide_number: int | None = None
+    neighbour_of: str | None = None  # passage id of the slide this unit was added next to
+
+    @property
+    def is_slide(self) -> bool:
+        return self.doc_id.startswith("slide:")
 
     @property
     def citation_id(self) -> str:
+        if self.is_slide:
+            return f"SLIDE:{self.lecture_id}:{self.slide_number}"
         return f"PMID:{self.pmid}" if self.pmid else f"DOI:{self.doi}"
+
+    @property
+    def display_source(self) -> str:
+        """Shown next to the citation: 'Lecture title, Slide N' or the article title."""
+        if self.is_slide:
+            return f"{self.lecture_title}, Slide {self.slide_number}"
+        return self.title
 
 
 def select_evidence(
@@ -42,17 +61,39 @@ def select_evidence(
     max_units: int = 10,
     per_doc: int = 2,
     max_docs: int | None = None,
+    slide_neighbours: int = 1,
 ) -> list[EvidenceUnit]:
-    """Best ``per_doc`` passages of each top document, in document rank order, de-duplicated."""
+    """Best ``per_doc`` passages of each top document, in document rank order, de-duplicated.
+
+    For lecture slides the definition is often on slide n−1 and the exception on slide n+1, so the
+    ``slide_neighbours`` adjacent slides of the same lecture are appended after a matched slide
+    (marked ``neighbour_of``); they count toward ``max_units``.
+    """
     units: list[EvidenceUnit] = []
     seen_text: set[str] = set()
+    seen_docs: set[str] = set()
     scores = {p.passage_id: p.score for p in result.passages}
     docs = result.docs[:max_docs] if max_docs else result.docs
+
+    def _unit(doc, p, rank, score, neighbour_of=None) -> EvidenceUnit:
+        s = doc.slide
+        return EvidenceUnit(
+            passage_id=p.passage_id, doc_id=doc.doc_id, pmid=doc.pmid, doi=doc.doi,
+            title=doc.title, year=doc.year, journal=doc.journal, source_type=doc.source_type,
+            is_peer_reviewed=doc.is_peer_reviewed, text=p.text, char_start=p.char_start,
+            char_end=p.char_end, score=score, doc_rank=rank, url=doc.url,
+            course_id=s.course_id if s else None, lecture_id=s.lecture_id if s else None,
+            lecture_title=s.lecture_title if s else None,
+            slide_number=s.slide_number if s else None, neighbour_of=neighbour_of,
+        )  # fmt: skip
+
     for rank, cand in enumerate(docs, start=1):
         doc = store.get_document(cand.doc_id)
         if doc is None:
             continue
+        seen_docs.add(doc.doc_id)
         passages = store.get_passages(cand.passage_ids[:per_doc])
+        added_slide = None
         for pid in cand.passage_ids[:per_doc]:
             p = passages.get(pid)
             if p is None:
@@ -61,25 +102,26 @@ def select_evidence(
             if key in seen_text:
                 continue
             seen_text.add(key)
-            units.append(
-                EvidenceUnit(
-                    passage_id=p.passage_id,
-                    doc_id=doc.doc_id,
-                    pmid=doc.pmid,
-                    doi=doc.doi,
-                    title=doc.title,
-                    year=doc.year,
-                    journal=doc.journal,
-                    source_type=doc.source_type,
-                    is_peer_reviewed=doc.is_peer_reviewed,
-                    text=p.text,
-                    char_start=p.char_start,
-                    char_end=p.char_end,
-                    score=scores.get(pid, cand.score),
-                    doc_rank=rank,
-                    url=doc.url,
-                )
-            )
+            units.append(_unit(doc, p, rank, scores.get(pid, cand.score)))
+            added_slide = added_slide or (p.passage_id if doc.slide else None)
             if len(units) >= max_units:
                 return units
+        if added_slide and slide_neighbours > 0:
+            s = doc.slide
+            for delta in range(1, slide_neighbours + 1):
+                for n in (s.slide_number - delta, s.slide_number + delta):
+                    nid = doc.make_slide_id(s.lecture_id, n)
+                    if n < 1 or nid in seen_docs:
+                        continue
+                    ndoc = store.get_document(nid)
+                    if ndoc is None:
+                        continue
+                    nps = store.passages_of(nid)
+                    if not nps:
+                        continue
+                    seen_docs.add(nid)
+                    seen_text.add(nps[0].text[:120].lower())
+                    units.append(_unit(ndoc, nps[0], rank, cand.score * 0.5, added_slide))
+                    if len(units) >= max_units:
+                        return units
     return units

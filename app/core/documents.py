@@ -23,6 +23,7 @@ class SourceType(str, Enum):
     REVIEW = "review"
     JOURNAL_ARTICLE = "journal_article"  # peer-reviewed, type not further classified
     PREPRINT = "preprint"  # not peer-reviewed
+    COURSE_SLIDE = "course_slide"  # teaching material (lecture slide); not peer-reviewed literature
     OTHER = "other"
 
 
@@ -34,11 +35,31 @@ EVIDENCE_RANK: dict[SourceType, int] = {
     SourceType.JOURNAL_ARTICLE: 4,
     SourceType.REVIEW: 4,
     SourceType.CASE_REPORT: 5,
+    SourceType.COURSE_SLIDE: 5,  # authoritative *for the course*, not as literature
     SourceType.PREPRINT: 6,
     SourceType.OTHER: 7,
 }
 
-PEER_REVIEWED = frozenset(t for t in SourceType if t not in (SourceType.PREPRINT, SourceType.OTHER))
+PEER_REVIEWED = frozenset(
+    t
+    for t in SourceType
+    if t not in (SourceType.PREPRINT, SourceType.COURSE_SLIDE, SourceType.OTHER)
+)
+
+
+class SlideMeta(BaseModel):
+    """Provenance of a lecture slide; what a 'Lecture title, Slide N' citation resolves to."""
+
+    course_id: str
+    lecture_id: str
+    lecture_title: str
+    slide_number: int
+    file_name: str = ""
+    slide_title: str = ""
+    section: str = ""
+    academic_year: str = ""
+    version: str = ""
+    content_hash: str = ""
 
 # PubMed <PublicationType> strings -> SourceType (first match in this order wins).
 _PUBTYPE_MAP: tuple[tuple[str, SourceType], ...] = (
@@ -78,8 +99,13 @@ class Document(BaseModel):
     mesh_terms: list[str] = Field(default_factory=list)
     authors: list[str] = Field(default_factory=list)
     url: str | None = None
-    source: str = Field(default="pubmed", description="ingestion source: pubmed|biorxiv|medrxiv")
+    source: str = Field(default="pubmed", description="pubmed | biorxiv | medrxiv | pptx")
     version: str | None = Field(default=None, description="preprint version, e.g. '2'")
+    slide: SlideMeta | None = None
+
+    @property
+    def course_id(self) -> str | None:
+        return self.slide.course_id if self.slide else None
 
     @field_validator("pmid")
     @classmethod
@@ -113,6 +139,10 @@ class Document(BaseModel):
         if doi:
             return f"doi:{doi.strip().lower()}"
         raise ValueError("a document needs a PMID or a DOI")
+
+    @staticmethod
+    def make_slide_id(lecture_id: str, slide_number: int) -> str:
+        return f"slide:{lecture_id}:{int(slide_number)}"
 
 
 class Passage(BaseModel):

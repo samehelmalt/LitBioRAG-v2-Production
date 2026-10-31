@@ -12,7 +12,7 @@ import sqlite3
 from collections.abc import Iterable, Iterator
 from pathlib import Path
 
-from app.core.documents import Document, Passage, SourceType
+from app.core.documents import Document, Passage, SlideMeta, SourceType
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS documents (
@@ -29,10 +29,13 @@ CREATE TABLE IF NOT EXISTS documents (
     authors     TEXT NOT NULL DEFAULT '[]',
     url         TEXT,
     source      TEXT NOT NULL,
-    version     TEXT
+    version     TEXT,
+    course_id   TEXT,
+    slide       TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_documents_pmid ON documents(pmid);
 CREATE INDEX IF NOT EXISTS idx_documents_doi  ON documents(doi);
+CREATE INDEX IF NOT EXISTS idx_documents_course ON documents(course_id);
 CREATE TABLE IF NOT EXISTS passages (
     passage_id TEXT PRIMARY KEY,
     doc_id     TEXT NOT NULL REFERENCES documents(doc_id),
@@ -66,13 +69,14 @@ class MetadataStore:
             (
                 d.doc_id, d.pmid, d.doi, d.title, d.abstract, d.source_type.value, d.year,
                 d.journal, json.dumps(d.pub_types), json.dumps(d.mesh_terms),
-                json.dumps(d.authors), d.url, d.source, d.version,
+                json.dumps(d.authors), d.url, d.source, d.version, d.course_id,
+                d.slide.model_dump_json() if d.slide else None,
             )  # fmt: skip
             for d in docs
         ]
         with self.conn:
             self.conn.executemany(
-                "INSERT OR REPLACE INTO documents VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
+                "INSERT OR REPLACE INTO documents VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
             )
         return len(rows)
 
@@ -111,7 +115,19 @@ class MetadataStore:
             url=row["url"],
             source=row["source"],
             version=row["version"],
+            slide=SlideMeta.model_validate_json(row["slide"]) if row["slide"] else None,
         )
+
+    def course_of(self, doc_ids: Iterable[str]) -> dict[str, str | None]:
+        ids = list(doc_ids)
+        out: dict[str, str | None] = {}
+        for i in range(0, len(ids), 500):
+            chunk = ids[i : i + 500]
+            marks = ",".join("?" * len(chunk))
+            q = f"SELECT doc_id, course_id FROM documents WHERE doc_id IN ({marks})"
+            for row in self.conn.execute(q, chunk):
+                out[row["doc_id"]] = row["course_id"]
+        return out
 
     @staticmethod
     def _passage(row: sqlite3.Row) -> Passage:
