@@ -1,0 +1,4 @@
+# Generation operating parameters (model choice lives in models.yaml).
+max_tokens: 1024
+temperature: 0.0        # deterministic by default; sampling is a benchmark variable
+max_evidence_units: 10  # evidence units rendered into the prompt

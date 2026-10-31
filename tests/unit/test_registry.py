@@ -80,7 +80,7 @@ def test_build_test_doubles_and_missing_adapter(cfg):
     assert reg.build("reranker").name == "lexical-overlap"
     assert ("hash", "dense_encoder") in registered_adapters()
     with pytest.raises(RegistryError, match="no adapter registered"):
-        reg.build("generator")  # hf_causal adapter arrives with app/generation
+        reg.build("verifier")  # hf_seq_cls verifier adapter arrives with app/verification
 
 
 def test_shipped_models_yaml_profiles_load():

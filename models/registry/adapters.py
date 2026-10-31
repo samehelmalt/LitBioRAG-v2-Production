@@ -31,6 +31,47 @@ def _st_encoder(spec: ModelSpec):
     )
 
 
+@adapter("template", "generator")
+def _template_generator(spec: ModelSpec):
+    from app.generation.base import TemplateGenerator
+
+    return TemplateGenerator(max_claims=int(spec.params.get("max_claims", 3)))
+
+
+@adapter("hf_causal", "generator")
+def _hf_generator(spec: ModelSpec):
+    from app.generation.base import HFCausalGenerator
+
+    return HFCausalGenerator(
+        spec.model_id,
+        revision=spec.revision,
+        quantization=spec.quantization,
+        device=spec.device,
+        dtype=str(spec.params.get("dtype", "bfloat16")),
+    )
+
+
+@adapter("openai_compatible", "generator")
+@adapter("openai_compatible", "offline_judge")
+def _openai_generator(spec: ModelSpec):
+    from app.generation.base import OpenAICompatibleGenerator
+
+    return OpenAICompatibleGenerator(
+        spec.model_id,
+        endpoint=spec.endpoint or "http://localhost:8000/v1",
+        api_key_env=spec.api_key_env,
+        json_mode=str(spec.params.get("json_mode", "true")).lower() == "true",
+    )
+
+
+@adapter("anthropic", "generator")
+@adapter("anthropic", "offline_judge")
+def _anthropic_generator(spec: ModelSpec):
+    from app.generation.base import AnthropicGenerator
+
+    return AnthropicGenerator(spec.model_id, api_key_env=spec.api_key_env or "ANTHROPIC_API_KEY")
+
+
 @adapter("lexical", "reranker")
 def _lexical_reranker(spec: ModelSpec):
     from app.reranking.base import LexicalOverlapReranker
