@@ -30,6 +30,7 @@ from app.retrieval.store import MetadataStore
 from app.safety.gate import Decision, GateConfig, decide
 from app.safety.scope import classify_scope
 from app.safety.sufficiency import evidence_sufficiency
+from app.service.followup import Resolution, resolve
 from app.verification.pipeline import VerificationConfig, verify
 from models.registry import ModelRegistry
 from models.registry.pool import ModelPool
@@ -48,6 +49,7 @@ class PipelineOutput:
     decision: Decision
     timings_ms: dict[str, float] = field(default_factory=dict)
     attempts: list[AttemptRecord] = field(default_factory=list)
+    resolution: Resolution | None = None  # follow-up rewrite, when one was applied
 
 
 @dataclass(frozen=True)
@@ -185,7 +187,15 @@ class AnswerPipeline:
                 progress(stage, info)
 
         say("scope_check")
-        scope_dec = classify_scope(question, self.scope_profile)
+        asked = question
+        resolution = None
+        if history:
+            extractor0 = self.pool.acquire("entity_extractor")
+            resolution = resolve(question, history, getattr(extractor0, "extract", None))
+            if resolution.interpreted:
+                question = resolution.question
+                say("resolved_follow_up", interpreted_as=question)
+        scope_dec = classify_scope(asked, self.scope_profile)
         if not scope_dec.in_scope:
             # out of scope: no retrieval, no model call, no tokens spent
             gen = GeneratedAnswer.abstention(ABSTAIN_OUT_OF_SCOPE, prompt_id=PROMPT_ID,
@@ -195,8 +205,9 @@ class AnswerPipeline:
             decision = decide(report, gen, config=self.gate_cfg, scope=scope_dec,
                               question=question)  # fmt: skip
             t["total"] = (time.perf_counter() - t0) * 1000
-            return PipelineOutput(question, None, [], gen, report, decision,
-                                  {k: round(v, 1) for k, v in t.items()})  # fmt: skip
+            return PipelineOutput(asked, None, [], gen, report, decision,
+                                  {k: round(v, 1) for k, v in t.items()},
+                                  resolution=resolution)  # fmt: skip
         say("retrieving", scope=scope)
         if scope == "indexed":
             res = self.retriever.retrieve(question, mode="hybrid+rerank", course_ids=course_ids)
@@ -245,10 +256,35 @@ class AnswerPipeline:
         say("verifying", claims=len(gen.claims), attempts=len(attempts))
         t2 = time.perf_counter()
         report = selected.verification if selected.verification is not None else do_verify(gen)
+        _mark_span_in_prompt(report, gen, units)
         say("deciding")
         suff = evidence_sufficiency(res, report, self.gate_cfg.sufficiency_model)
         decision = decide(report, gen, sufficiency=suff, config=self.gate_cfg, question=question)
         t["verification"] = (time.perf_counter() - t2) * 1000
         t["total"] = (time.perf_counter() - t0) * 1000
-        return PipelineOutput(question, res, units, gen, report, decision,
-                              {k: round(v, 1) for k, v in t.items()}, attempts)  # fmt: skip
+        return PipelineOutput(asked, res, units, gen, report, decision,
+                              {k: round(v, 1) for k, v in t.items()}, attempts,
+                              resolution=resolution)  # fmt: skip
+
+
+def _mark_span_in_prompt(report: VerificationReport, gen: GeneratedAnswer, units) -> None:
+    """Was each supported claim's supporting span inside the window the generator saw? The
+    verifier judges the full passage; the generator saw a compressed window (evidence_fit.windows).
+    A claim supported by text the generator never saw is a sign of prior knowledge leaking in."""
+    windows = ((gen.evidence_fit or {}).get("windows") or {})
+    by_pid = {u.passage_id: u for u in units}
+    marks = []
+    for v in report.verdicts:
+        if v.label != "supported" or not v.best_passage_id or v.best_passage_id not in by_pid:
+            continue
+        u = by_pid[v.best_passage_id]
+        w = windows.get(v.best_passage_id)
+        if w is None:
+            v.span_in_prompt = False
+        else:
+            seen = u.text[max(0, w[0] - u.char_start): max(0, w[1] - u.char_start)].lower()
+            words = [x for x in __import__("re").findall(r"[a-z0-9]{4,}", v.text.lower())]
+            hit = sum(1 for x in words if x in seen)
+            v.span_in_prompt = (hit / len(words) >= 0.5) if words else True
+        marks.append(v.span_in_prompt)
+    report.span_in_prompt_rate = (sum(marks) / len(marks)) if marks else None

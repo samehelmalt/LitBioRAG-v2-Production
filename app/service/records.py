@@ -78,6 +78,7 @@ def build_record(out, response: dict[str, Any], *, sub: str, chat_id: str | None
     control = {
         "versions": versions, "scope": scope, "kb_ids": kb_ids,
         "operating_point": operating_point, "request_id": response["request_id"],
+        "interpreted_as": response.get("interpreted_as"),
         "sub": sub, "chat_id": chat_id, "created_at": time.time(),
     }  # fmt: skip
     history = (

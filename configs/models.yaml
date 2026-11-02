@@ -90,6 +90,77 @@ profiles:
           date: ""
       entity_extractor: regex:biomed-v2
 
+  local-8b:
+    description: >
+      Profile A — local prototype on one 12 GB GPU: paired MedCPT retrievers, bge-reranker-v2-m3,
+      Qwen3-8B at 4-bit (thinking off, repetition controls from app/generation/profiles.py),
+      DeBERTa-v3-large NLI verifier. Candidates until MODEL_SELECTION.md records the benchmark.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64, vram_gb: 0.5}
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16, vram_gb: 1.2}
+      generator:
+        kind: hf_causal
+        model_id: Qwen/Qwen3-8B
+        quantization: 4bit
+        max_tokens: 1024
+        params: {dtype: bfloat16, vram_gb: 6.0}
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+        max_tokens: 512
+        params: {vram_gb: 1.0}
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v2
+
+  local-14b:
+    description: >
+      Profile B — higher-quality local: same retrieval and verifier as local-8b with Qwen3-14B at
+      4-bit. Needs ~9.5 GB for the generator; on a 12 GB card it must run on_demand (resources.yaml)
+      or on a second GPU (device: cuda:1). Benchmark against local-8b on the same slides, evidence
+      spans and question set.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64, vram_gb: 0.5}
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16, vram_gb: 1.2}
+      generator:
+        kind: hf_causal
+        model_id: Qwen/Qwen3-14B
+        quantization: 4bit
+        max_tokens: 1024
+        params: {dtype: bfloat16, vram_gb: 9.5}
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+        max_tokens: 512
+        params: {vram_gb: 1.0}
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v2
+
   default:
     description: >
       Production candidates sized for 12 GB VRAM. Every entry is a candidate until

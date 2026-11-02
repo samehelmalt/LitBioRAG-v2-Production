@@ -34,6 +34,7 @@ class Principal:
     roles: frozenset[str] = field(default_factory=frozenset)
     anonymous: bool = False
     via: str = "anonymous"  # jwt | api_key | anonymous
+    tenant: str = ""  # from the JWT 'tenant' claim; prefixes sub so tenants never share stores
 
     @property
     def is_admin(self) -> bool:
@@ -76,11 +77,14 @@ def authenticate(
             )
         except Exception as e:  # noqa: BLE001  (every decode failure is a 401; detail is generic)
             raise AuthError(401, "invalid or expired token") from e
+        tenant = str(claims.get("tenant", "") or "").strip()
+        sub = str(claims.get("sub", "")) or "unknown"
         return Principal(
-            sub=str(claims.get("sub", "")) or "unknown",
-            courses=frozenset(map(str, claims.get("courses", []) or [])),
+            sub=f"{tenant}/{sub}" if tenant else sub,  # tenant-scoped identity: every owner-keyed
+            courses=frozenset(map(str, claims.get("courses", []) or [])),  # store is isolated
             roles=frozenset(map(str, claims.get("roles", []) or [])),
             via="jwt",
+            tenant=tenant,
         )
     if cfg.required:
         raise AuthError(401, "authentication required")

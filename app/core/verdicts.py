@@ -42,6 +42,7 @@ class ClaimVerdict(BaseModel):
     near_neighbour_substitution: bool = False  # e.g. MAP3K7 where the question asked MAP3K3
     substituted_for: str | None = None  # "map3k7->map3k3"
     substitution_reason: str | None = None  # numbered_family | antonym_prefix | drug_class:… | …
+    span_in_prompt: bool | None = None  # supporting span inside the window the generator saw?
     off_target: bool = False  # names a neighbour while other claims do answer the asked entity
     notes: tuple[str, ...] = ()
 
@@ -96,6 +97,7 @@ class VerificationReport(BaseModel):
     question_entities_missing_in_claims: tuple[str, ...] = ()
     question_entities_missing_in_evidence: tuple[str, ...] = ()
     substitution_detected: bool = False
+    span_in_prompt_rate: float | None = None  # supported claims whose span was in the prompt
     verifier: str = ""
     policy_trace: list[str] = Field(default_factory=list)
 

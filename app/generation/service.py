@@ -98,6 +98,7 @@ def answer(
     fit = fit or {}
     fit["evidence_tokens_full"] = full_tokens
     fit["evidence_tokens_sent"] = sum(counter.count(u.text) for u in units)
+    fit["windows"] = {u.passage_id: [u.char_start, u.char_end] for u in units}
     messages = build_messages(question, units, history, lecture_first=lecture_first)
     if feedback:
         messages = [*messages, {"role": "user", "content": feedback}]

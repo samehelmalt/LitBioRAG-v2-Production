@@ -199,6 +199,8 @@ class QueryResponse(BaseModel):
     kb_ids: list[str] = Field(default_factory=list)
     chat_id: str | None = None
     record_id: str | None = None  # immutable answer record (GET /api/v1/records/{id})
+    interpreted_as: str | None = None  # follow-up rewritten from the delivered conversation state
+    interpretation_note: str | None = None
     attempts: list[dict[str, Any]] = Field(default_factory=list)  # attempt ledger summaries
     disclosure: str = DISCLOSURE
     review: ReviewInfo | None = None

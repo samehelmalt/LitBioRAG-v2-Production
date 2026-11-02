@@ -44,3 +44,12 @@ def token(sub="student-1", courses=(), roles=(), secret=SECRET, aud="litbiorag")
 
     return jwt.encode({"sub": sub, "courses": list(courses), "roles": list(roles), "aud": aud,
                        "exp": int(time.time()) + 600}, secret, algorithm="HS256")  # fmt: skip
+
+
+def _kb_client_fixture():
+    from tests.kb.conftest import kb_client as _kb
+
+    return _kb
+
+
+kb_client = _kb_client_fixture()  # noqa: F811  (re-exported fixture)

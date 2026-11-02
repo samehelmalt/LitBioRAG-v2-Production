@@ -100,7 +100,7 @@ window.AEOS = (function () {
     const subs = b.claims.filter((c) => c.substitution);
     const e = b.entities;
     const keyPoints = b.claims.filter((c) => !c.removed && c.label === "supported");
-    return `<div class="bubble">${renderBanner(b)}<p>${withCites(b.answer, b)}</p>
+    return `<div class="bubble">${b.interpreted_as ? `<div class="small muted">Interpreted as: <i>${esc(b.interpreted_as)}</i></div>` : ""}${renderBanner(b)}<p>${withCites(b.answer, b)}</p>
       ${keyPoints.length ? `<b>Key points</b><ul>${keyPoints.map((c) => `<li>${withCites(c.text, b)} ${c.citations.map((i) => `<span class="cite" data-cite="${esc(i)}">[${citeIndex(b)[i] || "?"}]</span>`).join("")}</li>`).join("")}</ul>` : ""}
       ${b.removed_claims.length ? `<details><summary class="muted">${b.removed_claims.length} claim(s) removed from this answer</summary><ul>${b.removed_claims.map((c) => `<li class="muted">${esc(c)}</li>`).join("")}</ul></details>` : ""}
       ${b.conflicts.length ? `<div class="banner ANSWER_WITH_CAUTION"><b>${b.conflicts.some((c) => c.kind === "lecture_vs_literature") ? "Lecture vs literature" : "Evidence is mixed"}</b>${b.conflicts.map((c) => `<div class="small">${c.kind === "lecture_vs_literature" ? "lecture says" : "supports"}: ${c.supporting_ids.map((i) => chip(i, "acc")).join("")} ${c.kind === "lecture_vs_literature" ? "literature says otherwise" : "contradicts"}: ${c.contradicting_ids.map((i) => chip(i, "bad")).join("")} <span class="muted">${esc(c.description)}</span></div>`).join("")}</div>` : ""}

@@ -351,6 +351,9 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         resp = to_response(out, rid, pl.versions.as_dict(), bool(pl.gate_cfg.calibrated_on))
         resp.scope, resp.kb_ids = scope, kb_ids
         resp.attempts = [a.summary() for a in out.attempts]
+        if out.resolution is not None and out.resolution.interpreted:
+            resp.interpreted_as = out.resolution.question
+            resp.interpretation_note = out.resolution.note
         case = reviews().maybe_enqueue(out, resp.model_dump(mode="json"), sub=p.sub,
                                        course_ids=courses)  # fmt: skip
         if case:
@@ -638,6 +641,10 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     @app.get("/trust", include_in_schema=False)
     def trust():
         return FileResponse(STATIC / "index.html")  # single-page app; route #/trust
+
+    @app.get("/embed", include_in_schema=False)
+    def embed():
+        return FileResponse(STATIC / "embed.html")
 
     app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 
