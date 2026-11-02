@@ -52,16 +52,44 @@ JSON schema:
 Respond with the JSON object only."""
 
 
-def render_evidence(units: Sequence[EvidenceUnit]) -> str:
-    lines = []
-    for u in units:
-        flag = "peer-reviewed" if u.is_peer_reviewed else "PREPRINT, not peer reviewed"
-        year = u.year if u.year is not None else "n.d."
-        if u.is_slide:
-            flag = "course material, not peer-reviewed literature"
-        header = f"[{u.citation_id} | {year} | {u.source_type.value} | {flag}] {u.display_source}"
-        lines.append(f"{header}\n{u.text}")
-    return "\n\n".join(lines) if lines else "(none)"
+EDUCATION_RULE = """
+Course-material policy (education deployment): the course material is the primary source. Answer
+from it. Literature passages are shown separately; use them only to report where the literature
+differs from the course material, in "conflicts" — never let literature replace or correct what
+the course material states, and never merge the two silently."""
+
+
+def _is_course(u: EvidenceUnit) -> bool:
+    return u.is_slide or getattr(u, "is_lecture_slide", False)
+
+
+def _render_unit(u: EvidenceUnit) -> str:
+    flag = "peer-reviewed" if u.is_peer_reviewed else "PREPRINT, not peer reviewed"
+    year = u.year if u.year is not None else "n.d."
+    if _is_course(u):
+        flag = "course material, not peer-reviewed literature"
+    elif u.is_file:
+        flag = "uploaded document, provenance as given by its owner"
+    header = f"[{u.citation_id} | {year} | {u.source_type.value} | {flag}] {u.display_source}"
+    return f"{header}\n{u.text}"
+
+
+def render_evidence(units: Sequence[EvidenceUnit], *, lecture_first: bool = False) -> str:
+    if not units:
+        return "(none)"
+    if not lecture_first:
+        return "\n\n".join(_render_unit(u) for u in units)
+    course = [u for u in units if _is_course(u)]
+    other = [u for u in units if not _is_course(u)]
+    blocks = []
+    if course:
+        blocks.append("=== Course material (primary source) ===\n\n"
+                      + "\n\n".join(_render_unit(u) for u in course))
+    if other:
+        blocks.append("=== Literature and other documents (not part of the course; report "
+                      "differences in \"conflicts\") ===\n\n"
+                      + "\n\n".join(_render_unit(u) for u in other))
+    return "\n\n".join(blocks)
 
 
 CONTEXT_TEMPLATE = """Conversation context (NOT evidence): earlier questions and the answers that
@@ -80,15 +108,19 @@ def render_history(history: Sequence[str] | None, *, max_items: int = 4,
 
 
 def build_messages(question: str, units: Sequence[EvidenceUnit],
-                   history: Sequence[str] | None = None) -> list[dict[str, str]]:  # fmt: skip
+                   history: Sequence[str] | None = None, *,
+                   lecture_first: bool = False) -> list[dict[str, str]]:  # fmt: skip
     ctx = render_history(history)
+    system = SYSTEM + (EDUCATION_RULE if lecture_first else "")
     return [
-        {"role": "system", "content": SYSTEM},
+        {"role": "system", "content": system},
         {
             "role": "user",
             "content": USER_TEMPLATE.format(
                 context=CONTEXT_TEMPLATE.format(history=ctx) if ctx else "",
-                question=question.strip(), evidence=render_evidence(units), schema=schema_text(),
+                question=question.strip(),
+                evidence=render_evidence(units, lecture_first=lecture_first),
+                schema=schema_text(),
             ),
         },
     ]

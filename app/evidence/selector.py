@@ -84,6 +84,7 @@ def select_evidence(
     per_doc: int = 2,
     max_docs: int | None = None,
     slide_neighbours: int = 1,
+    course_share: float = 0.0,
 ) -> list[EvidenceUnit]:
     """Best ``per_doc`` passages of each top document, in document rank order, de-duplicated.
 
@@ -91,6 +92,11 @@ def select_evidence(
     ``slide_neighbours`` adjacent slides of the same lecture are appended after a matched slide
     (marked ``neighbour_of``); they count toward ``max_units``.
     """
+    if course_share > 0:
+        # lecture-first: over-select, then guarantee the course-material share
+        wide = select_evidence(result, store, max_units=max_units * 3, per_doc=per_doc,
+                               max_docs=max_docs, slide_neighbours=slide_neighbours)  # fmt: skip
+        return _rebalance(wide, max_units, course_share)
     units: list[EvidenceUnit] = []
     seen_text: set[str] = set()
     seen_docs: set[str] = set()
@@ -155,3 +161,24 @@ def select_evidence(
                     if len(units) >= max_units:
                         return units
     return units
+
+
+def _rebalance(units: list[EvidenceUnit], max_units: int,
+               course_share: float) -> list[EvidenceUnit]:  # fmt: skip
+    """Keep rank order but reserve at least ``course_share`` of the slots for course material
+    when enough of it was retrieved; literature fills the rest."""
+    import math
+
+    course = [u for u in units if u.is_slide or u.is_lecture_slide]
+    other = [u for u in units if not (u.is_slide or u.is_lecture_slide)]
+    want_course = min(len(course), math.ceil(max_units * course_share))
+    chosen = set(id(u) for u in course[:want_course])
+    for u in other:
+        if len(chosen) >= max_units:
+            break
+        chosen.add(id(u))
+    for u in course[want_course:]:
+        if len(chosen) >= max_units:
+            break
+        chosen.add(id(u))
+    return [u for u in units if id(u) in chosen][:max_units]

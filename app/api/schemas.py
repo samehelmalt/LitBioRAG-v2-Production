@@ -152,6 +152,9 @@ class ConflictOut(BaseModel):
     supporting_ids: list[str]
     contradicting_ids: list[str]
     description: str
+    kind: str = "evidence"  # evidence | lecture_vs_literature
+    supporting_tiers: list[str] = Field(default_factory=list)
+    contradicting_tiers: list[str] = Field(default_factory=list)
 
 
 class EntityGrounding(BaseModel):

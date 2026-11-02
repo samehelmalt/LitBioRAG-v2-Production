@@ -36,6 +36,7 @@ from app.verification.numeric import numeric_consistency
 
 
 class VerificationConfig(BaseModel):
+    lecture_first: bool = False  # education profile: course material is the primary source
     entail_threshold: float = Field(0.60, ge=0, le=1)
     contradict_threshold: float = Field(0.55, ge=0, le=1)
     max_pairs_per_claim: int = Field(12, ge=1)
@@ -115,6 +116,14 @@ def verify(
         )
         if conflict:
             conflicts.append(conflict)
+        # lecture-first (education deployments): a claim the course material supports is not
+        # "contradicted" because the literature differs; the difference is reported, labelled,
+        # and the gate delivers it with caution instead of abstaining
+        if (cfg.lecture_first and label == "contradicted" and conflict is not None
+                and conflict.kind == "lecture_vs_literature"
+                and conflict.supporting_tiers == ("course_material",)):
+            label = "supported"
+            trace.append(f"{c.id}: lecture-first — course material supports, literature differs")
         notes = []
         if fabricated:
             notes.append(f"fabricated citation(s): {', '.join(fabricated)}")

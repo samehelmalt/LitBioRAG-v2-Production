@@ -83,6 +83,7 @@ class AnswerPipeline:
         kb_root: Path | None = None,
     ):
         self.scope_profile = scope_profile
+        self.lecture_first = scope_profile == "education"
         self.bundle = Path(bundle)
         self.registry = ModelRegistry.load(profile=profile)
         self.resources = resources or ResourceConfig.from_yaml()
@@ -107,6 +108,8 @@ class AnswerPipeline:
         self.ret_cfg = ret_cfg
         self.gen_cfg = GenerationConfig.from_yaml(configs / "generation.yaml")
         self.ver_cfg = VerificationConfig.from_yaml(configs / "verification.yaml")
+        if self.lecture_first:
+            self.ver_cfg = self.ver_cfg.model_copy(update={"lecture_first": True})
         self.gate_cfg = GateConfig.from_yaml(configs / "gate.yaml")
         self.budget = self.resources.generator_budget()
         self.ledger = ledger
@@ -202,7 +205,8 @@ class AnswerPipeline:
             m = self.multi()
             res = m.retrieve(question, scope=scope, course_ids=course_ids, kb_ids=kb_ids)
             store = m.store
-        units = select_evidence(res, store, max_units=max_units or self.max_units)
+        units = select_evidence(res, store, max_units=max_units or self.max_units,
+                                course_share=0.6 if self.lecture_first else 0.0)  # fmt: skip
         t["retrieval"] = (time.perf_counter() - t0) * 1000
         say("retrieved", documents=len(res.docs), evidence_units=len(units),
             ms=round(t["retrieval"], 1))  # fmt: skip
@@ -225,7 +229,7 @@ class AnswerPipeline:
                 parsed = generate_answer(
                     question, units, generator, config=self.gen_cfg, budget=self.budget,
                     ledger=self.ledger, request_id=request_id, history=history,
-                    cache=self.gen_cache, feedback=feedback,
+                    cache=self.gen_cache, feedback=feedback, lecture_first=self.lecture_first,
                 )  # fmt: skip
                 return parsed.raw, parsed
 

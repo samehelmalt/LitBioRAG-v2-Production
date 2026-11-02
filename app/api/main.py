@@ -99,7 +99,10 @@ def to_response(out: PipelineOutput, request_id: str, versions: dict[str, Any],
         removed_claims=list(out.decision.removed_claims),
         conflicts=[schemas.ConflictOut(claim_id=c.claim_id, supporting_ids=list(c.supporting_ids),
                                        contradicting_ids=list(c.contradicting_ids),
-                                       description=c.description) for c in rep.conflicts],
+                                       description=c.description, kind=c.kind,
+                                       supporting_tiers=list(c.supporting_tiers),
+                                       contradicting_tiers=list(c.contradicting_tiers))
+                   for c in rep.conflicts],
         entities=schemas.EntityGrounding(
             asked=list(rep.question_entities),
             missing_in_evidence=list(rep.question_entities_missing_in_evidence),
@@ -324,7 +327,8 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             if chat is None:
                 raise HTTPException(404, "unknown chat")
             history = chats.history(req.chat_id)
-        scope = req.scope or st.kb.default_scope
+        scope = req.scope or ("uploaded" if st.scope_profile == "education" and pl.kb is not None
+                              else st.kb.default_scope)
         kb_ids: list[str] = []
         if not corpus().indexed_enabled:
             if scope == "indexed":

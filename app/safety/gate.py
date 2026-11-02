@@ -221,9 +221,15 @@ def decide(
     conf = confidence(report, sufficiency, cfg.confidence_model)
     # 11 conflicts → caution
     if report.conflicts:
-        return out(Action.ANSWER_WITH_CAUTION, "R11-conflict",
-                   f"mixed evidence on {', '.join(k.claim_id for k in report.conflicts)}",
-                   text, removed, conf)  # fmt: skip
+        lec = [k.claim_id for k in report.conflicts if k.kind == "lecture_vs_literature"]
+        other = [k.claim_id for k in report.conflicts if k.kind != "lecture_vs_literature"]
+        parts = []
+        if lec:
+            parts.append("the course material and the literature differ on " + ", ".join(lec))
+        if other:
+            parts.append("mixed evidence on " + ", ".join(other))
+        return out(Action.ANSWER_WITH_CAUTION, "R11-conflict", "; ".join(parts), text, removed,
+                   conf)  # fmt: skip
     if removed:
         return out(Action.ANSWER_WITH_CAUTION, "R10-repair", "unsupported claims removed",
                    text, removed, conf)  # fmt: skip

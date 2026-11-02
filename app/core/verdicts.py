@@ -69,6 +69,9 @@ class ConflictRecord(BaseModel):
     supporting_ids: tuple[str, ...] = ()
     contradicting_ids: tuple[str, ...] = ()
     description: str = ""
+    kind: str = "evidence"  # evidence | lecture_vs_literature
+    supporting_tiers: tuple[str, ...] = ()  # course_material | literature
+    contradicting_tiers: tuple[str, ...] = ()
 
 
 class VerificationReport(BaseModel):

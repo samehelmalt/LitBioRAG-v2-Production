@@ -72,6 +72,7 @@ def answer(
     history: list[str] | None = None,
     cache=None,
     feedback: str | None = None,
+    lecture_first: bool = False,
 ) -> GeneratedAnswer:
     """Evidence → prompt → model → parsed answer, under a token budget and a spend cap.
 
@@ -97,7 +98,7 @@ def answer(
     fit = fit or {}
     fit["evidence_tokens_full"] = full_tokens
     fit["evidence_tokens_sent"] = sum(counter.count(u.text) for u in units)
-    messages = build_messages(question, units, history)
+    messages = build_messages(question, units, history, lecture_first=lecture_first)
     if feedback:
         messages = [*messages, {"role": "user", "content": feedback}]
     prompt_tokens = sum(counter.count(m.get("content", "")) for m in messages)
