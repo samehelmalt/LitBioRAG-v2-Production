@@ -95,6 +95,20 @@ class BM25Index:
         return n
 
     # ---- search -----------------------------------------------------------------------
+    def delete(self, passage_ids: Iterable[str], *, heap_mb: int = 64) -> int:
+        """Remove passages by id (Tantivy term delete); used by the incremental KB indexer."""
+        ids = list(passage_ids)
+        if not ids:
+            return 0
+        writer = self.index.writer(heap_size=heap_mb * 1024 * 1024)
+        for pid in ids:
+            writer.delete_documents_by_term("passage_id", pid)
+        writer.commit()
+        writer.wait_merging_threads()
+        self.index.reload()
+        self._searcher = None
+        return len(ids)
+
     def _get_searcher(self) -> tantivy.Searcher:
         if self._searcher is None:
             self.index.reload()

@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS kb_files (
   meta TEXT NOT NULL DEFAULT '{}',
   PRIMARY KEY (kb_id, file_id)
 );
+CREATE TABLE IF NOT EXISTS kb_jobs (
+  job_id TEXT PRIMARY KEY, kb_id TEXT NOT NULL, file_id TEXT NOT NULL, status TEXT NOT NULL,
+  started_at REAL NOT NULL, finished_at REAL, n_units INTEGER, needs_ocr_units INTEGER, error TEXT
+);
 """
 
 
@@ -39,6 +43,7 @@ class KBRegistry:
                 self._conn.execute(
                     "ALTER TABLE kb_files ADD COLUMN meta TEXT NOT NULL DEFAULT '{}'")
         self._lock = threading.Lock()
+        self.jobs = JobTable(self._conn, self._lock)
 
     # ---- kbs ------------------------------------------------------------------------------
     def create(self, *, name: str, owner: str, description: str = "") -> dict[str, Any]:
@@ -138,6 +143,48 @@ class KBRegistry:
     def delete_file(self, kb_id: str, file_id: str) -> None:
         with self._lock, self._conn:
             self._conn.execute("DELETE FROM kb_files WHERE kb_id=? AND file_id=?", (kb_id, file_id))
+
+
+class JobTable:
+    """Dict-like view over ``kb_jobs`` so index jobs survive restarts."""
+
+    def __init__(self, conn: sqlite3.Connection, lock: threading.Lock):
+        self._conn, self._lock = conn, lock
+
+    def start(self, job_id: str, *, kb_id: str, file_id: str) -> dict[str, Any]:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO kb_jobs VALUES (?,?,?,?,?,NULL,NULL,NULL,NULL)",
+                (job_id, kb_id, file_id, "queued", time.time()))
+        return self[job_id]
+
+    def update(self, job_id: str, **fields: Any) -> None:
+        cols = [c for c in ("status", "finished_at", "n_units", "needs_ocr_units", "error")
+                if c in fields]
+        if not cols:
+            return
+        with self._lock, self._conn:
+            self._conn.execute(f"UPDATE kb_jobs SET {', '.join(c + '=?' for c in cols)} "
+                               "WHERE job_id=?", (*[fields[c] for c in cols], job_id))  # fmt: skip
+
+    def __getitem__(self, job_id: str) -> dict[str, Any]:
+        r = self._conn.execute("SELECT * FROM kb_jobs WHERE job_id=?", (job_id,)).fetchone()
+        if r is None:
+            raise KeyError(job_id)
+        return dict(r)
+
+    def get(self, job_id: str, default=None):
+        try:
+            return self[job_id]
+        except KeyError:
+            return default
+
+    def items(self):
+        rows = self._conn.execute("SELECT * FROM kb_jobs ORDER BY started_at").fetchall()
+        return [(r["job_id"], dict(r)) for r in rows]
+
+    def values(self):
+        return [v for _, v in self.items()]
 
 
 def _file(r: sqlite3.Row) -> dict[str, Any]:

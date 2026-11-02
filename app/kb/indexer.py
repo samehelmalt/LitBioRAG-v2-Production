@@ -9,7 +9,6 @@ appended to in place; the dense index is rebuilt from the store's passages after
 
 from __future__ import annotations
 
-import json
 import shutil
 import threading
 import time
@@ -18,10 +17,10 @@ from typing import Any
 
 from app.core.documents import Document
 from app.kb.adapters import LectureMeta, adapter_for, file_sha256, units_to_documents
+from app.kb.dense_store import IncrementalDense
 from app.kb.registry import KBRegistry
 from app.kb.vision import make_image_extractor
 from app.retrieval.bm25 import BM25Index
-from app.retrieval.dense import DenseIndex, build_dense_index
 from app.retrieval.encoders import Encoder
 from app.retrieval.passages import split_document
 from app.retrieval.store import MetadataStore
@@ -42,16 +41,16 @@ class KBIndexer:
         self._lock = threading.RLock()
         self.store = MetadataStore(self.index_dir / "metadata.sqlite")
         self.bm25 = BM25Index(self.index_dir / "bm25")
-        self._dense: DenseIndex | None = None
-        self.jobs: dict[str, dict[str, Any]] = {}
+        self._dense = IncrementalDense(self.index_dir / "dense", encoder)
+        self.jobs = self.registry.jobs  # persistent: survives restarts
+        if self._dense.ntotal == 0 and self.store.counts().get("passages", 0) > 0:
+            self._rebuild_dense()  # encoder changed (or first run on an old layout): re-embed
         self.image_text = (image_text if image_text is not None
                            else make_image_extractor(image_config))  # fmt: skip
 
     # ---- queries use these ---------------------------------------------------------------
     @property
-    def dense(self) -> DenseIndex | None:
-        if self._dense is None and (self.index_dir / "dense" / "index.faiss").exists():
-            self._dense = DenseIndex(self.index_dir / "dense", self.encoder, mmap=False)
+    def dense(self) -> IncrementalDense:
         return self._dense
 
     def has_content(self) -> bool:
@@ -77,8 +76,7 @@ class KBIndexer:
                                         uploaded_by=uploaded_by, path=str(dest),
                                         meta=lecture.__dict__)  # fmt: skip
         job_id = f"{kb_id}:{file_id}"
-        self.jobs[job_id] = {"status": "queued", "started_at": time.time(), "file_id": file_id,
-                             "kb_id": kb_id}  # fmt: skip
+        self.jobs.start(job_id, kb_id=kb_id, file_id=file_id)
         if background:
             threading.Thread(target=self._index_file, args=(kb_id, file_id, dest, file_name,
                                                               uploaded_by, lecture),
@@ -90,8 +88,8 @@ class KBIndexer:
 
     def _index_file(self, kb_id: str, file_id: str, path: Path, file_name: str,
                     uploaded_by: str, lecture: LectureMeta | None = None) -> None:  # fmt: skip
-        job = self.jobs[f"{kb_id}:{file_id}"]
-        job["status"] = "indexing"
+        job_id = f"{kb_id}:{file_id}"
+        self.jobs.update(job_id, status="indexing")
         self.registry.set_file_status(kb_id, file_id, "indexing")
         try:
             with self._lock:
@@ -101,7 +99,7 @@ class KBIndexer:
                                           file_name=file_name, kind=adapter.kind,
                                           uploaded_by=uploaded_by, lecture=lecture)  # fmt: skip
                 # replace any earlier units of the same file (re-upload / changed content)
-                self.store.delete_documents(self.store.doc_ids_where(prefix=f"file:{file_id}:"))
+                self._remove_docs(self.store.doc_ids_where(prefix=f"file:{file_id}:"))
                 self._add_documents(docs)
                 # deck versioning: earlier versions of the same lecture leave search but stay
                 # resolvable for historical citations
@@ -110,11 +108,11 @@ class KBIndexer:
                     for old in self.registry.previous_versions(kb_id, lecture.course_id,
                                                                lecture.lecture_id, file_id):
                         ids = self.store.doc_ids_where(prefix=f"file:{old['file_id']}:")
+                        pids = [p.passage_id for d in ids for p in self.store.passages_of(d)]
                         superseded += self.store.mark_superseded(ids, file_id)
+                        self.bm25.delete(pids)
+                        self._dense.remove(pids)
                         self.registry.set_file_meta(kb_id, old["file_id"], superseded_by=file_id)
-                    if superseded:
-                        self._rebuild_bm25()
-                self._rebuild_dense()
                 needs_ocr = sum(1 for d in docs if d.file and d.file.needs_ocr)
                 n_images = sum(d.file.n_images for d in docs if d.file)
                 self.registry.set_file_status(kb_id, file_id, "indexed", n_units=len(docs))
@@ -122,11 +120,12 @@ class KBIndexer:
                                             n_images=n_images, image_extractor=self.image_text.name,
                                             superseded_units=superseded)  # fmt: skip
                 self.registry.bump_version(kb_id)
-            job.update(status="done", n_units=len(docs), needs_ocr_units=needs_ocr,
-                       finished_at=time.time())  # fmt: skip
+            self.jobs.update(job_id, status="done", n_units=len(docs), needs_ocr_units=needs_ocr,
+                             finished_at=time.time())  # fmt: skip
         except Exception as e:  # noqa: BLE001  (the job log carries the reason; nothing crashes)
             self.registry.set_file_status(kb_id, file_id, "failed", error=str(e)[:500])
-            job.update(status="failed", error=str(e)[:500], finished_at=time.time())
+            self.jobs.update(job_id, status="failed", error=str(e)[:500],
+                             finished_at=time.time())  # fmt: skip
 
     def _add_documents(self, docs: list[Document]) -> None:
         if not docs:
@@ -139,54 +138,45 @@ class KBIndexer:
         self.store.add_passages(passages)
         meta = {d.doc_id: (d.year, d.source_type.value, d.course_id) for d in docs}
         self.bm25.add(passages, meta)
+        self._dense.add([p.passage_id for p in passages], [p.text for p in passages])
+
+    def _remove_docs(self, doc_ids: list[str]) -> list[str]:
+        """Remove documents and their passages from the store and both indexes."""
+        pids = [p.passage_id for d in doc_ids for p in self.store.passages_of(d)]
+        self.store.delete_documents(doc_ids)
+        self.bm25.delete(pids)
+        self._dense.remove(pids)
+        return pids
 
     def remove_file(self, kb_id: str, file_id: str) -> int:
         with self._lock:
             ids = self.store.doc_ids_where(prefix=f"file:{file_id}:")
-            self.store.delete_documents(ids)
+            self._remove_docs(ids)
             rec = self.registry.get_file(kb_id, file_id)
             if rec and Path(rec["path"]).exists():
                 Path(rec["path"]).unlink()
             self.registry.delete_file(kb_id, file_id)
-            self._rebuild_bm25()
-            self._rebuild_dense()
             self.registry.bump_version(kb_id)
         return len(ids)
 
     def remove_kb(self, kb_id: str) -> int:
         with self._lock:
             ids = self.store.doc_ids_where(course_id=kb_id)
-            self.store.delete_documents(ids)
+            self._remove_docs(ids)
             shutil.rmtree(self.files_dir / kb_id, ignore_errors=True)
             self.registry.delete(kb_id)
-            self._rebuild_bm25()
-            self._rebuild_dense()
         return len(ids)
 
     # ---- index maintenance ---------------------------------------------------------------
-    def _rebuild_bm25(self) -> None:
-        shutil.rmtree(self.index_dir / "bm25", ignore_errors=True)
-        self.bm25 = BM25Index(self.index_dir / "bm25")
-        docs = {d: self.store.get_document(d) for d in self.store.doc_ids_where()}
-        meta = {k: (v.year, v.source_type.value, v.course_id) for k, v in docs.items() if v}
-        self.bm25.add(list(self.store.iter_passages()), meta)
-
     def _rebuild_dense(self) -> None:
-        self._dense = None
-        out = self.index_dir / "dense"
-        ids, texts = [], []
-        for p in self.store.iter_passages():
-            ids.append(p.passage_id)
-            texts.append(p.text)
-        if not ids:
-            shutil.rmtree(out, ignore_errors=True)
-            return
-        vecs = self.encoder.encode(texts, batch_size=64).astype("float32")
-        build_dense_index(iter([vecs]), ids, out, encoder_name=self.encoder.name,
-                          dim=self.encoder.dim)  # fmt: skip
-        (out / "encoder.json").write_text(json.dumps({"encoder": self.encoder.name,
-                                                       "dim": self.encoder.dim}))  # fmt: skip
+        """Full re-embed from the store: only when the encoder changed."""
+        with self._lock:
+            shutil.rmtree(self.index_dir / "dense", ignore_errors=True)
+            self._dense = IncrementalDense(self.index_dir / "dense", self.encoder)
+            ps = list(self.store.iter_passages())
+            if ps:
+                self._dense.add([p.passage_id for p in ps], [p.text for p in ps])
 
     def status(self) -> dict[str, Any]:
-        return {"counts": self.store.counts(), "jobs": {k: v for k, v in self.jobs.items()
-                                                        if v["status"] != "done"}}  # fmt: skip
+        return {"counts": self.store.counts(), "dense_vectors": self._dense.ntotal,
+                "jobs": {k: v for k, v in self.jobs.items() if v["status"] != "done"}}  # fmt: skip
