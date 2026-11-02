@@ -32,6 +32,7 @@ profiles:
         kind: sentence_transformers
         model_id: ncbi/MedCPT-Article-Encoder
         max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64}  # paired towers
       reranker:
         kind: hf_seq_cls
         model_id: ncbi/MedCPT-Cross-Encoder
@@ -63,6 +64,7 @@ profiles:
         kind: sentence_transformers
         model_id: ncbi/MedCPT-Article-Encoder
         max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64}  # paired towers
       reranker:
         kind: hf_seq_cls
         model_id: BAAI/bge-reranker-v2-m3
@@ -99,6 +101,7 @@ profiles:
         kind: sentence_transformers
         model_id: ncbi/MedCPT-Article-Encoder        # candidate; Step 5a benchmark decides
         max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64}  # paired towers
       reranker:
         kind: hf_seq_cls
         model_id: BAAI/bge-reranker-v2-m3             # candidate; Step 5b

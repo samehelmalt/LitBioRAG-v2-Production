@@ -98,19 +98,26 @@ class CachedEncoder:
         self.dim = inner.dim
 
     def encode(self, texts: Sequence[str], batch_size: int = 64):
+        return self._cached("emb", self.inner.encode, texts, batch_size)
+
+    def encode_queries(self, texts: Sequence[str], batch_size: int = 64):
+        fn = getattr(self.inner, "encode_queries", self.inner.encode)
+        return self._cached("qemb", fn, texts, batch_size)
+
+    def _cached(self, ns: str, fn, texts: Sequence[str], batch_size: int):
         import numpy as np
 
         out = [None] * len(texts)
         todo = []
         for i, t in enumerate(texts):
-            hit = self.cache.get("emb", _key(self.name, t))
+            hit = self.cache.get(ns, _key(self.name, t))
             if hit is None:
                 todo.append(i)
             else:
                 out[i] = np.asarray(hit, dtype="float32")
         if todo:
-            fresh = self.inner.encode([texts[i] for i in todo], batch_size=batch_size)
+            fresh = fn([texts[i] for i in todo], batch_size=batch_size)
             for i, v in zip(todo, fresh, strict=True):
                 out[i] = np.asarray(v, dtype="float32")
-                self.cache.put("emb", _key(self.name, texts[i]), out[i].tolist())
+                self.cache.put(ns, _key(self.name, texts[i]), out[i].tolist())
         return np.stack(out)

@@ -16,7 +16,7 @@ from pathlib import Path
 import faiss
 import numpy as np
 
-from app.retrieval.encoders import Encoder, l2_normalize
+from app.retrieval.encoders import Encoder, encode_queries, l2_normalize
 
 IVF_THRESHOLD = 50_000  # below this, exact search is cheap and strictly better
 
@@ -94,7 +94,7 @@ class DenseIndex:
         return self.search_many([query], k)[0]
 
     def search_many(self, queries: list[str], k: int = 100) -> list[list[DenseHit]]:
-        q = l2_normalize(self.encoder.encode(queries))
+        q = l2_normalize(encode_queries(self.encoder, queries))
         scores, idxs = self.index.search(np.ascontiguousarray(q, dtype="float32"), k)
         out: list[list[DenseHit]] = []
         for row_s, row_i in zip(scores, idxs, strict=True):

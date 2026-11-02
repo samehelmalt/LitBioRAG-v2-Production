@@ -21,13 +21,18 @@ def _hash_encoder(spec: ModelSpec):
 
 @adapter("sentence_transformers", "dense_encoder")
 def _st_encoder(spec: ModelSpec):
-    from app.retrieval.encoders import SentenceTransformerEncoder
+    from app.retrieval.encoders import PAIRED_QUERY_ENCODERS, SentenceTransformerEncoder
 
+    query_id = spec.params.get("query") or spec.params.get("query_model_id") \
+        or PAIRED_QUERY_ENCODERS.get(spec.model_id)
     return SentenceTransformerEncoder(
         spec.model_id,
         device=spec.device,
         max_seq_length=spec.max_tokens,
         revision=spec.revision,
+        query_model_id=query_id,
+        query_max_seq_length=int(spec.params["query_max_tokens"])
+        if "query_max_tokens" in spec.params else None,
     )
 
 

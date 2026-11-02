@@ -93,6 +93,18 @@ class ModelRegistry:
 
     # ---- validation -------------------------------------------------------------------
     def validate(self) -> None:
+        # asymmetric retrievers: the article tower must come with its query tower
+        from app.retrieval.encoders import PAIRED_QUERY_ENCODERS
+
+        enc = self.profile.models.get("dense_encoder")
+        if enc is not None and enc.model_id in PAIRED_QUERY_ENCODERS:
+            want = PAIRED_QUERY_ENCODERS[enc.model_id]
+            got = enc.params.get("query") or enc.params.get("query_model_id")
+            if got and got != want:
+                raise RegistryError(
+                    f"profile {self.profile.name}: dense_encoder {enc.model_id!r} is paired with "
+                    f"{want!r}, not {got!r}"
+                )
         for group in self.profile.independent_families:
             seen: dict[str, str] = {}
             for role in group:
