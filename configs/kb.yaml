@@ -1,0 +1,11 @@
+# Uploaded knowledge bases: image understanding and deck versioning.
+images:
+  ocr: none            # tesseract | none   (needs the tesseract binary + pytesseract)
+  captions: none       # hosted | none      (OpenAI-compatible vision model; key from api_key_env)
+  model: gpt-4o-mini   # vision model id when captions: hosted (candidate; benchmark decides)
+  endpoint: https://api.openai.com/v1
+  api_key_env: OPENAI_API_KEY
+  ocr_lang: eng
+  min_ocr_chars: 40    # below this the captioner is asked (when enabled)
+versions:
+  keep_superseded: true   # old deck versions stay resolvable for historical citations

@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS kb_files (
   sha256 TEXT NOT NULL, bytes INTEGER NOT NULL, uploaded_by TEXT NOT NULL,
   uploaded_at REAL NOT NULL,
   n_units INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL, error TEXT, path TEXT NOT NULL,
+  meta TEXT NOT NULL DEFAULT '{}',
   PRIMARY KEY (kb_id, file_id)
 );
 """
@@ -32,6 +33,11 @@ class KBRegistry:
             Path(path).parent.mkdir(parents=True, exist_ok=True)
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(_DDL)
+        cols = {r[1] for r in self._conn.execute("PRAGMA table_info(kb_files)")}
+        if "meta" not in cols:
+            with self._conn:
+                self._conn.execute(
+                    "ALTER TABLE kb_files ADD COLUMN meta TEXT NOT NULL DEFAULT '{}'")
         self._lock = threading.Lock()
 
     # ---- kbs ------------------------------------------------------------------------------
@@ -80,12 +86,12 @@ class KBRegistry:
     # ---- files ----------------------------------------------------------------------------
     def upsert_file(self, kb_id: str, *, file_id: str, file_name: str, kind: str, sha256: str,
                     size: int, uploaded_by: str, path: str,
-                    status: str = "queued") -> dict:  # fmt: skip
+                    status: str = "queued", meta: dict | None = None) -> dict:  # fmt: skip
         with self._lock, self._conn:
             self._conn.execute(
-                "INSERT OR REPLACE INTO kb_files VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT OR REPLACE INTO kb_files VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (kb_id, file_id, file_name, kind, sha256, size, uploaded_by, time.time(), 0,
-                 status, None, path),
+                 status, None, path, json.dumps(meta or {})),
             )
         return self.get_file(kb_id, file_id)  # type: ignore[return-value]
 
@@ -104,16 +110,43 @@ class KBRegistry:
     def get_file(self, kb_id: str, file_id: str) -> dict | None:
         r = self._conn.execute("SELECT * FROM kb_files WHERE kb_id=? AND file_id=?",
                                (kb_id, file_id)).fetchone()  # fmt: skip
-        return dict(r) if r else None
+        return _file(r) if r else None
 
     def files(self, kb_id: str) -> list[dict]:
         rows = self._conn.execute("SELECT * FROM kb_files WHERE kb_id=? ORDER BY uploaded_at",
                                   (kb_id,)).fetchall()  # fmt: skip
-        return [dict(r) for r in rows]
+        return [_file(r) for r in rows]
+
+    def set_file_meta(self, kb_id: str, file_id: str, **updates) -> None:
+        f = self.get_file(kb_id, file_id)
+        if f is None:
+            return
+        meta = {**f["meta"], **updates}
+        with self._lock, self._conn:
+            self._conn.execute("UPDATE kb_files SET meta=? WHERE kb_id=? AND file_id=?",
+                               (json.dumps(meta), kb_id, file_id))  # fmt: skip
+
+    def previous_versions(self, kb_id: str, course_id: str, lecture_id: str,
+                          exclude_file_id: str) -> list[dict]:  # fmt: skip
+        if not lecture_id:
+            return []
+        return [f for f in self.files(kb_id)
+                if f["file_id"] != exclude_file_id and f["meta"].get("lecture_id") == lecture_id
+                and f["meta"].get("course_id", "") == course_id
+                and not f["meta"].get("superseded_by")]  # fmt: skip
 
     def delete_file(self, kb_id: str, file_id: str) -> None:
         with self._lock, self._conn:
             self._conn.execute("DELETE FROM kb_files WHERE kb_id=? AND file_id=?", (kb_id, file_id))
+
+
+def _file(r: sqlite3.Row) -> dict[str, Any]:
+    d = dict(r)
+    try:
+        d["meta"] = json.loads(d.get("meta") or "{}")
+    except ValueError:
+        d["meta"] = {}
+    return d
 
 
 def _kb(r: sqlite3.Row) -> dict[str, Any]:

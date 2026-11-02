@@ -13,7 +13,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -57,7 +57,8 @@ def _source(u: EvidenceUnit) -> schemas.SourceOut:
         char_end=u.char_end, retrieval_score=u.score, rank=u.doc_rank, course_id=u.course_id,
         lecture_title=u.lecture_title, slide_number=u.slide_number, kb_id=u.kb_id,
         file_id=u.file_id, file_name=u.file_name, locator=u.locator,
-        locator_label=u.locator_label,
+        locator_label=u.locator_label, canonical_id=u.canonical_id,
+        deck_version=u.deck_version, superseded_by=u.superseded_by,
     )  # fmt: skip
 
 
@@ -409,7 +410,10 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
 
     @app.post("/api/v1/kb/{kb_id}/upload", status_code=202)
     def kb_upload(kb_id: str, file: UploadFile = Upload, background: bool = BackgroundFlag,
-                  p: Principal = Auth):  # fmt: skip
+                  course_id: Annotated[str, Form()] = "", lecture_id: Annotated[str, Form()] = "",
+                  lecture_title: Annotated[str, Form()] = "",
+                  academic_year: Annotated[str, Form()] = "",
+                  version: Annotated[str, Form()] = "", p: Principal = Auth):  # fmt: skip
         ix = kb_indexer()
         if not ix.registry.can_write(kb_id, p.sub, admin=p.is_admin):
             raise HTTPException(403, "only the owner can upload to this knowledge base")
@@ -434,8 +438,12 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                     raise HTTPException(413, f"file larger than {st.limits.max_upload_mb} MB")
                 tmp.write(chunk)
         try:
+            meta = {k: v for k, v in (("course_id", course_id), ("lecture_id", lecture_id),
+                                      ("lecture_title", lecture_title),
+                                      ("academic_year", academic_year), ("version", version))
+                    if v}
             rec = ix.add_file(kb_id, Path(tmp.name), file_name=name, uploaded_by=p.sub,
-                              background=background)  # fmt: skip
+                              background=background, meta=meta)  # fmt: skip
         finally:
             Path(tmp.name).unlink(missing_ok=True)
         audit.record({"event": "kb_upload", "kb_id": kb_id, "file_id": rec["file_id"],
@@ -452,6 +460,32 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         jobs = {k: v for k, v in ix.jobs.items() if v.get("kb_id") == kb_id}
         return {"kb_id": kb_id, "version": ix.registry.get(kb_id)["version"],  # type: ignore
                 "files": files, "jobs": jobs}
+
+    @app.get("/api/v1/slides/{file_id}/{n}")
+    def slide(file_id: str, n: int, p: Principal = Auth):
+        """Resolve a slide citation to the exact slide: text, notes, image texts, neighbours,
+        canonical id, version and whether a newer version supersedes it."""
+        ix = kb_indexer()
+        d = ix.store.get_document(f"file:{file_id}:s{n}")
+        if d is None or d.file is None:
+            raise HTTPException(404, "unknown slide")
+        readable_kbs(p, [d.file.kb_id])
+        f = d.file
+        neighbours = {}
+        for k in (n - 1, n + 1):
+            nd = ix.store.get_document(f"file:{file_id}:s{k}")
+            if nd is not None:
+                neighbours[k] = {"title": nd.title, "canonical_id": nd.file.canonical_id}
+        return {
+            "canonical_id": f.canonical_id, "citation_id": f"SLIDE:{f.lecture_id}:{n}"
+            if f.lecture_id else f"FILE:{file_id}:s{n}", "course_id": f.course_id,
+            "lecture_id": f.lecture_id, "lecture_title": f.lecture_title, "slide_number": n,
+            "deck_version": f.deck_version, "academic_year": f.academic_year,
+            "file_name": f.file_name, "title": d.title, "text": d.abstract, "section": f.section,
+            "n_images": f.n_images, "images_with_text": f.images_with_text,
+            "needs_ocr": f.needs_ocr, "superseded_by": f.superseded_by or None,
+            "neighbours": neighbours, "content_hash": f.content_hash,
+        }  # fmt: skip
 
     @app.delete("/api/v1/kb/{kb_id}/files/{file_id}")
     def kb_delete_file(kb_id: str, file_id: str, p: Principal = Auth):

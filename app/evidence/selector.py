@@ -41,6 +41,9 @@ class EvidenceUnit(BaseModel):
     file_name: str | None = None
     locator: str | None = None  # "p3" | "s7" | "Sheet1!A1:D40" | "sec2"
     locator_label: str | None = None  # "page 3" | "slide 7" | "Sheet1 rows 1–40"
+    canonical_id: str | None = None  # course/lecture/slide/version/hash for uploaded decks
+    deck_version: str | None = None
+    superseded_by: str | None = None
 
     @property
     def is_slide(self) -> bool:
@@ -51,8 +54,12 @@ class EvidenceUnit(BaseModel):
         return self.doc_id.startswith("file:")
 
     @property
+    def is_lecture_slide(self) -> bool:
+        return bool(self.lecture_id) and self.slide_number is not None
+
+    @property
     def citation_id(self) -> str:
-        if self.is_slide:
+        if self.is_slide or (self.is_file and self.is_lecture_slide):
             return f"SLIDE:{self.lecture_id}:{self.slide_number}"
         if self.is_file:
             return f"FILE:{self.file_id}:{self.locator}"
@@ -60,9 +67,10 @@ class EvidenceUnit(BaseModel):
 
     @property
     def display_source(self) -> str:
-        """'Lecture title, Slide N' | 'file name, page N' | the article title."""
-        if self.is_slide:
-            return f"{self.lecture_title}, Slide {self.slide_number}"
+        """'Lecture title, Slide N (v2026)' | 'file name, page N' | the article title."""
+        if self.is_slide or (self.is_file and self.is_lecture_slide):
+            v = f" (v{self.deck_version})" if self.deck_version else ""
+            return f"{self.lecture_title}, Slide {self.slide_number}{v}"
         if self.is_file:
             return f"{self.file_name}, {self.locator_label or self.locator}"
         return self.title
@@ -97,12 +105,16 @@ def select_evidence(
             title=doc.title, year=doc.year, journal=doc.journal, source_type=doc.source_type,
             is_peer_reviewed=doc.is_peer_reviewed, text=p.text, char_start=p.char_start,
             char_end=p.char_end, score=score, doc_rank=rank, url=doc.url,
-            course_id=s.course_id if s else None, lecture_id=s.lecture_id if s else None,
-            lecture_title=s.lecture_title if s else None,
-            slide_number=s.slide_number if s else None, neighbour_of=neighbour_of,
+            course_id=(s.course_id if s else (f.course_id or f.kb_id) if f else None),
+            lecture_id=(s.lecture_id if s else (f.lecture_id or None) if f else None),
+            lecture_title=(s.lecture_title if s else (f.lecture_title or None) if f else None),
+            slide_number=(s.slide_number if s else f.slide_number if f else None),
+            neighbour_of=neighbour_of,
             kb_id=f.kb_id if f else None, file_id=f.file_id if f else None,
             file_name=f.file_name if f else None, locator=f.locator if f else None,
-            locator_label=f.label if f else None,
+            locator_label=f.label if f else None, canonical_id=f.canonical_id if f else None,
+            deck_version=(f.deck_version or None) if f else None,
+            superseded_by=(f.superseded_by or None) if f else None,
         )  # fmt: skip
 
     for rank, cand in enumerate(docs, start=1):

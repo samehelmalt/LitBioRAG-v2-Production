@@ -67,6 +67,29 @@ class FileMeta(BaseModel):
     version: str = ""
     content_hash: str = ""
     uploaded_by: str = ""
+    # lecture provenance for uploaded decks (commercial contract: every citation resolves to the
+    # exact slide of a known lecture version)
+    course_id: str = ""
+    lecture_id: str = ""
+    lecture_title: str = ""
+    academic_year: str = ""
+    deck_version: str = ""
+    slide_number: int | None = None
+    section: str = ""
+    n_images: int = 0
+    images_with_text: int = 0
+    needs_ocr: bool = False  # pictures present but no text could be extracted from them
+    superseded_by: str = ""  # file_id of a newer version of the same lecture
+
+    @property
+    def canonical_id(self) -> str:
+        """course_id/lecture_id/slide/version/content_hash (for files without lecture metadata:
+        kb_id/file_id/locator/version/hash)."""
+        if self.lecture_id:
+            return (f"{self.course_id or '-'}/{self.lecture_id}/s{self.slide_number or 0}/"
+                    f"v{self.deck_version or self.version or '1'}/{self.content_hash}")
+        return (f"{self.kb_id}/{self.file_id}/{self.locator}/v{self.version or '1'}/"
+                f"{self.content_hash}")
 
 
 class SlideMeta(BaseModel):
@@ -82,6 +105,9 @@ class SlideMeta(BaseModel):
     academic_year: str = ""
     version: str = ""
     content_hash: str = ""
+    n_images: int = 0
+    images_with_text: int = 0
+    needs_ocr: bool = False
 
 # PubMed <PublicationType> strings -> SourceType (first match in this order wins).
 _PUBTYPE_MAP: tuple[tuple[str, SourceType], ...] = (

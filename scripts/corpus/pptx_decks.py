@@ -30,6 +30,21 @@ from app.core.documents import Document, SlideMeta, SourceType  # noqa: E402
 _PICTURE = 13  # MSO_SHAPE_TYPE.PICTURE
 
 
+def _pictures(shape) -> list[tuple[bytes, str]]:
+    """(blob, content_type) for every picture in a shape (recursing into groups)."""
+    out: list[tuple[bytes, str]] = []
+    if shape.shape_type == _PICTURE:
+        try:
+            img = shape.image
+            out.append((img.blob, img.content_type or "image/png"))
+        except Exception:  # noqa: BLE001  (linked/unsupported images have no blob)
+            pass
+    if getattr(shape, "shape_type", None) == 6:  # group
+        for sub in shape.shapes:
+            out.extend(_pictures(sub))
+    return out
+
+
 def _shape_texts(shape) -> list[str]:
     out: list[str] = []
     if getattr(shape, "has_text_frame", False) and shape.has_text_frame:
@@ -63,7 +78,9 @@ def extract_deck(
     lecture_title: str,
     academic_year: str = "",
     version: str = "",
+    image_text=None,
 ) -> list[Document]:
+    """``image_text``: an ``app.kb.vision.ImageTextExtractor`` (OCR / captions); None = none."""
     from pptx import Presentation  # optional dependency (pptx extra)
 
     prs = Presentation(str(path))
@@ -73,10 +90,24 @@ def extract_deck(
         title_shape = slide.shapes.title
         title = (title_shape.text or "").strip() if title_shape is not None else ""
         parts: list[str] = []
+        pictures: list[tuple[bytes, str]] = []
         for shape in slide.shapes:
             if title_shape is not None and shape.shape_id == title_shape.shape_id:
                 continue
             parts.extend(_shape_texts(shape))
+            pictures.extend(_pictures(shape))
+        images_with_text = 0
+        for i, (blob, ctype) in enumerate(pictures, start=1):
+            txt = ""
+            if image_text is not None:
+                try:
+                    txt = (image_text.extract(blob, content_type=ctype, context=title) or "")
+                except Exception:  # noqa: BLE001  (a failing engine never fails the deck)
+                    txt = ""
+            txt = txt.strip()
+            if txt:
+                images_with_text += 1
+                parts.append(f"[image {i} text] {txt}")
         notes = ""
         if slide.has_notes_slide and slide.notes_slide.notes_text_frame is not None:
             notes = (slide.notes_slide.notes_text_frame.text or "").strip()
@@ -102,6 +133,8 @@ def extract_deck(
                     course_id=course_id, lecture_id=lecture_id, lecture_title=lecture_title,
                     slide_number=n, file_name=path.name, slide_title=title, section=this_section,
                     academic_year=academic_year, version=version, content_hash=content_hash,
+                    n_images=len(pictures), images_with_text=images_with_text,
+                    needs_ocr=bool(pictures) and images_with_text == 0 and not body.strip(),
                 ),  # fmt: skip
             )
         )

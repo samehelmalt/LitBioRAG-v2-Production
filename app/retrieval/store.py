@@ -204,6 +204,24 @@ class MetadataStore:
                 self.conn.execute(f"DELETE FROM documents WHERE doc_id IN ({marks})", chunk)
         return len(ids)
 
+    def mark_superseded(self, doc_ids: Iterable[str], by_file_id: str) -> int:
+        """Old deck versions stay citable: the document row keeps its text, the passages leave
+        the search indexes (callers rebuild/remove them), and FileMeta.superseded_by is set."""
+        n = 0
+        with self.conn:
+            for did in doc_ids:
+                row = self.conn.execute("SELECT file FROM documents WHERE doc_id=?",
+                                        (did,)).fetchone()  # fmt: skip
+                if row is None or not row["file"]:
+                    continue
+                meta = json.loads(row["file"])
+                meta["superseded_by"] = by_file_id
+                self.conn.execute("UPDATE documents SET file=? WHERE doc_id=?",
+                                  (json.dumps(meta), did))  # fmt: skip
+                self.conn.execute("DELETE FROM passages WHERE doc_id=?", (did,))
+                n += 1
+        return n
+
     def doc_ids_where(
         self, *, course_id: str | None = None, prefix: str | None = None
     ) -> list[str]:

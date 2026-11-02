@@ -142,6 +142,9 @@ class SourceOut(BaseModel):
     file_name: str | None = None
     locator: str | None = None
     locator_label: str | None = None
+    canonical_id: str | None = None
+    deck_version: str | None = None
+    superseded_by: str | None = None
 
 
 class ConflictOut(BaseModel):
