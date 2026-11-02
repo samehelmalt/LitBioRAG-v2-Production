@@ -32,7 +32,32 @@ Models are configuration, not code: edit `configs/models.yaml` or set `LITBIORAG
 | generator (local, ≤ 12 GB at 4-bit) | `Qwen/Qwen3-8B`, `Qwen/Qwen3-14B`, `google/gemma-3-12b-it`, `google/medgemma-4b-it`, `meta-llama/Llama-3.1-8B-Instruct` | structured-output compliance weighs more than chain-of-thought (thesis E1) |
 | generator (hosted, optional) | any 27B-class or API model behind `openai_compatible` / `anthropic` | cost and latency columns added |
 | verifier | `MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli`, Bespoke-MiniCheck-7B (4-bit), `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` (thesis baseline) | different family from the generator |
-| entity_extractor | `regex:biomed-v1` (default), scispaCy `en_core_sci_md` + UMLS linker | |
+| entity_extractor | `regex:biomed-v2` (default), scispaCy `en_core_sci_md` + UMLS linker | |
+| slide images | Tesseract OCR; hosted vision model (`configs/kb.yaml`) | image-only slides are flagged until one is enabled |
+
+**MedCPT is a paired encoder**: `ncbi/MedCPT-Article-Encoder` embeds passages and
+`ncbi/MedCPT-Query-Encoder` embeds questions. The registry refuses the article tower without its
+query tower; every profile names the pair (`params.query`). The thesis used the article tower for
+both, which the production baseline will measure as a separate row.
+
+## Profiles for the education prototype
+| Profile | Generator | Retrieval / verifier | Fits 12 GB? | Use |
+|---|---|---|---|---|
+| `local-8b` (A) | Qwen3-8B 4-bit, thinking off | MedCPT pair + bge-reranker-v2-m3 + DeBERTa-v3-large NLI | yes, all resident (~8.7 GB) | first prototype run; private data |
+| `local-14b` (B) | Qwen3-14B 4-bit | same | generator on_demand or second GPU | quality comparison on identical inputs |
+| `hosted` (C) | any OpenAI-compatible / Anthropic model | same, local | generator uses no VRAM | when confidentiality permits; spend caps apply |
+
+## Prototype benchmark protocol (30 slides, before scaling to 5,000)
+1. Build the deck + question set (`scripts/make_prototype_deck.py`) or use the client's reviewed
+   set (same schema, `evaluation/datasets/lecture_qa.py`).
+2. For each profile, run `scripts/run_lecture_qa.py` with the **same** deck, evidence windows and
+   questions; the run directory records versions, question-set summary and the attempt ledger.
+3. Compare: slide Recall@5/10 and MRR; citation-resolution validity (must be 100%); delivered
+   precision and false PASS (proxy, then human labels in the `human_label` column); unanswerable
+   abstention; repetition / format defect rate; attempts per answer; latency; cost per 1,000
+   answers. Report candidate / verified / released metrics separately.
+4. Choose one winner per role; calibrate the gate on the calibration split for that verifier;
+   record the row below with the run id. No row, no claim.
 
 ## Results
 

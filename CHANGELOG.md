@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.10.0 — 2026-11-02
+Closes the gaps of the external v0.9.2 assessment and the LitBioRAG failure classes.
+- Retrieval: paired MedCPT query/article encoders (searches use the query tower; registry
+  refuses a mismatched pair).
+- Generation: model-family profiles (Qwen3 thinking off, DeepSeek reasoning-tag stripping,
+  decoding controls, stop strings); output-integrity checks (repetition, n-gram loops, role
+  echoes, truncated JSON, duplicate claims, uncovered sentences, off-topic); bounded regeneration
+  with precise evidence-bound feedback and an immutable attempt ledger.
+- One transaction, six channels: RAW / CANDIDATE / USER / AUDIT / CONTROL / HISTORY records per
+  request id (`GET /api/v1/records/{id}`); chats keep delivered turns only; metrics reported as
+  candidate / verified / released.
+- Conversation: follow-ups rewritten from the delivered state and shown as "Interpreted as";
+  earlier answers are context, never evidence.
+- Slides: OCR (Tesseract) and hosted vision captions, both optional; image-only slides flagged
+  `needs_ocr`; lecture provenance (course / lecture / year / version) on upload; canonical slide
+  ids; `GET /api/v1/slides/{file_id}/{n}`; deck versions supersede in search while old citations
+  still resolve.
+- Knowledge bases: incremental FAISS id-mapped add/remove and Tantivy deletes with atomic
+  persistence; persistent index jobs.
+- Education policy: lecture-first with labelled `lecture_vs_literature` conflicts; education
+  profile defaults to the uploaded scope; course-material share in evidence selection.
+- Evaluation: lecture QA question-set schema, synthetic 30-slide prototype deck and 34-question
+  set, slide-level runner (Recall@k, MRR, citation validity, delivered precision, false PASS,
+  unanswerable abstention, defects, latency, cost); span-in-prompt check per claim.
+- Platform: embeddable chat widget (`/embed`, `static/widget.js`), tenant-scoped identities,
+  `local-8b` and `local-14b` model profiles.
+
 ## 0.9.2 — 2026-10-31
 - Product name AEOS Medical; medical-cross logo.
 - Docker local test run: `docker compose up --build` builds a demo bundle on first start, issues
