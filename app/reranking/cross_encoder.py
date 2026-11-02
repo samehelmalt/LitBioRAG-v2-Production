@@ -41,16 +41,16 @@ class CrossEncoderReranker:
         model_max = getattr(self.tokenizer, "model_max_length", 512) or 512
         self.max_length = min(max_length or model_max, model_max, 8192)
 
-    def rerank(self, query: str, candidates: Sequence[Candidate], top_n: int) -> list[RerankHit]:
-        if not candidates:
-            return []
+    def score_pairs(self, pairs: Sequence[tuple[str, str]]) -> list[float]:
+        """Relevance score per (query, passage) pair; pairs may come from different queries, which
+        is what lets ``app.core.batcher`` share one forward pass across concurrent requests."""
         scores: list[float] = []
         with self._torch.inference_mode():
-            for i in range(0, len(candidates), self.batch_size):
-                batch = candidates[i : i + self.batch_size]
+            for i in range(0, len(pairs), self.batch_size):
+                batch = pairs[i : i + self.batch_size]
                 enc = self.tokenizer(
-                    [query] * len(batch),
-                    [c.text for c in batch],
+                    [q for q, _ in batch],
+                    [t for _, t in batch],
                     padding=True,
                     truncation="only_second",  # never cut the query
                     max_length=self.max_length,
@@ -60,6 +60,12 @@ class CrossEncoderReranker:
                 # single-logit relevance heads (MedCPT, BGE) vs 2-class heads
                 col = logits[:, 0] if logits.shape[-1] == 1 else logits[:, -1]
                 scores.extend(col.float().cpu().tolist())
+        return scores
+
+    def rerank(self, query: str, candidates: Sequence[Candidate], top_n: int) -> list[RerankHit]:
+        if not candidates:
+            return []
+        scores = self.score_pairs([(query, c.text) for c in candidates])
         hits = [RerankHit(c.passage_id, s) for c, s in zip(candidates, scores, strict=True)]
         hits.sort(key=lambda h: (-h.score, h.passage_id))
         return hits[:top_n]

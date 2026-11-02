@@ -36,8 +36,25 @@ gpu:
     verifier: 1.0
     generator: 6.0                # 8B at 4-bit incl. KV cache; 14B at 4-bit ~9.5
 
+concurrency:                      # admission control per model role (app/core/admission.py)
+  queue_max: 32                   # waiters beyond capacity; one more gets 503 + Retry-After
+  queue_timeout_s: 45             # longest wait in the queue before 503
+  roles:                          # roles not listed here are not gated
+    generator:
+      capacity: 1                 # in-process hf_causal: one sequence at a time. With an
+                                  #   openai_compatible generator (vLLM, hosted API) raise this to
+                                  #   the server's batch size, e.g. 32–64: vLLM batches them.
+    verifier:
+      capacity: 4                 # NLI forward passes that may run at once on one GPU
+
+batching:                         # cross-request micro-batching (app/core/batcher.py)
+  enabled: true                   # concurrent requests share one verifier / reranker forward pass
+  max_wait_ms: 20                 # a caller waits at most this long for others; alone = no wait
+  max_batch: 64                   # pairs per shared pass
+  roles: [verifier, reranker]
+
 cache:
-  enabled: false                  # true in production; CI and tests run without a cache
+  enabled: false                # true in production; CI and tests run without a cache
   path: data/cache/litbiorag.sqlite
   ttl_days: 30
   verifier_pairs: true            # (model, premise, hypothesis) -> NLI scores

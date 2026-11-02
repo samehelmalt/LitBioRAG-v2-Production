@@ -28,6 +28,7 @@ from app.api.keys import KeyStore
 from app.api.ratelimit import RateLimiter
 from app.api.settings import ApiSettings
 from app.api.trials import TrialLedger, TrialLimitExceeded
+from app.core.admission import Overloaded
 from app.core.budget import Pricing, ResourceConfig, UsageLedger
 from app.core.documents import Document, SourceType
 from app.corpus.manager import CorpusConfig, CorpusManager
@@ -305,6 +306,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             gate_calibrated_on=p.versions.gate_calibrated_on or "UNCALIBRATED",
             preflight=p.preflight,
             ledger_spent_today_usd=ledger.spent_today if ledger else None,
+            concurrency=p.pool.admission.snapshot(),
         )  # fmt: skip
 
     @app.get("/api/v1/trial")
@@ -375,6 +377,15 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                          max_units=min(req.max_units or pl.max_units, st.limits.max_units),
                          scope=scope, kb_ids=kb_ids, history=history,
                          progress=progress)  # fmt: skip
+        except Overloaded as e:
+            if charged:
+                trials.refund(p.sub, rid)
+            audit.record({"event": "overloaded", "request_id": rid, "sub": p.sub,
+                          "role": e.role, "reason": e.reason})  # fmt: skip
+            raise HTTPException(
+                503, f"the service is busy ({e.role}: {e.reason}); try again shortly",
+                headers={"Retry-After": str(int(e.retry_after_s))},
+            ) from e
         except Exception:
             if charged:
                 trials.refund(p.sub, rid)

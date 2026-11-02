@@ -267,6 +267,9 @@ class Health(BaseModel):
     gate_calibrated_on: str
     preflight: dict[str, Any]
     ledger_spent_today_usd: float | None
+    concurrency: dict[str, Any] = Field(default_factory=dict,
+                                        description="admission control per model role: "
+                                                    "in_flight, queued, rejected, wait times")
 
 
 class ErrorOut(BaseModel):

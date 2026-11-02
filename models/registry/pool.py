@@ -15,6 +15,7 @@ import logging
 from contextlib import contextmanager
 from typing import Any
 
+from app.core.admission import Admission
 from app.core.budget import ResourceConfig
 from models.registry.loader import ModelRegistry
 
@@ -46,6 +47,8 @@ class ModelPool:
         self.vram_gb = float(gpu.get("vram_gb") or 0.0)
         self._resident: dict[str, Any] = {}
         self._loads: dict[str, int] = {}
+        # admission control: how many requests may hold each role at once (H1)
+        self.admission = Admission.from_config(self.res.concurrency)
 
     # ---- policy ---------------------------------------------------------------------------
     def policy(self, role: str) -> str:
@@ -95,12 +98,15 @@ class ModelPool:
             t.cuda.empty_cache()
 
     @contextmanager
-    def use(self, role: str):
-        obj = self.acquire(role)
-        try:
-            yield obj
-        finally:
-            self.release(role, obj)
+    def use(self, role: str, *, on_queued=None):
+        """Admit (bounded concurrency, FIFO queue), then acquire; raises ``Overloaded`` when the
+        role's queue is full or the wait times out, before any model is loaded."""
+        with self.admission.admit(role, on_queued=on_queued):
+            obj = self.acquire(role)
+            try:
+                yield obj
+            finally:
+                self.release(role, obj)
 
     @property
     def load_counts(self) -> dict[str, int]:

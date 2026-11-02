@@ -179,14 +179,20 @@ def build_spec(spec: ModelSpec) -> Any:
 
 
 def wrap_with_cache(role: str, obj: Any) -> Any:
-    """Wrap verifier / dense_encoder in the on-disk cache when configs/resources.yaml enables it.
-    Cache keys include the model name, so a swapped model never reads another model's results."""
+    """Wrap verifier / reranker in the cross-request micro-batcher and verifier / dense_encoder in
+    the on-disk cache when configs/resources.yaml enables them (cache outside, batcher inside, so
+    cache hits never wait). Cache keys include the model name, so a swapped model never reads
+    another model's results."""
     try:
         from app.core.budget import ResourceConfig
 
-        cfg = ResourceConfig.from_yaml().cache or {}
-    except Exception:  # noqa: BLE001  (no config → no cache)
+        res = ResourceConfig.from_yaml()
+    except Exception:  # noqa: BLE001  (no config → no wrappers)
         return obj
+    from app.core.batcher import wrap_with_batching
+
+    obj = wrap_with_batching(role, obj, res.batching)
+    cfg = res.cache or {}
     if not cfg.get("enabled"):
         return obj
     from app.core.cache import CachedEncoder, CachedVerifier, DiskCache

@@ -92,6 +92,8 @@ class ResourceConfig(BaseModel):
     api: dict[str, Any] = Field(default_factory=dict)
     gpu: dict[str, Any] = Field(default_factory=dict)
     cache: dict[str, Any] = Field(default_factory=dict)
+    concurrency: dict[str, Any] = Field(default_factory=dict)
+    batching: dict[str, Any] = Field(default_factory=dict)
 
     @classmethod
     def from_yaml(cls, path: Path | str | None = None) -> ResourceConfig:

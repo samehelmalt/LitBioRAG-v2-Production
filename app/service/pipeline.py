@@ -228,11 +228,16 @@ class AnswerPipeline:
         thresholds = self.registry.thresholds("verifier")
 
         def do_verify(parsed: GeneratedAnswer) -> VerificationReport:
-            return verify(parsed, units, verifier, extractor, config=self.ver_cfg,
-                          thresholds=thresholds, question=question)  # fmt: skip
+            with self.pool.admission.admit(
+                "verifier", on_queued=lambda n: say("queued", role="verifier", ahead=n)
+            ):
+                return verify(parsed, units, verifier, extractor, config=self.ver_cfg,
+                              thresholds=thresholds, question=question)  # fmt: skip
 
         attempts: list[AttemptRecord] = []
-        with self.pool.use("generator") as generator:
+        with self.pool.use(
+            "generator", on_queued=lambda n: say("queued", role="generator", ahead=n)
+        ) as generator:
 
             def do_generate(feedback: str | None) -> tuple[str, GeneratedAnswer]:
                 if feedback:

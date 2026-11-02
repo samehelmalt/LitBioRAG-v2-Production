@@ -54,7 +54,7 @@
       $("tab-citations").innerHTML = A.renderClaims(b);
       $("tab-analysis").innerHTML = A.renderAnalysis(b) + `<details><summary class="muted small">full verification report</summary>${kv(b.verification)}</details>`;
     }
-    const STAGES = { scope_check: "Checking scope", retrieving: "Searching knowledge base", retrieved: "Retrieving relevant documents", generating: "Generating grounded answer", verifying: "Verifying claims against evidence", deciding: "Deciding delivery" };
+    const STAGES = { scope_check: "Checking scope", retrieving: "Searching knowledge base", retrieved: "Retrieving relevant documents", generating: "Generating grounded answer", verifying: "Verifying claims against evidence", deciding: "Deciding delivery", queued: "Waiting for a free model slot" };
     $("ask").addEventListener("submit", async (ev) => {
       ev.preventDefault();
       const q = $("q").value.trim(); if (!q) return;
