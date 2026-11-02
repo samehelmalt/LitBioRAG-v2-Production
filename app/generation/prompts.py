@@ -64,9 +64,10 @@ def render_evidence(units: Sequence[EvidenceUnit]) -> str:
     return "\n\n".join(lines) if lines else "(none)"
 
 
-CONTEXT_TEMPLATE = """Earlier questions in this conversation (context only; they resolve
-pronouns and abbreviations — answer the current question from the evidence below, not from
-earlier answers):
+CONTEXT_TEMPLATE = """Conversation context (NOT evidence): earlier questions and the answers that
+were delivered. Use them only to resolve pronouns, abbreviations and the topic of the current
+question. Every claim must still be supported by the evidence passages below; do not cite or
+restate earlier answers as facts.
 {history}
 
 """

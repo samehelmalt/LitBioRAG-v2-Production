@@ -33,6 +33,7 @@ from app.corpus.manager import CorpusConfig, CorpusManager
 from app.evidence.selector import EvidenceUnit
 from app.review.service import ReleaseNeedsConfirmation, ReviewConfig, ReviewService
 from app.service.pipeline import AnswerPipeline, PipelineOutput
+from app.service.records import RecordStore, build_record
 
 log = logging.getLogger("litbiorag.api")
 STATIC = Path(__file__).resolve().parents[1] / "web" / "static"
@@ -165,6 +166,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     data_dir = st.audit_path.parent if st.audit_path else None
     chats = ChatStore(data_dir / "chats.sqlite" if data_dir else None)
     keys = KeyStore(data_dir / "api_keys.sqlite" if data_dir else None)
+    records = RecordStore(data_dir / "answers.sqlite" if data_dir else None)
     state: dict[str, Any] = {"pipeline": pipeline, "review": review, "corpus": None}
 
     @asynccontextmanager
@@ -343,14 +345,22 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                      scope=scope, kb_ids=kb_ids, history=history, progress=progress)  # fmt: skip
         resp = to_response(out, rid, pl.versions.as_dict(), bool(pl.gate_cfg.calibrated_on))
         resp.scope, resp.kb_ids = scope, kb_ids
-        if chat is not None:
-            chats.append(req.chat_id, request_id=rid, question=req.question, action=resp.action,
-                         answer=resp.answer, response=resp.model_dump(mode="json"))  # fmt: skip
-            resp.chat_id = req.chat_id
+        resp.attempts = [a.summary() for a in out.attempts]
         case = reviews().maybe_enqueue(out, resp.model_dump(mode="json"), sub=p.sub,
                                        course_ids=courses)  # fmt: skip
         if case:
             resp.review = schemas.ReviewInfo(case_id=case["case_id"], status="under_review")
+        if chat is not None:
+            resp.chat_id = req.chat_id
+        # the immutable record is the single source for chat, audit and review views
+        rec = build_record(out, resp.model_dump(mode="json"), sub=p.sub, chat_id=req.chat_id,
+                           scope=scope, kb_ids=kb_ids, versions=pl.versions.as_dict(),
+                           operating_point=pl.gate_cfg.operating_point)  # fmt: skip
+        records.save(rec)
+        resp.record_id = rid
+        if chat is not None:
+            chats.append(req.chat_id, request_id=rid, question=req.question, action=resp.action,
+                         answer=resp.answer, response=resp.model_dump(mode="json"))  # fmt: skip
         audit.record({
             "event": "query", "request_id": rid, "sub": p.sub, "via": p.via,
             "courses": courses, "question": req.question, "action": resp.action,
@@ -639,6 +649,32 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         return StreamingResponse(events(), media_type="text/event-stream",
                                  headers={"Cache-Control": "no-cache", "X-Request-ID": rid})
 
+    # ---- answer records ---------------------------------------------------------------------
+    @app.get("/api/v1/records/{request_id}")
+    def record(request_id: str, channels: str | None = None, p: Principal = Auth):
+        """Immutable channels of one request: owner sees user/history/control; reviewers and
+        admins see raw/candidate/audit too."""
+        rec = records.get(request_id)
+        if rec is None:
+            raise HTTPException(404, "unknown request id")
+        privileged = p.is_admin or "reviewer" in p.roles
+        if rec["sub"] != p.sub and not privileged:
+            raise HTTPException(403, "not your request")
+        allowed = {"user", "history", "control"} | ({"raw", "candidate", "audit"}
+                                                      if privileged else set())
+        want = [c for c in (channels or "").split(",") if c] or sorted(allowed)
+        bad = [c for c in want if c not in allowed]
+        if bad:
+            raise HTTPException(403, f"channel(s) not available to you: {', '.join(bad)}")
+        return {"request_id": request_id, "action": rec["action"], "delivered": rec["delivered"],
+                "created_at": rec["created_at"], **{c: rec[c] for c in want}}  # fmt: skip
+
+    @app.get("/api/v1/records")
+    def my_records(p: Principal = Auth):
+        if p.anonymous:
+            raise HTTPException(401, "sign in to list your requests")
+        return records.list_for(p.sub)
+
     # ---- chats ------------------------------------------------------------------------------
     def _chat_owner(chat_id: str, p: Principal) -> dict:
         if p.anonymous:
@@ -663,7 +699,8 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     @app.get("/api/v1/chats/{chat_id}")
     def chats_get(chat_id: str, p: Principal = Auth):
         c = _chat_owner(chat_id, p)
-        return {**c, "messages": chats.messages(chat_id, with_response=True)}
+        return {**c, "messages": chats.messages(chat_id, with_response=True),
+                "history": records.history_for_chat(chat_id)}  # fmt: skip
 
     @app.delete("/api/v1/chats/{chat_id}")
     def chats_delete(chat_id: str, p: Principal = Auth):

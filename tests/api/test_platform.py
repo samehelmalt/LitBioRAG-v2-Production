@@ -42,9 +42,9 @@ def test_history_is_rendered_into_the_prompt_as_context_only():
                      url=None)  # fmt: skip
     plain = build_messages("q2", [u])[1]["content"]
     ctx = build_messages("q2", [u], ["first question about MAP3K3"])[1]["content"]
-    assert "Earlier questions" not in plain
-    assert "Earlier questions" in ctx and "- first question about MAP3K3" in ctx
-    assert "context only" in ctx and ctx.endswith("Respond with the JSON object only.")
+    assert "Conversation context" not in plain
+    assert "Conversation context (NOT evidence)" in ctx and "- first question about MAP3K3" in ctx
+    assert "NOT evidence" in ctx and ctx.endswith("Respond with the JSON object only.")
 
 
 def test_stream_emits_stages_then_the_same_result(client):

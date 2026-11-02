@@ -192,6 +192,8 @@ class QueryResponse(BaseModel):
     scope: str = "indexed"
     kb_ids: list[str] = Field(default_factory=list)
     chat_id: str | None = None
+    record_id: str | None = None  # immutable answer record (GET /api/v1/records/{id})
+    attempts: list[dict[str, Any]] = Field(default_factory=list)  # attempt ledger summaries
     disclosure: str = DISCLOSURE
     review: ReviewInfo | None = None
 

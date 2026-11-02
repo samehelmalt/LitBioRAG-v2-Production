@@ -81,7 +81,8 @@ class ReviewService:
             evidence=[u.model_dump(mode="json") for u in out.evidence],
         )
         self.audit.record({"event": "review_enqueued", "case_id": case["case_id"],
-                           "request_id": case["request_id"], "rule": d.rule})  # fmt: skip
+                           "request_id": case["request_id"], "rule": d.rule,
+                           "record_id": case["request_id"]})  # fmt: skip
         return case
 
     # ---- decide --------------------------------------------------------------------------

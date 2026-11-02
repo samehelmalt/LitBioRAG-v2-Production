@@ -17,6 +17,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from app.evidence.selector import select_evidence
+from app.generation.attempts import run_attempts
 from app.generation.service import GenerationConfig
 from app.generation.service import answer as generate_answer
 from app.retrieval.pipeline import HybridRetriever
@@ -64,6 +65,13 @@ class AnswerRow:
     sufficiency_features: dict[str, float] = field(default_factory=dict)
     latency_ms: float = 0.0
     answer_text: str = ""
+    # metric separation: candidate = attempt 1 raw output, verified = selected attempt,
+    # released = delivered by the gate (ANSWER / ANSWER_WITH_CAUTION)
+    n_attempts: int = 1
+    candidate_quality_ok: bool = True
+    candidate_entailment_rate: float | None = None
+    candidate_vetoed: bool = False
+    released: bool = False
 
 
 def run_answers(
@@ -85,9 +93,22 @@ def run_answers(
         t0 = time.perf_counter()
         res = retriever.retrieve(rec.question, mode="hybrid+rerank")
         units = select_evidence(res, retriever.store, max_units=max_units)
-        gen = generate_answer(rec.question, units, generator, config=gen_cfg)
-        rep = verify(gen, units, verifier, extractor, config=ver_cfg, thresholds=thresholds,
-                     question=rec.question)  # fmt: skip
+        def do_generate(feedback, _q=rec.question, _u=units):
+            parsed = generate_answer(_q, _u, generator, config=gen_cfg, feedback=feedback)
+            return parsed.raw, parsed
+
+        def do_verify(parsed, _q=rec.question, _u=units):
+            return verify(parsed, _u, verifier, extractor, config=ver_cfg, thresholds=thresholds,
+                          question=_q)  # fmt: skip
+
+        attempts, selected = run_attempts(
+            do_generate, do_verify, max_attempts=(gen_cfg or GenerationConfig()).max_attempts,
+            question_entities=extractor.extract(rec.question) or None,
+            extract_entities=extractor.extract, units=units,
+        )
+        gen = selected.answer
+        rep = selected.verification if selected.verification is not None else do_verify(gen)
+        first = attempts[0]
         suff = evidence_sufficiency(res, rep, gate_cfg.sufficiency_model)
         dec = decide(rep, gen, sufficiency=suff, config=gate_cfg, question=rec.question)
         gold = gold_doc_ids(rec)
@@ -108,6 +129,12 @@ def run_answers(
                 substitution_detected=rep.substitution_detected,
                 entity_fidelity=rep.entity_fidelity, numeric_fidelity=rep.numeric_fidelity,
                 n_conflicts=len(rep.conflicts), yn_gold=rec.yn_label, yn_pred=yn_pred,
+                n_attempts=len([a for a in attempts if a.raw]),
+                candidate_quality_ok=first.quality.ok,
+                candidate_entailment_rate=(first.verification.entailment_rate
+                                           if first.verification else None),
+                candidate_vetoed=first.vetoed,
+                released=dec.action.value in ("ANSWER", "ANSWER_WITH_CAUTION"),
                 proxy_acceptable=proxy_acceptable(
                     yn_gold=rec.yn_label or None, yn_pred=yn_pred or None,
                     gold_retrieved=gold_in_ev, unsupported_rate=rep.unsupported_rate,
@@ -122,12 +149,38 @@ def run_answers(
     return rows
 
 
+def _mean(xs) -> float | None:
+    xs = [float(x) for x in xs]
+    return sum(xs) / len(xs) if xs else None
+
+
 def summarize(rows: Sequence[AnswerRow], calibrated_on: str = "") -> dict:
     decisions = [r.internal_state for r in rows]
     labels = [r.proxy_acceptable for r in rows]
+    released = [r for r in rows if r.released]
     out: dict = {
         "n": len(rows),
         "labels": "proxy" if rows else None,
+        "channels": {  # the same metric at three stages; they are not interchangeable
+            "candidate": {
+                "quality_ok_rate": _mean([r.candidate_quality_ok for r in rows]),
+                "vetoed_rate": _mean([r.candidate_vetoed for r in rows]),
+                "entailment_rate": _mean([r.candidate_entailment_rate for r in rows
+                                          if r.candidate_entailment_rate is not None]),
+            },
+            "verified": {
+                "entailment_rate": _mean([r.entailment_rate for r in rows
+                                          if r.entailment_rate is not None]),
+                "mean_attempts": _mean([r.n_attempts for r in rows]),
+            },
+            "released": {
+                "n": len(released),
+                "coverage": len(released) / len(rows) if rows else None,
+                "precision_proxy": _mean([r.proxy_acceptable for r in released]),
+                "entailment_rate": _mean([r.entailment_rate for r in released
+                                          if r.entailment_rate is not None]),
+            },
+        },
         "calibrated_on": calibrated_on or "UNCALIBRATED (heuristic defaults)",
         "actions": dict(Counter(r.action for r in rows)),
         "rules": dict(Counter(r.rule for r in rows)),

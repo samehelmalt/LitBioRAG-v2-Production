@@ -68,10 +68,27 @@ class ChatStore:
         return out
 
     def history(self, chat_id: str) -> list[str]:
-        return [m["question"] for m in self.messages(chat_id)]
+        """Context strings for the generator: delivered turns only (question + answer summary).
+        Withheld turns contribute their question for disambiguation but no answer text."""
+        out: list[str] = []
+        for m in self.messages(chat_id):
+            if m["action"] in ("ANSWER", "ANSWER_WITH_CAUTION") and m["answer"]:
+                out.append(f"Q: {m['question'][:300]} → delivered answer: {m['answer'][:300]}")
+            else:
+                out.append(f"Q: {m['question'][:300]} → (no answer was delivered)")
+        return out[-4:]
+
+    def verified_turns(self, chat_id: str) -> list[dict[str, Any]]:
+        return [m for m in self.messages(chat_id)
+                if m["action"] in ("ANSWER", "ANSWER_WITH_CAUTION")]  # fmt: skip
 
     def append(self, chat_id: str, *, request_id: str, question: str, action: str, answer: str,
                response: dict | None) -> int:  # fmt: skip
+        delivered = action in ("ANSWER", "ANSWER_WITH_CAUTION")
+        if not delivered:
+            answer = ""  # a withheld answer never enters the conversation
+            response = {k: v for k, v in (response or {}).items()
+                        if k in ("request_id", "action", "rule", "reason", "review")}
         with self._lock, self._conn:
             seq = self._conn.execute("SELECT COALESCE(MAX(seq),0)+1 FROM messages WHERE chat_id=?",
                                      (chat_id,)).fetchone()[0]  # fmt: skip
