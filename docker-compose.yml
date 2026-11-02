@@ -14,6 +14,8 @@ services:
       LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:-demo}
       LITBIORAG_MODEL_PROFILE: ${PROFILE:-test}
       LITBIORAG_API_PORT: "8471"
+      AEOS_DEMO_TOKENS: "1"            # landing page "Try the live demo" mints 2-hour demo tokens
+      AEOS_TRIAL_QUESTIONS: "${AEOS_TRIAL_QUESTIONS:-5}"
     volumes:
       - ./data:/srv/aeos/data
     restart: unless-stopped

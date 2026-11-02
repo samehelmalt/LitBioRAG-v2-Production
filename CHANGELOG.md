@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.12.0 — 2026-11-02
+Public landing page and self-service demo.
+- `GET /` is now a landing page (hero with institution and student paths, six-step how-it-works
+  diagram, feature grid, real screenshots, claim / do-not-claim block, deployment shapes, trial
+  request form); the application moved to `/app`. Copy is owner-editable in `configs/landing.yaml`
+  (`GET /api/v1/landing`); no prices or accuracy figures are invented.
+- Leads: `POST /api/v1/leads` (validated, honeypot, rate limited, JSONL + optional webhook),
+  `GET /api/v1/leads` for admins. No e-mail sending.
+- Demo access: `POST /api/v1/demo/token` mints 2-hour visitor tokens when `AEOS_DEMO_TOKENS=1`
+  (default in `docker-compose.yml`, refused in client mode); `/app?demo=1` signs in automatically
+  and shows a demo banner; the trial allowance applies.
+- `scripts/screenshots.py` + `scripts/screenshots.js` (Node Playwright) regenerate the landing
+  screenshots from a running server; `scripts/release.py --screenshots-from <url>`.
+
 ## 0.11.0 — 2026-11-02
 Concurrency for many simultaneous users (owner question: "Do we need vLLM for thousands of
 students?").

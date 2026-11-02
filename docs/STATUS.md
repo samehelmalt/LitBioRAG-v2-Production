@@ -1,4 +1,4 @@
-# Status — what is done, what is missing (2026-11-02, v0.11.0)
+# Status — what is done, what is missing (2026-11-02, v0.12.0)
 
 ## Done (code, tests, docs; all in CI)
 | Area | State |
@@ -26,6 +26,7 @@
 | Lecture QA harness + synthetic 30-slide prototype deck | done; measured only with test doubles |
 | Embeddable widget, tenant isolation, local-8b / local-14b profiles | done |
 | Trial allowance, client-mode guard, chart extraction, client-trial / offline-demo deployments | done |
+| Public landing page at `/` (two paths, how-it-works, screenshots, trust block, shapes, trial form), lead capture, self-service demo tokens | done |
 | Concurrency: admission control (queue, 503 + Retry-After), verifier/reranker micro-batching, Redis-shared limiter/ledgers/jobs, `vllm-8b` profile + GPU compose, multi-replica compose, load-test script | done; capacity NOT MEASURED |
 
 ## Missing / blocked (honest list)

@@ -9,12 +9,14 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Any
 
+import yaml
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
@@ -25,6 +27,7 @@ from app.api.audit import AuditLog
 from app.api.auth import AuthError, Principal, authenticate, check_entitlement
 from app.api.chats import ChatStore
 from app.api.keys import KeyStore
+from app.api.leads import LeadIn, LeadStore
 from app.api.settings import ApiSettings
 from app.api.trials import TrialLedger, TrialLimitExceeded
 from app.core.admission import Overloaded
@@ -182,6 +185,9 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
         trials = state.trial_ledger(
             tp if tp.is_absolute() else Path(__file__).resolve().parents[2] / tp,
             st.trial.questions)  # fmt: skip
+    leads = LeadStore(data_dir / "leads.jsonl" if data_dir else None)
+    lead_limiter = state.rate_limiter(1, 5)  # per address: 5 at once, then one a minute
+    demo_limiter = state.rate_limiter(1, 3)
     shared_state = state
     state: dict[str, Any] = {"pipeline": pipeline, "review": review, "corpus": None}
 
@@ -683,13 +689,75 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                     continue
         return out or {"status": "NOT YET MEASURED"}
 
+    # ---- public landing page, leads, demo access ---------------------------------------------
     @app.get("/", include_in_schema=False)
+    @app.get("/landing", include_in_schema=False)
+    def landing():
+        return FileResponse(STATIC / "landing.html")
+
+    @app.get("/app", include_in_schema=False)
+    @app.get("/app/", include_in_schema=False)
     def index():
         return FileResponse(STATIC / "index.html")
 
     @app.get("/trust", include_in_schema=False)
     def trust():
         return FileResponse(STATIC / "index.html")  # single-page app; route #/trust
+
+    @app.get("/api/v1/landing")
+    def landing_copy():
+        """Owner-editable copy (configs/landing.yaml) plus what the demo offers. Public."""
+        raw: dict[str, Any] = {}
+        if st.landing_path.exists():
+            raw = yaml.safe_load(st.landing_path.read_text()) or {}
+        return {**raw, "demo_enabled": st.demo_tokens,
+                "demo_questions": trials.limit if trials is not None else None}  # fmt: skip
+
+    @app.post("/api/v1/leads", status_code=202)
+    def lead_create(lead: LeadIn, request: Request):
+        """Trial request from the landing page. Anonymous; rate limited per client address."""
+        ip = request.client.host if request.client else "?"
+        ok, retry = lead_limiter.allow(f"lead:{ip}")
+        if not ok:
+            raise HTTPException(429, "too many requests; try again later",
+                                headers={"Retry-After": str(int(retry) + 1)})  # fmt: skip
+        if lead.website.strip():  # honeypot filled: answer like a success, store nothing
+            return {"status": "received"}
+        rec = leads.add(lead, request_id=request.state.request_id, client=ip)
+        audit.record({"event": "lead", "lead_id": rec["lead_id"], "path": lead.path,
+                      "role": lead.role, "request_id": request.state.request_id})  # fmt: skip
+        return {"status": "received", "lead_id": rec["lead_id"]}
+
+    @app.get("/api/v1/leads")
+    def lead_list(limit: int = 200, p: Principal = Auth):
+        require_admin(p)
+        return leads.list(limit=min(limit, 1000))
+
+    @app.post("/api/v1/demo/token")
+    def demo_token(request: Request):
+        """Self-service demo access: a short-lived token for an anonymous visitor. Only when
+        api.yaml demo_tokens / AEOS_DEMO_TOKENS=1; refused in client mode by the entrypoint."""
+        if not st.demo_tokens:
+            raise HTTPException(404, "self-service demo tokens are disabled on this server")
+        ip = request.client.host if request.client else "?"
+        ok, retry = demo_limiter.allow(f"demo:{ip}")
+        if not ok:
+            raise HTTPException(429, "demo token limit reached; try again later",
+                                headers={"Retry-After": str(int(retry) + 1)})  # fmt: skip
+        secret = os.environ.get(st.auth.jwt_secret_env, "")
+        if len(secret) < 32:
+            raise HTTPException(503, "token signing is not configured on this server")
+        import jwt
+
+        sub = "demo-" + uuid.uuid4().hex[:8]
+        exp = int(time.time()) + st.demo_token_hours * 3600
+        claims = {"sub": sub, "roles": [], "courses": [], "aud": st.auth.jwt_audience,
+                  "iat": int(time.time()), "exp": exp}  # fmt: skip
+        tok = jwt.encode(claims, secret, algorithm="HS256")
+        audit.record({"event": "demo_token", "sub": sub, "client": ip,
+                      "request_id": request.state.request_id})  # fmt: skip
+        return {"token": tok, "sub": sub, "expires_at": exp,
+                "questions": trials.limit if trials is not None else None}  # fmt: skip
 
     @app.get("/embed", include_in_schema=False)
     def embed():

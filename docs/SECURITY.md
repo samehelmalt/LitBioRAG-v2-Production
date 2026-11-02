@@ -33,6 +33,16 @@
 - Secret rotation runbook and dependency vulnerability scanning in CI.
 - Penetration test of the deployed UI + API before public launch.
 
+## Landing page: leads and demo tokens
+- Trial requests (`POST /api/v1/leads`) are anonymous by design: validated lengths and e-mail
+  format, a honeypot field, a per-address token bucket, and storage in `data/audit/leads.jsonl`
+  (personal data: name, e-mail, institution — delete on request; the audit line carries only the
+  lead id). The optional webhook (`LEADS_WEBHOOK_URL`) receives the same record over HTTPS.
+- Demo tokens (`POST /api/v1/demo/token`) exist only when `AEOS_DEMO_TOKENS=1`: 2-hour JWTs with
+  no roles and no courses, three per address then one a minute, trial-limited like any other
+  identity, and refused at start-up in client mode (`AEOS_CLIENT_MODE=1`). They give access to
+  the demo profile on the demo bundle, never to course material.
+
 ## Uploads
 Files are streamed to a temp file with a hard size limit, accepted only by extension from the
 supported list, parsed by pure-Python readers (no macros, no external processes), stored under the

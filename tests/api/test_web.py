@@ -6,9 +6,15 @@ from pathlib import Path
 
 
 def test_pages_and_static_are_served(client):
-    html = client.get("/").text
+    landing = client.get("/").text
+    assert "AEOS" in landing and "/static/landing.js" in landing and "Request a trial" in landing
+    assert "/app?demo=1" in landing and 'href="/app"' in landing  # both CTA paths
+    assert client.get("/landing").text == landing
+    html = client.get("/app").text
     assert "AEOS" in html and "/static/app.js" in html and "/static/pages.js" in html
+    assert client.get("/app/").text == html
     assert client.get("/trust").status_code == 200 and "AEOS" in client.get("/trust").text
+    assert client.get("/static/landing.css").status_code == 200
     assert client.get("/static/styles.css").status_code == 200
     assert client.get("/static/logo.svg").status_code == 200
     js = client.get("/static/app.js").text + client.get("/static/pages.js").text

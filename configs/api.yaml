@@ -31,7 +31,11 @@ kb:
 
 cors_origins: []                    # the web UI origin(s) in production
 
-state_backend: sqlite               # sqlite = one API process; redis = several replicas share the
+demo_tokens: false                  # true: the landing page can mint 2-hour demo tokens (AEOS_DEMO_TOKENS=1);
+demo_token_hours: 2                 #   never in client mode; the trial allowance still applies
+landing_config: configs/landing.yaml
+
+state_backend: sqlite              # sqlite = one API process; redis = several replicas share the
                                     #   rate limiter, trial and usage ledgers and KB job table
 redis_url_env: REDIS_URL            # e.g. redis://redis:6379/0 (compose.scale.yaml); AEOS_STATE_BACKEND
                                     #   overrides state_backend

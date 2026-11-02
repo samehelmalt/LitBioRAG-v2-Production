@@ -70,3 +70,12 @@ Implemented as a thin client in `app/web/static/` served by the API (`/`, `/trus
 `/api/v1/models` and `/api/v1/metrics` on the trust page; an admin profile switcher is deferred to
 the faculty console. Out-of-scope questions are stopped before retrieval, so an ESCALATE screen
 shows no sources and spends no tokens.
+
+## Landing page (2026-11-02)
+`GET /` is a public page (`landing.html`, `landing.css`, `landing.js`): hero with two paths
+(institution trial request, student sign-in) and a "Try the live demo" button; six-step
+how-it-works diagram (inline SVG); feature grid; four screenshots of the real UI against the demo
+bundle (`scripts/screenshots.py`, Node Playwright); the claim / do-not-claim block (accuracy NOT
+YET MEASURED, confidence uncalibrated, not medical advice); deployment shapes with prices "on
+request" from `configs/landing.yaml`; trial request form → `POST /api/v1/leads`. Light and dark
+themes share the app's tokens; single-column below 960 px. The app itself moved to `/app`.

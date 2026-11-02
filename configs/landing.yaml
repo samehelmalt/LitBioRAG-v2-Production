@@ -1,0 +1,28 @@
+# Public landing page copy the owner edits without touching code (served as GET /api/v1/landing).
+# No prices are invented: every shape is "on request" until the owner fills them in.
+organisation: AEOS Medical
+contact_email: ""                      # shown on the page when set; leads also land in data/leads
+github_url: https://github.com/samehelmalt/LitBioRAG-v2-Production
+tagline: Answers your students can check.
+subtitle: >
+  A medical teaching assistant that answers only from evidence it can show you — your lecture
+  decks and the biomedical literature — verifies every claim, and hands anything doubtful to a
+  human reviewer instead of guessing.
+institutions: []                       # names allowed to appear as "used by" (none until agreed)
+shapes:                                # deployment shapes (docs/DEPLOYMENT.md) with price copy
+  - name: Institution trial
+    for: Faculty and IT evaluating the product
+    includes: Hosted by us for 14 days, your decks, 5 questions per prospect account, review queue
+    price: on request
+  - name: On-premise GPU
+    for: Universities keeping all content on their own servers
+    includes: vLLM generator + API on one GPU host, Redis, uploads, admin console, audit log
+    price: on request
+  - name: Cloud generator
+    for: Teams without a GPU
+    includes: Retrieval and verification on your host, generator behind your own API key, spend caps
+    price: on request
+  - name: Multi-campus
+    for: Thousands of concurrent students
+    includes: API replicas behind a gateway, shared Redis state, load-tested capacity plan
+    price: on request

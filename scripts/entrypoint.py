@@ -33,6 +33,8 @@ def _client_mode_guard(bundle: Path, profile: str) -> None:
         problems.append("the demo bundle is not client content; set CORPUS_ID to a real bundle")
     if len(os.environ.get("LITBIORAG_JWT_SECRET", "")) < 32:
         problems.append("LITBIORAG_JWT_SECRET must be a persistent secret of 32+ characters")
+    if os.environ.get("AEOS_DEMO_TOKENS", "0") == "1":
+        problems.append("AEOS_DEMO_TOKENS=1 lets anyone mint tokens; unset it for client trials")
     if problems:
         for p in problems:
             print(f"[entrypoint] client mode refused: {p}", file=sys.stderr, flush=True)

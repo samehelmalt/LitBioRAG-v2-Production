@@ -42,6 +42,10 @@ def test_client_mode_guard_refuses_demo_setups(monkeypatch):
     with pytest.raises(SystemExit):
         entrypoint._client_mode_guard(Path("data/artifacts/real"), "hosted")
     monkeypatch.setenv("LITBIORAG_JWT_SECRET", "x" * 40)
+    monkeypatch.setenv("AEOS_DEMO_TOKENS", "1")
+    with pytest.raises(SystemExit):  # self-service demo tokens never in a client trial
+        entrypoint._client_mode_guard(Path("data/artifacts/real"), "hosted")
+    monkeypatch.delenv("AEOS_DEMO_TOKENS")
     entrypoint._client_mode_guard(Path("data/artifacts/real"), "hosted")  # passes
 
 

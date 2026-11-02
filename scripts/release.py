@@ -27,6 +27,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--version", required=True)
     ap.add_argument("--skip-tests", action="store_true")
+    ap.add_argument("--screenshots-from", default="",
+                    help="base URL of a running demo server to refresh app/web/static/shots")
     a = ap.parse_args(argv)
     if a.version not in (ROOT / "CHANGELOG.md").read_text():
         print(f"CHANGELOG.md has no entry for {a.version}", file=sys.stderr)
@@ -34,6 +36,11 @@ def main(argv: list[str] | None = None) -> int:
     if not a.skip_tests:
         run([sys.executable, "-m", "ruff", "check", "."])
         run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"])
+    if a.screenshots_from:
+        # regenerate the landing-page screenshots from a running demo server (needs Node Playwright
+        # and LITBIORAG_JWT_SECRET); without them the committed PNGs are kept
+        subprocess.run([sys.executable, "-m", "scripts.screenshots", "--base-url",
+                        a.screenshots_from], cwd=ROOT)  # fmt: skip
     dist = ROOT / "dist"
     dist.mkdir(exist_ok=True)
     out = dist / f"aeos-medical-{a.version}.zip"

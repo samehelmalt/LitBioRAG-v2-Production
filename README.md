@@ -26,7 +26,7 @@ cp .env.example .env                                 # fill LITBIORAG_JWT_SECRET
 python -m scripts.build_indexes --docs docs.jsonl --out data/artifacts/demo --corpus-id demo \
     --encoder hash:128                                # tiny demo bundle; real bundles: docs/CORPUS.md
 python -m scripts.serve --bundle data/artifacts/demo --profile test --port 8471
-# open http://localhost:8471  (UI)   http://localhost:8471/api/docs  (OpenAPI)
+# open http://localhost:8471  (landing)   /app  (UI)   /api/docs  (OpenAPI)
 ```
 Many concurrent users: `compose.gpu-vllm.yaml` (vLLM generator + Redis on one GPU host) or
 `compose.scale.yaml` (API replicas behind nginx); see docs/DEPLOYMENT.md "Scaling".
@@ -34,7 +34,7 @@ Many concurrent users: `compose.gpu-vllm.yaml` (vLLM generator + Redis on one GP
 Docker (local test, no preparation): `docker compose up --build`, then open
 http://localhost:8471 . The first start builds a demo bundle from `scripts/demo/demo_docs.jsonl`
 with deterministic test doubles and prints three demo tokens (user, reviewer, admin) to paste into
-"Sign in". For real models set `PROFILE=hosted` and `OPENAI_API_KEY` in `.env` and point
+"Sign in"; the landing page's "Try the live demo" button signs visitors in by itself (`AEOS_DEMO_TOKENS=1`). For real models set `PROFILE=hosted` and `OPENAI_API_KEY` in `.env` and point
 `CORPUS_ID` at a fetched bundle under `./data/artifacts`. Port 8471 is used on purpose to avoid
 the usual 8000/8080/3000.
 

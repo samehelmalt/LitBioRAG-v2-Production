@@ -58,10 +58,18 @@ class ApiSettings(BaseModel):
                                description="sqlite = per process; redis = shared rate limiter, "
                                            "trial/usage ledgers and KB jobs across replicas")
     redis_url_env: str = "REDIS_URL"
+    demo_tokens: bool = False  # landing-page demo tokens (AEOS_DEMO_TOKENS=1); never in client mode
+    demo_token_hours: int = 2
+    landing_config: str = "configs/landing.yaml"
 
     @property
     def redis_url(self) -> str:
         return os.environ.get(self.redis_url_env, "")
+
+    @property
+    def landing_path(self) -> Path:
+        p = Path(self.landing_config)
+        return p if p.is_absolute() else ROOT / p
 
     @classmethod
     def load(cls, path: Path | str | None = None, **overrides: Any) -> ApiSettings:
@@ -75,6 +83,8 @@ class ApiSettings(BaseModel):
             s.trial.questions = int(os.environ["AEOS_TRIAL_QUESTIONS"])
         if os.environ.get("AEOS_STATE_BACKEND"):
             s.state_backend = os.environ["AEOS_STATE_BACKEND"]
+        if os.environ.get("AEOS_DEMO_TOKENS"):
+            s.demo_tokens = os.environ["AEOS_DEMO_TOKENS"] == "1"
         return s
 
     @property

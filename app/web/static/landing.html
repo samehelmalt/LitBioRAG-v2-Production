@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEOS Medical</title>
+<meta name="description" content="A medical teaching assistant that answers only from evidence it can show, verifies every claim and sends doubtful answers to a human reviewer.">
+<link rel="icon" href="/static/logo.svg"><link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/landing.css"></head>
+<body class="landing">
+<header class="lnav">
+  <a class="brand" href="/"><img src="/static/logo.svg" alt="AEOS Medical logo"><span>AEOS <b>Medical</b></span></a>
+  <nav aria-label="Page sections"><a href="#how">How it works</a><a href="#features">Features</a><a href="#trust">Trust</a><a href="#shapes">Deployment</a><a href="/app#/trust">Status</a></nav>
+  <div class="actions"><button class="iconbtn" id="theme" title="theme">☾</button><a class="btn ghost" href="/app">Sign in</a><a class="btn" href="/app?demo=1#/chat" id="cta-demo-top">Try the live demo</a></div>
+</header>
+
+<main>
+<section class="lhero" id="top">
+  <div class="lhero-text">
+    <p class="eyebrow">Evidence-gated medical teaching assistant</p>
+    <h1 id="tagline">Answers your students can check.</h1>
+    <p class="lead" id="subtitle">A medical teaching assistant that answers only from evidence it can show you — your lecture decks and the biomedical literature — verifies every claim, and hands anything doubtful to a human reviewer instead of guessing.</p>
+    <div class="cta-row">
+      <a class="btn big" href="#trial" id="cta-trial">Request an institution trial</a>
+      <a class="btn big ghost" href="/app?demo=1#/chat" id="cta-demo">Try the live demo</a>
+    </div>
+    <p class="small muted">Student with a course code? <a href="/app">Sign in with your course token</a>. <span id="demo-note"></span></p>
+  </div>
+  <div class="lhero-card" aria-label="Example answer">
+    <div class="bubble q small">What ECG changes are seen with hyperkalaemia?</div>
+    <div class="bubble small">
+      <div class="banner ANSWER"><b>ANSWER</b> — supported by the cited evidence<div class="small muted">Deciding rule R12: all critical claims supported · confidence (uncalibrated)</div></div>
+      <p>Peaked T waves appear first, followed by PR prolongation and QRS widening as potassium rises <span class="cite">[1]</span><span class="cite">[2]</span>.</p>
+      <div class="small muted"><span class="chip ok">supported</span><span class="chip acc">Lecture 3, Slide 12</span><span class="chip ok">peer reviewed</span></div>
+    </div>
+    <div class="small muted" style="text-align:right">Illustration of an answer card; real answers come from your material.</div>
+  </div>
+</section>
+
+<section class="paths" id="paths">
+  <article class="card">
+    <h3>For institutions</h3>
+    <ul>
+      <li>Upload lecture decks, PDFs, spreadsheets and notes; answers cite the slide and version.</li>
+      <li>Course entitlements decide what each student can search, before retrieval runs.</li>
+      <li>Blocked or escalated answers wait in a <b>review queue</b> for faculty to release or keep blocked.</li>
+      <li>Runs on your own GPU host, or with a generator behind your API key; every request is audited.</li>
+    </ul>
+    <a class="btn" href="#trial">Request a trial</a>
+  </article>
+  <article class="card">
+    <h3>For students</h3>
+    <ul>
+      <li>Ask about your lectures; every statement links to the slide or paper it came from.</li>
+      <li>When the evidence is not there, you get <b>"under review"</b> or a clear abstention, not a guess.</li>
+      <li>Follow-up questions are resolved from the answers you actually received.</li>
+      <li>Where lectures and the literature disagree, both are shown and labelled.</li>
+    </ul>
+    <a class="btn ghost" href="/app">Sign in with your course token</a>
+  </article>
+</section>
+
+<section id="how" class="how">
+  <h2>How an answer is produced</h2>
+  <p class="muted">Six checks between a question and a delivered answer. Nothing is decided in the browser; everything shown comes from the service and is recorded.</p>
+  <svg class="chain" viewBox="0 0 1200 190" role="img" aria-labelledby="chain-title">
+    <title id="chain-title">Scope, retrieve, generate, verify, gate, human review, with an immutable record underneath</title>
+    <defs><linearGradient id="cg" x1="0" x2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="var(--muted)"/></marker></defs>
+    <g class="step" transform="translate(10,20)"><rect width="170" height="90" rx="14"/><text x="85" y="34">1 · Scope</text><text class="d" x="85" y="58">patient-specific or</text><text class="d" x="85" y="74">emergency → escalate</text></g>
+    <path d="M182 65h20" marker-end="url(#arr)"/>
+    <g class="step" transform="translate(212,20)"><rect width="170" height="90" rx="14"/><text x="85" y="34">2 · Retrieve</text><text class="d" x="85" y="58">your decks + literature,</text><text class="d" x="85" y="74">exact gene/drug symbols</text></g>
+    <path d="M384 65h20" marker-end="url(#arr)"/>
+    <g class="step" transform="translate(414,20)"><rect width="170" height="90" rx="14"/><text x="85" y="34">3 · Generate</text><text class="d" x="85" y="58">claims with citations</text><text class="d" x="85" y="74">or an abstention</text></g>
+    <path d="M586 65h20" marker-end="url(#arr)"/>
+    <g class="step" transform="translate(616,20)"><rect width="170" height="90" rx="14"/><text x="85" y="34">4 · Verify</text><text class="d" x="85" y="58">each claim vs its passage:</text><text class="d" x="85" y="74">support, entities, numbers</text></g>
+    <path d="M788 65h20" marker-end="url(#arr)"/>
+    <g class="step" transform="translate(818,20)"><rect width="170" height="90" rx="14"/><text x="85" y="34">5 · Gate</text><text class="d" x="85" y="58">answer · caution · clarify</text><text class="d" x="85" y="74">abstain · escalate</text></g>
+    <path d="M990 65h20" marker-end="url(#arr)"/>
+    <g class="step" transform="translate(1020,20)"><rect width="170" height="90" rx="14"/><text x="85" y="34">6 · Human review</text><text class="d" x="85" y="58">withheld answers wait</text><text class="d" x="85" y="74">for faculty release</text></g>
+    <rect class="record" x="10" y="135" width="1180" height="40" rx="10"/>
+    <text class="rec" x="600" y="160">Immutable record of every request: raw output · candidate claims · delivered answer · audit · control versions · history</text>
+  </svg>
+  <ol class="how-list">
+    <li><b>Scope.</b> Patient-specific, dosing and emergency questions are escalated before any model runs; off-topic questions are declined without spending tokens.</li>
+    <li><b>Retrieve.</b> Keyword and semantic search over the indexed literature and your uploaded material, fused and reranked. Gene, drug and disease names are matched exactly, so a question about MAP3K3 is never answered about MAP3K7.</li>
+    <li><b>Generate.</b> The language model must return separate claims, each with citations, or abstain. Evidence is trimmed to a token budget; repeated questions are served from cache.</li>
+    <li><b>Verify.</b> A second model from a different family checks every claim against its cited passage; citations, entities, numbers and conflicting sources are checked too.</li>
+    <li><b>Gate.</b> Ordered rules decide the delivery action and remove unsupported claims rather than rewriting them. The deciding rule is shown with the answer.</li>
+    <li><b>Human review.</b> Blocked and escalated cases queue for a reviewer who releases (after re-verification) or keeps them blocked. The student sees "under review".</li>
+  </ol>
+</section>
+
+<section id="features" class="features">
+  <h2>What the platform includes</h2>
+  <div class="grid">
+    <div class="card"><h3>Knowledge bases</h3><p>PDF, DOCX, XLSX, PPTX, TXT and Markdown. Slides keep lecture, slide number and deck version; image-only slides are flagged, with optional OCR.</p></div>
+    <div class="card"><h3>Scope selector</h3><p>Answer from uploaded material only, from the indexed literature (PubMed, bioRxiv/medRxiv), or both — per question.</p></div>
+    <div class="card"><h3>Confusable-entity detection</h3><p>Numbered gene families, drug classes, letter variants and look-alike conditions are caught when an answer swaps one for another.</p></div>
+    <div class="card"><h3>Lecture first</h3><p>Course material leads; literature that differs is reported separately as "literature says", never silently overriding the lecture.</p></div>
+    <div class="card"><h3>Review queue</h3><p>Reviewers see the full trust surface, edit, re-verify and release or block. Decisions become labelled data.</p></div>
+    <div class="card"><h3>Model switching by config</h3><p>Local 8B/14B, vLLM, OpenAI-compatible, Anthropic or DeepSeek generators; the verifier always stays local and from another model family.</p></div>
+    <div class="card"><h3>Built for a lecture hall</h3><p>Admission control, shared forward passes, Redis-shared limits and a vLLM deployment for many simultaneous students.</p></div>
+    <div class="card"><h3>API and widget</h3><p>Every screen is an API call; embed the chat in your LMS with a scoped key. Tenant isolation and audit logs throughout.</p></div>
+  </div>
+</section>
+
+<section id="shots" class="shots">
+  <h2>Screens</h2>
+  <div class="grid">
+    <figure><img src="/static/shots/chat.png" alt="Chat view with the decision banner, cited answer, claim verdicts and sources" loading="lazy"><figcaption>Chat: decision banner, cited answer, claim-by-claim verdicts, sources</figcaption></figure>
+    <figure><img src="/static/shots/review.png" alt="Review queue with a pending case" loading="lazy"><figcaption>Review queue: release or block withheld answers</figcaption></figure>
+    <figure><img src="/static/shots/upload.png" alt="Upload documents page with lecture metadata fields" loading="lazy"><figcaption>Upload: decks with course, lecture and version</figcaption></figure>
+    <figure><img src="/static/shots/trust.png" alt="Trust and versions page" loading="lazy"><figcaption>Trust &amp; Versions: what is in service and what has been measured</figcaption></figure>
+  </div>
+</section>
+
+<section id="trust" class="trust">
+  <h2>What we claim, and what we do not</h2>
+  <div class="two">
+    <div class="card"><h3>We claim</h3><ul>
+      <li>Every delivered statement is tied to a passage you can open; unsupported statements are removed before delivery.</li>
+      <li>Patient-specific, dosing and emergency questions are not answered; they are escalated.</li>
+      <li>Withheld answers are reviewed by a person before they reach a student.</li>
+      <li>Every request is recorded immutably: what the model produced, what was verified, what was delivered, and which versions were in service.</li>
+      <li>Your content stays on your host unless you choose a cloud generator, in which case question text and evidence excerpts are sent to that provider.</li>
+    </ul></div>
+    <div class="card"><h3>We do not claim</h3><ul>
+      <li><b>Not medical advice.</b> This is a study and research aid; it is not a clinical decision tool.</li>
+      <li><b>Accuracy is not yet measured</b> on real models and real corpora. Until the benchmark run is recorded, the product shows "NOT YET MEASURED" and no accuracy figure is quoted anywhere, including here.</li>
+      <li><b>Confidence is uncalibrated</b> until the calibration job has run for the served verifier; the UI says so next to every confidence value.</li>
+      <li>Capacity figures are estimates until the load test has run on the target hardware.</li>
+      <li>Confusable-entity detection covers rules and a curated list, not every possible name.</li>
+    </ul></div>
+  </div>
+  <p class="small muted">Live status of the versions in service and of every measurement: <a href="/app#/trust">Trust &amp; Versions</a>.</p>
+</section>
+
+<section id="shapes" class="shapes">
+  <h2>Deployment shapes</h2>
+  <div class="grid" id="shape-cards"></div>
+  <p class="small muted">Prices are agreed per institution. Technical details: <code>docs/DEPLOYMENT.md</code> in the repository.</p>
+</section>
+
+<section id="trial" class="trial">
+  <div class="card form-card">
+    <h2>Request a trial</h2>
+    <p class="muted">Tell us who you are and we will set up a trial account. We do not send marketing e-mail.</p>
+    <form id="lead-form" autocomplete="on">
+      <div class="two">
+        <label>Name<input class="inp" name="name" required minlength="2" maxlength="120"></label>
+        <label>E-mail<input class="inp" name="email" type="email" required maxlength="200"></label>
+        <label>Institution<input class="inp" name="institution" maxlength="200"></label>
+        <label>Role<select class="inp" name="role"><option value="faculty">Faculty</option><option value="it">IT / platform</option><option value="student">Student</option><option value="other">Other</option></select></label>
+        <label>I am asking as<select class="inp" name="path"><option value="institution">an institution</option><option value="student">a student</option></select></label>
+        <label>Course size<input class="inp" name="course_size" placeholder="e.g. 300 students" maxlength="40"></label>
+      </div>
+      <label>Message<textarea class="inp" name="message" rows="3" maxlength="2000" placeholder="Which courses, which decks, when?"></textarea></label>
+      <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="cta-row"><button class="btn big" type="submit" id="lead-submit">Send request</button><span id="lead-status" class="small muted" role="status"></span></div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="lfoot">
+  <div>AI-generated summaries of lecture material and literature, verified claim by claim; not medical advice. Check the sources before acting on any statement.</div>
+  <div class="small muted"><span id="foot-org">AEOS Medical</span> · <a id="foot-github" href="https://github.com/samehelmalt/LitBioRAG-v2-Production">source</a> · <span id="foot-contact"></span> · service <span id="foot-version">…</span> · <a href="/app#/trust">status</a></div>
+</footer>
+<div id="toast" class="toast" hidden></div>
+<script src="/static/landing.js"></script>
+</body></html>

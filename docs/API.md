@@ -94,6 +94,20 @@ response echoes `scope` and the `kb_ids` searched. Uploaded sources carry `kb_id
 | GET | `/api/v1/corpus/jobs/{id}` | status, result, log tail |
 
 
+## Landing page, leads and demo access
+`GET /` serves the public landing page (`app/web/static/landing.html`); the application is at
+`/app` (`/trust` and `/embed` unchanged). Copy comes from `configs/landing.yaml` via
+`GET /api/v1/landing` (public; also reports `demo_enabled` and `demo_questions`; prices are
+"on request" until the owner fills them in).
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/v1/leads` | none (rate limited per address) | trial request `{name, email, institution, role, path, course_size, message}`; honeypot field `website` → 202 without storing; stored in `data/audit/leads.jsonl`, forwarded to `LEADS_WEBHOOK_URL` when set |
+| GET | `/api/v1/leads` | admin | newest leads first |
+| POST | `/api/v1/demo/token` | none (3 per address, then 1/min) | 2-hour visitor token (`sub=demo-…`, no roles, no courses) when `demo_tokens` / `AEOS_DEMO_TOKENS=1`; 404 otherwise; refused at start-up in client mode; the trial allowance applies |
+
+`/app?demo=1` makes the UI request a demo token and sign in; a banner names the demo profile.
+
 ## Trial allowance
 `configs/api.yaml: trial.questions` (or `AEOS_TRIAL_QUESTIONS`) limits answered questions per
 authenticated identity. The allowance is reserved after all validation and before the pipeline

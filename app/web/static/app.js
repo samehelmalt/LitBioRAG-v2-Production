@@ -70,7 +70,18 @@ window.AEOS = (function () {
   (function initTheme() { let t = null; try { t = localStorage.getItem("aeos.theme"); } catch (e) {} if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark"; applyTheme(t); })();
   $("theme").addEventListener("click", () => { const t = document.documentElement.dataset.theme === "light" ? "dark" : "light"; applyTheme(t); try { localStorage.setItem("aeos.theme", t); } catch (e) {} });
   $("topsearch").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.value.trim()) { location.hash = "#/chat"; setTimeout(() => { const q = $("q"); if (q) { q.value = e.target.value; $("ask").requestSubmit(); } }, 50); } });
-  document.addEventListener("DOMContentLoaded", () => { updateWho(); route(); });
+  async function demoSignin() {
+    // /app?demo=1 from the landing page: mint a short-lived demo token when not signed in
+    if (!/[?&]demo=1\b/.test(location.search) || state.token || state.apiKey) return;
+    try {
+      const d = await api("POST", "/api/v1/demo/token");
+      state.token = d.token; try { sessionStorage.setItem("aeos.token", d.token); } catch (e) {}
+      updateWho();
+      toast(`Demo mode as ${d.sub}: ${d.questions == null ? "unlimited" : d.questions} questions on a synthetic corpus; answers come from the demo profile, not a calibrated medical model.`, 9000);
+    } catch (e) { toast(`Demo access unavailable: ${e.message}`, 6000); }
+    history.replaceState(null, "", location.pathname + location.hash);
+  }
+  document.addEventListener("DOMContentLoaded", async () => { updateWho(); await demoSignin(); route(); });
 
   // ---- shared renderers -------------------------------------------------------------------
   const ACTION_TEXT = {
