@@ -27,6 +27,9 @@ from typing import Any, Protocol
 from app.core.budget import HeuristicCounter, Usage
 from app.evidence.selector import EvidenceUnit
 
+if False:  # typing only; profiles import lazily at runtime
+    from app.generation.profiles import GeneratorProfile
+
 Messages = Sequence[dict[str, str]]
 
 
@@ -63,8 +66,14 @@ class TemplateGenerator:
         flip_negation: bool = False,
         always_abstain: bool = False,
         emit_invalid_json: bool = False,
+        repeat_sentences: bool = False,
+        role_echo: bool = False,
+        fix_on_feedback: bool = True,
     ):
         self.name = "template:evidence-extractive"
+        self.repeat_sentences = repeat_sentences
+        self.role_echo = role_echo
+        self.fix_on_feedback = fix_on_feedback
         self.max_claims = max_claims
         self.fabricate_citation = fabricate_citation
         self.alter_numbers = alter_numbers
@@ -100,7 +109,10 @@ class TemplateGenerator:
         temperature: float = 0.0,
         evidence: Sequence[EvidenceUnit] | None = None,
     ) -> str:
-        if self.emit_invalid_json:
+        got_feedback = any("rejected for these reasons" in m.get("content", "")
+                           for m in messages if m.get("role") == "user")
+        defective = not (got_feedback and self.fix_on_feedback)
+        if self.emit_invalid_json and defective:
             return "I cannot format this as JSON, sorry."
         if self.always_abstain or not evidence:
             return json.dumps(
@@ -128,9 +140,13 @@ class TemplateGenerator:
                 {"answer": "", "abstained": True, "abstain_reason": "insufficient_evidence",
                  "claims": [], "conflicts": []}  # fmt: skip
             )
+        if self.repeat_sentences and defective:
+            claims = claims + [dict(claims[0])] * 3  # the DeepSeek loop, in miniature
+        answer_text = " ".join(c["text"] for c in claims)
+        if self.role_echo and defective:
+            answer_text = "Assistant: " + answer_text + "\nUser: thanks"
         return json.dumps(
-            {"answer": " ".join(c["text"] for c in claims), "abstained": False,
-             "claims": claims, "conflicts": []}  # fmt: skip
+            {"answer": answer_text, "abstained": False, "claims": claims, "conflicts": []}
         )
 
 
@@ -144,10 +160,14 @@ class HFCausalGenerator:
         quantization: str | None = None,
         device: str | None = None,
         dtype: str = "bfloat16",
+        profile: GeneratorProfile | None = None,
     ):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
+        from app.generation.profiles import select_profile
+
+        self.profile = profile or select_profile(model_id)
         self.name = f"hf_causal:{model_id}" + (f"@{revision}" if revision else "")
         self._torch = torch
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
@@ -171,12 +191,17 @@ class HFCausalGenerator:
     def generate(self, messages, *, max_tokens=1024, temperature=0.0, evidence=None) -> str:
         t0 = time.perf_counter()
         ids = self.tokenizer.apply_chat_template(
-            list(messages), add_generation_prompt=True, return_tensors="pt"
+            list(messages), add_generation_prompt=True, return_tensors="pt",
+            **self.profile.chat_template_kwargs,
         ).to(self.model.device)
         gen: dict[str, Any] = {
-            "max_new_tokens": max_tokens,
+            "max_new_tokens": self.profile.max_new_tokens(max_tokens),
             "pad_token_id": self.tokenizer.eos_token_id,
+            **self.profile.decoding,
         }
+        if self.profile.stop_strings:
+            gen["stop_strings"] = self.profile.stop_strings
+            gen["tokenizer"] = self.tokenizer
         if temperature > 0:
             gen.update(do_sample=True, temperature=temperature, top_p=0.9)
         else:
@@ -187,7 +212,10 @@ class HFCausalGenerator:
         self.last_usage = Usage(model=self.name, prompt_tokens=int(ids.shape[1]),
                                 completion_tokens=int(new.shape[0]), exact=True,
                                 latency_ms=(time.perf_counter() - t0) * 1000)  # fmt: skip
-        return self.tokenizer.decode(new, skip_special_tokens=True)
+        text = self.tokenizer.decode(new, skip_special_tokens=True)
+        final, reasoning = self.profile.strip_reasoning(text)
+        self.last_reasoning = reasoning  # kept for the RAW channel, never shown as answer
+        return final
 
 
 # ---------------------------------------------------------------------- OpenAI-compatible -------
@@ -202,7 +230,11 @@ class OpenAICompatibleGenerator:
         json_mode: bool = True,
         max_retries: int = 3,
         backoff_s: float = 2.0,
+        profile: GeneratorProfile | None = None,
     ):
+        from app.generation.profiles import select_profile
+
+        self.profile = profile or select_profile(model_id)
         self.name = f"openai_compatible:{model_id}"
         self.model_id = model_id
         self.endpoint = endpoint.rstrip("/")
@@ -249,6 +281,7 @@ class OpenAICompatibleGenerator:
         t0 = time.perf_counter()
         data = self._post(body)
         text = data["choices"][0]["message"]["content"] or ""
+        text, self.last_reasoning = self.profile.strip_reasoning(text)
         u = data.get("usage") or {}
         self.last_usage = Usage(
             model=self.name,

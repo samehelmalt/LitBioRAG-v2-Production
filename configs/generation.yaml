@@ -5,3 +5,5 @@ max_evidence_units: 10  # evidence units rendered into the prompt
 compress_evidence: true # keep the question-relevant window of each passage (offsets preserved)
 max_sentences_per_unit: 4
 cache_generations: true # reuse the raw answer when question + evidence set + model are identical
+max_attempts: 2         # one controlled transaction may regenerate once with precise feedback
+profiles: []            # model-family overrides; defaults in app/generation/profiles.py

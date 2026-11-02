@@ -17,6 +17,7 @@ from typing import Any
 from app.core.budget import ResourceConfig, UsageLedger
 from app.core.verdicts import VerificationReport
 from app.evidence.selector import EvidenceUnit, select_evidence
+from app.generation.attempts import AttemptRecord, run_attempts
 from app.generation.contract import ABSTAIN_OUT_OF_SCOPE, GeneratedAnswer
 from app.generation.prompts import PROMPT_ID
 from app.generation.service import GenerationConfig
@@ -46,6 +47,7 @@ class PipelineOutput:
     report: VerificationReport
     decision: Decision
     timings_ms: dict[str, float] = field(default_factory=dict)
+    attempts: list[AttemptRecord] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -206,24 +208,43 @@ class AnswerPipeline:
             ms=round(t["retrieval"], 1))  # fmt: skip
         t1 = time.perf_counter()
         say("generating")
+        extractor = self.pool.acquire("entity_extractor")
+        verifier = self.pool.acquire("verifier")
+        thresholds = self.registry.thresholds("verifier")
+
+        def do_verify(parsed: GeneratedAnswer) -> VerificationReport:
+            return verify(parsed, units, verifier, extractor, config=self.ver_cfg,
+                          thresholds=thresholds, question=question)  # fmt: skip
+
+        attempts: list[AttemptRecord] = []
         with self.pool.use("generator") as generator:
-            gen = generate_answer(
-                question, units, generator, config=self.gen_cfg, budget=self.budget,
-                ledger=self.ledger, request_id=request_id, history=history,
-                cache=self.gen_cache,
-            )  # fmt: skip
+
+            def do_generate(feedback: str | None) -> tuple[str, GeneratedAnswer]:
+                if feedback:
+                    say("regenerating", attempt=len(attempts) + 2)
+                parsed = generate_answer(
+                    question, units, generator, config=self.gen_cfg, budget=self.budget,
+                    ledger=self.ledger, request_id=request_id, history=history,
+                    cache=self.gen_cache, feedback=feedback,
+                )  # fmt: skip
+                return parsed.raw, parsed
+
+            q_ents = {e for e in extractor.extract(question)} if hasattr(extractor, "extract") \
+                else set()
+            attempts, selected = run_attempts(
+                do_generate, do_verify, max_attempts=self.gen_cfg.max_attempts,
+                question_entities=q_ents or None, extract_entities=extractor.extract,
+                units=units,
+            )
+        gen = selected.answer
         t["generation"] = (time.perf_counter() - t1) * 1000
-        say("verifying", claims=len(gen.claims))
+        say("verifying", claims=len(gen.claims), attempts=len(attempts))
         t2 = time.perf_counter()
-        report = verify(
-            gen, units, self.pool.acquire("verifier"), self.pool.acquire("entity_extractor"),
-            config=self.ver_cfg, thresholds=self.registry.thresholds("verifier"),
-            question=question,
-        )  # fmt: skip
+        report = selected.verification if selected.verification is not None else do_verify(gen)
         say("deciding")
         suff = evidence_sufficiency(res, report, self.gate_cfg.sufficiency_model)
         decision = decide(report, gen, sufficiency=suff, config=self.gate_cfg, question=question)
         t["verification"] = (time.perf_counter() - t2) * 1000
         t["total"] = (time.perf_counter() - t0) * 1000
         return PipelineOutput(question, res, units, gen, report, decision,
-                              {k: round(v, 1) for k, v in t.items()})  # fmt: skip
+                              {k: round(v, 1) for k, v in t.items()}, attempts)  # fmt: skip

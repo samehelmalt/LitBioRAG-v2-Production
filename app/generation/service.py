@@ -43,6 +43,8 @@ class GenerationConfig(BaseModel):
     compress_evidence: bool = True
     max_sentences_per_unit: int = Field(4, ge=1)
     cache_generations: bool = True
+    max_attempts: int = Field(2, ge=1, le=4)  # bounded regeneration with precise feedback
+    profiles: list[dict] = Field(default_factory=list)  # overrides for app/generation/profiles
 
     @classmethod
     def from_yaml(cls, path: Path | str) -> GenerationConfig:
@@ -69,6 +71,7 @@ def answer(
     request_id: str = "",
     history: list[str] | None = None,
     cache=None,
+    feedback: str | None = None,
 ) -> GeneratedAnswer:
     """Evidence → prompt → model → parsed answer, under a token budget and a spend cap.
 
@@ -95,9 +98,11 @@ def answer(
     fit["evidence_tokens_full"] = full_tokens
     fit["evidence_tokens_sent"] = sum(counter.count(u.text) for u in units)
     messages = build_messages(question, units, history)
+    if feedback:
+        messages = [*messages, {"role": "user", "content": feedback}]
     prompt_tokens = sum(counter.count(m.get("content", "")) for m in messages)
     cache_key = None
-    if cache is not None and cfg.cache_generations:
+    if cache is not None and cfg.cache_generations and not feedback:
         import hashlib
 
         h = hashlib.sha256()
