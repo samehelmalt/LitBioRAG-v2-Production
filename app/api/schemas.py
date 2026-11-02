@@ -270,6 +270,7 @@ class Health(BaseModel):
     concurrency: dict[str, Any] = Field(default_factory=dict,
                                         description="admission control per model role: "
                                                     "in_flight, queued, rejected, wait times")
+    state_backend: str = "sqlite"
 
 
 class ErrorOut(BaseModel):

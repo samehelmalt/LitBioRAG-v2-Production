@@ -25,12 +25,12 @@ from app.api.audit import AuditLog
 from app.api.auth import AuthError, Principal, authenticate, check_entitlement
 from app.api.chats import ChatStore
 from app.api.keys import KeyStore
-from app.api.ratelimit import RateLimiter
 from app.api.settings import ApiSettings
 from app.api.trials import TrialLedger, TrialLimitExceeded
 from app.core.admission import Overloaded
 from app.core.budget import Pricing, ResourceConfig, UsageLedger
 from app.core.documents import Document, SourceType
+from app.core.shared_state import StateBackend
 from app.corpus.manager import CorpusConfig, CorpusManager
 from app.evidence.selector import EvidenceUnit
 from app.review.service import ReleaseNeedsConfirmation, ReviewConfig, ReviewService
@@ -153,19 +153,22 @@ def _case_out(case: dict, *, full: bool) -> schemas.ReviewCaseOut:
 def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline | None = None,
                ledger: UsageLedger | None = None, review: ReviewService | None = None,
                review_config: ReviewConfig | None = None,
-               corpus_config: CorpusConfig | None = None) -> FastAPI:  # fmt: skip
+               corpus_config: CorpusConfig | None = None,
+               state: StateBackend | None = None) -> FastAPI:  # fmt: skip
     st = settings or ApiSettings.load()
     res = ResourceConfig.from_yaml()
     api_cfg = res.api or {}
+    if state is None:
+        state = StateBackend.from_settings(st.state_backend, st.redis_url)
     if ledger is None:
         lp = api_cfg.get("ledger_path")
-        ledger = UsageLedger(
+        ledger = state.usage_ledger(
             Path(lp) if lp else None,
             max_usd_per_request=float(api_cfg.get("max_usd_per_request", 0) or 0),
             max_usd_per_day=float(api_cfg.get("max_usd_per_day", 0) or 0),
             pricing=Pricing.load(),
         )
-    limiter = RateLimiter(st.limits.rate_per_minute, st.limits.burst)
+    limiter = state.rate_limiter(st.limits.rate_per_minute, st.limits.burst)
     audit = AuditLog(st.audit_path, store_question_text=st.audit.store_question_text)
     feedback_path = st.audit_path.parent / "feedback.jsonl" if st.audit_path else None
     feedback_log = AuditLog(feedback_path)
@@ -176,8 +179,10 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     trials: TrialLedger | None = None
     if st.trial.questions > 0:
         tp = Path(st.trial.db_path)
-        trials = TrialLedger(tp if tp.is_absolute() else Path(__file__).resolve().parents[2] / tp,
-                             st.trial.questions)  # fmt: skip
+        trials = state.trial_ledger(
+            tp if tp.is_absolute() else Path(__file__).resolve().parents[2] / tp,
+            st.trial.questions)  # fmt: skip
+    shared_state = state
     state: dict[str, Any] = {"pipeline": pipeline, "review": review, "corpus": None}
 
     @asynccontextmanager
@@ -188,6 +193,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             state["pipeline"] = AnswerPipeline(
                 st.bundle_path, profile=st.profile or None, ledger=ledger, resources=res,
                 scope_profile=st.scope_profile, kb_root=st.kb_root,
+                kb_jobs=shared_state.kb_jobs(),
             )
         if state["review"] is None:
             state["review"] = ReviewService(state["pipeline"], review_config, audit=audit)
@@ -307,6 +313,7 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             preflight=p.preflight,
             ledger_spent_today_usd=ledger.spent_today if ledger else None,
             concurrency=p.pool.admission.snapshot(),
+            state_backend=shared_state.kind,
         )  # fmt: skip
 
     @app.get("/api/v1/trial")

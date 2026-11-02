@@ -8,6 +8,8 @@ that has no adapter yet instead of guessing.
 
 from __future__ import annotations
 
+import os
+
 from models.registry.loader import adapter
 from models.registry.schema import ModelSpec
 
@@ -61,9 +63,12 @@ def _hf_generator(spec: ModelSpec):
 def _openai_generator(spec: ModelSpec):
     from app.generation.base import OpenAICompatibleGenerator
 
+    endpoint = spec.endpoint or "http://localhost:8000/v1"
+    if spec.endpoint and spec.endpoint.startswith("http://vllm:") and os.environ.get("VLLM_URL"):
+        endpoint = os.environ["VLLM_URL"]  # vllm-8b: another host without editing yaml
     return OpenAICompatibleGenerator(
         spec.model_id,
-        endpoint=spec.endpoint or "http://localhost:8000/v1",
+        endpoint=endpoint,
         api_key_env=spec.api_key_env,
         json_mode=str(spec.params.get("json_mode", "true")).lower() == "true",
         timeout=int(spec.params.get("timeout_s", 60)),

@@ -8,6 +8,7 @@ COPY app ./app
 COPY models ./models
 COPY configs ./configs
 COPY scripts ./scripts
+COPY deploy ./deploy
 COPY evaluation/datasets/splits ./evaluation/datasets/splits
 RUN if [ "$WITH_OCR" = "1" ]; then apt-get update \
     && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng \

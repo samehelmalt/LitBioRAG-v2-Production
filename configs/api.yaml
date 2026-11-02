@@ -30,3 +30,8 @@ kb:
   default_scope: both               # indexed | uploaded | both (per-request override)
 
 cors_origins: []                    # the web UI origin(s) in production
+
+state_backend: sqlite               # sqlite = one API process; redis = several replicas share the
+                                    #   rate limiter, trial and usage ledgers and KB job table
+redis_url_env: REDIS_URL            # e.g. redis://redis:6379/0 (compose.scale.yaml); AEOS_STATE_BACKEND
+                                    #   overrides state_backend

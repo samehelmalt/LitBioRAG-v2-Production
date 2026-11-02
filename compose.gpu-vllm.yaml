@@ -1,0 +1,77 @@
+# One GPU host serving many concurrent users: vLLM runs the generator as its own service
+# (continuous batching, paged KV cache); the API container keeps retrieval, the reranker and the
+# verifier on the same GPU and talks to vLLM over /v1/chat/completions (profile vllm-8b).
+#
+#   docker compose -f compose.gpu-vllm.yaml up --build -d
+#
+# Memory on a 12 GB card: vLLM takes VLLM_GPU_FRACTION of the device (0.70 → ~8.4 GB: ~5.5 GB
+# AWQ weights + ~2.9 GB KV cache ≈ 20k tokens ≈ 6 answers of 3.5k tokens in flight); the API
+# process needs ~2.7 GB for MedCPT + bge-reranker + DeBERTa-large. On a 24 GB card set
+# VLLM_GPU_FRACTION=0.85 and VLLM_MAX_SEQS=48; on 48 GB, 0.9 and 128. Capacity numbers are
+# estimates until scripts/load_test.py has run on the host (docs/DEPLOYMENT.md "Scaling").
+services:
+  vllm:
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:latest}   # pin a tag you have tested
+    command: >
+      --model ${VLLM_MODEL:-Qwen/Qwen3-8B-AWQ}
+      --served-model-name ${VLLM_MODEL:-Qwen/Qwen3-8B-AWQ}
+      --max-model-len ${VLLM_MAX_MODEL_LEN:-8192}
+      --max-num-seqs ${VLLM_MAX_SEQS:-16}
+      --gpu-memory-utilization ${VLLM_GPU_FRACTION:-0.70}
+      --dtype auto
+      --enable-prefix-caching
+      --port 8000
+    environment:
+      HF_HOME: /root/.cache/huggingface
+      VLLM_API_KEY: ${VLLM_API_KEY:-}                 # empty = unauthenticated on the internal network
+    volumes:
+      - ./data/model-cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices: [{ driver: nvidia, count: 1, capabilities: [gpu] }]
+    ipc: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+    restart: unless-stopped
+    # not published: only the API container reaches vLLM
+
+  aeos:
+    build:
+      context: .
+      args: { EXTRAS: "index,api,kb,pptx,ml,scale", WITH_OCR: "${WITH_OCR:-0}" }
+    image: aeos-medical:gpu-vllm
+    depends_on:
+      vllm: { condition: service_healthy }
+      redis: { condition: service_started }
+    ports: ["127.0.0.1:8471:8471"]                     # behind an HTTPS reverse proxy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      LITBIORAG_MODEL_PROFILE: ${PROFILE:-vllm-8b}
+      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:?set CORPUS_ID to a fetched bundle}
+      LITBIORAG_API_PORT: "8471"
+      VLLM_URL: http://vllm:8000/v1
+      VLLM_API_KEY: ${VLLM_API_KEY:-}
+      AEOS_CONCURRENCY_GENERATOR: ${VLLM_MAX_SEQS:-16}  # admission capacity = vLLM batch size
+      AEOS_STATE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/0
+      HF_HOME: /srv/aeos/data/model-cache
+      AEOS_CLIENT_MODE: "${AEOS_CLIENT_MODE:-0}"
+    volumes: ["./data:/srv/aeos/data"]
+    deploy:
+      resources:
+        reservations:
+          devices: [{ driver: nvidia, count: 1, capabilities: [gpu] }]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+    volumes: ["./data/redis:/data"]
+    restart: unless-stopped

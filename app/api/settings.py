@@ -54,6 +54,14 @@ class ApiSettings(BaseModel):
     audit: AuditSettings = Field(default_factory=AuditSettings)
     kb: KBSettings = Field(default_factory=KBSettings)
     cors_origins: list[str] = Field(default_factory=list)
+    state_backend: str = Field("sqlite", pattern="^(sqlite|redis)$",
+                               description="sqlite = per process; redis = shared rate limiter, "
+                                           "trial/usage ledgers and KB jobs across replicas")
+    redis_url_env: str = "REDIS_URL"
+
+    @property
+    def redis_url(self) -> str:
+        return os.environ.get(self.redis_url_env, "")
 
     @classmethod
     def load(cls, path: Path | str | None = None, **overrides: Any) -> ApiSettings:
@@ -65,6 +73,8 @@ class ApiSettings(BaseModel):
         s.profile = os.environ.get("LITBIORAG_MODEL_PROFILE", "") or s.profile
         if os.environ.get("AEOS_TRIAL_QUESTIONS"):
             s.trial.questions = int(os.environ["AEOS_TRIAL_QUESTIONS"])
+        if os.environ.get("AEOS_STATE_BACKEND"):
+            s.state_backend = os.environ["AEOS_STATE_BACKEND"]
         return s
 
     @property

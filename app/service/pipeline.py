@@ -83,6 +83,7 @@ class AnswerPipeline:
         max_units: int = 8,
         scope_profile: str = "research",
         kb_root: Path | None = None,
+        kb_jobs=None,
     ):
         self.scope_profile = scope_profile
         self.lecture_first = scope_profile == "education"
@@ -106,7 +107,7 @@ class AnswerPipeline:
         if kb_root is not None:
             from app.kb.indexer import KBIndexer
 
-            self.kb = KBIndexer(kb_root, encoder)
+            self.kb = KBIndexer(kb_root, encoder, jobs=kb_jobs)
         self.ret_cfg = ret_cfg
         self.gen_cfg = GenerationConfig.from_yaml(configs / "generation.yaml")
         self.ver_cfg = VerificationConfig.from_yaml(configs / "verification.yaml")

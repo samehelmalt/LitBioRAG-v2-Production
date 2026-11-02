@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.11.0 — 2026-11-02
+Concurrency for many simultaneous users (owner question: "Do we need vLLM for thousands of
+students?").
+- Admission control per model role (`app/core/admission.py`): capacity, FIFO queue with the
+  position shown on the progress stream, bounded queue and timeout → `503` + `Retry-After`
+  (trial refunded, audit line); counters in `/health.concurrency`; `AEOS_CONCURRENCY_<ROLE>`.
+- Cross-request micro-batching for the verifier and the cross-encoder reranker
+  (`app/core/batcher.py`): concurrent requests share one forward pass; a lone request never waits;
+  scores identical to direct calls. `CrossEncoderReranker.score_pairs` for mixed-query batches.
+- Redis-backed rate limiter, trial ledger, usage ledger (shared daily cap) and KB job table
+  (`app/core/shared_state.py`; `configs/api.yaml: state_backend: redis`, `REDIS_URL`); `scale`
+  extra; `fakeredis[lua]` in dev.
+- `vllm-8b` profile (generator behind vLLM's OpenAI-compatible endpoint, `VLLM_URL`),
+  `compose.gpu-vllm.yaml` (vLLM + API + Redis on one GPU host), `compose.scale.yaml` (N API
+  replicas behind nginx + Redis), `deploy/nginx.conf`.
+- `scripts/load_test.py`: 10/50/100 concurrent users, p50/p95/p99, status mix, cache hits,
+  generator tokens/s → `evaluation/benchmarks/runs/<name>/load/`; DEPLOYMENT.md "Scaling" with
+  capacity estimates marked NOT MEASURED.
+
 ## 0.10.1 — 2026-11-02
 Ported from the owner's "Cloud Selector v1.4" fork, adapted to the v0.10.0 base:
 - Trial allowance per authenticated identity (reserve-before-run, refund-on-failure, idempotent

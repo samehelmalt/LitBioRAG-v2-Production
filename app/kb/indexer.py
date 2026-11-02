@@ -29,7 +29,7 @@ from app.retrieval.store import MetadataStore
 class KBIndexer:
     def __init__(self, root: Path | str, encoder: Encoder, *, registry: KBRegistry | None = None,
                  target_words: int = 200, max_words: int = 300, image_text=None,
-                 image_config: dict | None = None):  # fmt: skip
+                 image_config: dict | None = None, jobs=None):  # fmt: skip
         self.root = Path(root)
         self.files_dir = self.root / "files"
         self.index_dir = self.root / "index"
@@ -42,7 +42,8 @@ class KBIndexer:
         self.store = MetadataStore(self.index_dir / "metadata.sqlite")
         self.bm25 = BM25Index(self.index_dir / "bm25")
         self._dense = IncrementalDense(self.index_dir / "dense", encoder)
-        self.jobs = self.registry.jobs  # persistent: survives restarts
+        # persistent: survives restarts; a shared (Redis) table makes jobs visible to every replica
+        self.jobs = jobs if jobs is not None else self.registry.jobs
         if self._dense.ntotal == 0 and self.store.counts().get("passages", 0) > 0:
             self._rebuild_dense()  # encoder changed (or first run on an old layout): re-embed
         self.image_text = (image_text if image_text is not None

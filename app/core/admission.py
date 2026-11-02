@@ -18,6 +18,7 @@ the intended shape (each replica owns its GPU or its share of a vLLM pool).
 
 from __future__ import annotations
 
+import os
 import threading
 import time
 from collections import deque
@@ -77,14 +78,21 @@ class Admission:
                 verifier: {capacity: 4, queue_max: 64}
         """
         raw = raw or {}
+        env = {k[len("AEOS_CONCURRENCY_"):].lower(): v for k, v in os.environ.items()
+               if k.startswith("AEOS_CONCURRENCY_") and v.strip()}  # AEOS_CONCURRENCY_GENERATOR=32
         base = RoleLimits(
             capacity=int(raw.get("capacity", 1)),
             queue_max=int(raw.get("queue_max", 16)),
             queue_timeout_s=float(raw.get("queue_timeout_s", 30.0)),
         )
         limits: dict[str, RoleLimits] = {}
-        for role, spec in (raw.get("roles") or {}).items():
-            spec = spec or {}
+        roles = dict(raw.get("roles") or {})
+        for role in env:
+            roles.setdefault(role, {})
+        for role, spec in roles.items():
+            spec = dict(spec or {})
+            if role in env:
+                spec["capacity"] = int(env[role])  # deployment override (e.g. vLLM batch size)
             limits[role] = RoleLimits(
                 capacity=int(spec.get("capacity", base.capacity)),
                 queue_max=int(spec.get("queue_max", base.queue_max)),

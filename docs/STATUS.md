@@ -1,4 +1,4 @@
-# Status — what is done, what is missing (2026-11-02, v0.10.0)
+# Status — what is done, what is missing (2026-11-02, v0.11.0)
 
 ## Done (code, tests, docs; all in CI)
 | Area | State |
@@ -25,6 +25,8 @@
 | Lecture-first policy with labelled literature differences | done |
 | Lecture QA harness + synthetic 30-slide prototype deck | done; measured only with test doubles |
 | Embeddable widget, tenant isolation, local-8b / local-14b profiles | done |
+| Trial allowance, client-mode guard, chart extraction, client-trial / offline-demo deployments | done |
+| Concurrency: admission control (queue, 503 + Retry-After), verifier/reranker micro-batching, Redis-shared limiter/ledgers/jobs, `vllm-8b` profile + GPU compose, multi-replica compose, load-test script | done; capacity NOT MEASURED |
 
 ## Missing / blocked (honest list)
 1. **Measured baseline (E4).** Needs an API key in the serving environment (hosted profile) or a
@@ -38,8 +40,10 @@
    key); the pipeline flags image-only slides until one is enabled.
 5. **Ontology extractor** (scispaCy/UMLS) to extend confusable detection beyond the rules and the
    curated list.
-6. **Multi-replica deployment**: rate limiter, ledger, job runner and caches are single-process;
-   Redis/Postgres variants are not built.
+6. **Multi-host deployment**: Redis covers the limiter, ledgers and KB jobs (v0.11.0); answer
+   records, chats, review cases and KB files/indexes still live on one host (SQLite + disk).
+   PostgreSQL / object-storage variants are not built. Capacity figures in DEPLOYMENT.md are
+   estimates until `scripts/load_test.py` runs on the serving host.
 7. **Security**: no penetration test yet; secret rotation runbook; dependency scanning in CI.
 8. **Reviewer notifications** (email/webhook) — log-only hook.
 9. **Human labels**: zero until users and reviewers produce them; proxy labels until then.

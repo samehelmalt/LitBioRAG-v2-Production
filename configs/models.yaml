@@ -223,6 +223,46 @@ profiles:
           date: ""
       entity_extractor: regex:biomed-v2
 
+  vllm-8b:
+    description: >
+      Profile A served by vLLM (compose.gpu-vllm.yaml): the same retrieval, reranker and verifier
+      as local-8b stay in the API process; the generator is Qwen3-8B (AWQ 4-bit) behind vLLM's
+      OpenAI-compatible endpoint on the same GPU host. vLLM batches concurrent requests
+      (continuous batching, paged KV cache), so resources.yaml concurrency.roles.generator.capacity
+      can be raised to the server's --max-num-seqs instead of 1. Endpoint via VLLM_URL
+      (default http://vllm:8000/v1); an optional bearer token via VLLM_API_KEY. No API spend: the
+      ledger records tokens with zero cost unless pricing.yaml prices the model id.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64, vram_gb: 0.5}
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16, vram_gb: 1.2}
+      generator:
+        kind: openai_compatible
+        model_id: Qwen/Qwen3-8B-AWQ
+        endpoint: http://vllm:8000/v1              # override: LITBIORAG_MODEL__GENERATOR=... or VLLM_URL
+        api_key_env: VLLM_API_KEY
+        max_tokens: 1024
+        params: {timeout_s: 120, max_retries: 2, backoff_s: 1.0, json_mode: "true"}
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+        max_tokens: 512
+        params: {vram_gb: 1.0}
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v2
+
   local-14b:
     description: >
       Profile B — higher-quality local: same retrieval and verifier as local-8b with Qwen3-14B at

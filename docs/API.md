@@ -8,7 +8,7 @@ returns is exactly what the evaluation runners measure.
 ## Endpoints
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| GET | `/health` | none | status, bundle id, profile, gate calibration status, GPU pre-flight, today's API spend |
+| GET | `/health` | none | status, bundle id, profile, gate calibration status, GPU pre-flight, today's API spend, `concurrency` (per-role in-flight / queued / rejected / wait times), `state_backend` |
 | GET | `/api/v1/models` | principal | active profile with model names, families, quantization, calibration status, gate costs |
 | POST | `/api/v1/query` | principal | question → delivery decision with the full trust surface |
 | GET | `/api/v1/sources/{doc_id}` | principal | source document metadata and abstract; slides require course entitlement |
@@ -45,6 +45,13 @@ Response fields and what the UI must do with them (UI_PROTOTYPE_REVIEW.md):
 
 Errors are `{"request_id", "error"}` with 401 / 403 / 404 / 422 / 429 (`Retry-After`) / 500
 ("internal error", never a stack trace). Every response carries `X-Request-ID`.
+
+## Overload
+When a model role is at capacity and its queue is full, or a request waits longer than the queue
+timeout, the answer is `503 {"error": "the service is busy (generator: ...)"}` with a `Retry-After`
+header (seconds); the trial allowance is refunded and an `overloaded` audit line is written. On the
+SSE stream a waiting request emits `stage: queued` with `role` and `ahead` (callers before it).
+Clients retry after `Retry-After`; nothing is lost. (`configs/resources.yaml: concurrency`.)
 
 ## Observability
 One structured log line per request (`event: access`) and one audit JSON line per query

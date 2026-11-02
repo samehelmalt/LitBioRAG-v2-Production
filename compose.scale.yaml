@@ -1,0 +1,48 @@
+# Several API replicas behind one entry point, sharing Redis for the rate limiter, trial and
+# usage ledgers and KB job table (configs/api.yaml state_backend: redis). The generator must be
+# a service the replicas can share: a hosted provider (PROFILE=hosted / cloud-anthropic /
+# cloud-deepseek with its key in .env) or a vLLM host reachable as VLLM_URL (PROFILE=vllm-8b).
+# Each replica loads its own reranker and verifier (GPU per replica, or CPU and slow).
+#
+#   AEOS_REPLICAS=3 docker compose -f compose.scale.yaml up --build -d
+#
+# All replicas mount the same ./data on ONE host (SQLite in WAL mode for records, chats and the
+# review queue; the KB files and index). Spreading replicas across hosts needs PostgreSQL and
+# shared object storage for those stores, which is not built (docs/DEPLOYMENT.md "Scaling").
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    ports: ["127.0.0.1:8471:8471"]
+    volumes: ["./deploy/nginx.conf:/etc/nginx/nginx.conf:ro"]
+    depends_on: [aeos]
+    restart: unless-stopped
+
+  aeos:
+    build:
+      context: .
+      args: { EXTRAS: "index,api,kb,pptx,ml,scale", WITH_OCR: "${WITH_OCR:-0}" }
+    image: aeos-medical:scale
+    deploy:
+      replicas: ${AEOS_REPLICAS:-2}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      LITBIORAG_MODEL_PROFILE: ${PROFILE:?set PROFILE to hosted, cloud-anthropic, cloud-deepseek or vllm-8b}
+      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:?set CORPUS_ID to a fetched bundle}
+      LITBIORAG_API_PORT: "8471"
+      VLLM_URL: ${VLLM_URL:-}
+      AEOS_CONCURRENCY_GENERATOR: ${AEOS_CONCURRENCY_GENERATOR:-8}   # per replica
+      AEOS_STATE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/0
+      HF_HOME: /srv/aeos/data/model-cache
+      AEOS_CLIENT_MODE: "${AEOS_CLIENT_MODE:-0}"
+    volumes: ["./data:/srv/aeos/data"]
+    depends_on: [redis]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+    volumes: ["./data/redis:/data"]
+    restart: unless-stopped

@@ -28,6 +28,9 @@ python -m scripts.build_indexes --docs docs.jsonl --out data/artifacts/demo --co
 python -m scripts.serve --bundle data/artifacts/demo --profile test --port 8471
 # open http://localhost:8471  (UI)   http://localhost:8471/api/docs  (OpenAPI)
 ```
+Many concurrent users: `compose.gpu-vllm.yaml` (vLLM generator + Redis on one GPU host) or
+`compose.scale.yaml` (API replicas behind nginx); see docs/DEPLOYMENT.md "Scaling".
+
 Docker (local test, no preparation): `docker compose up --build`, then open
 http://localhost:8471 . The first start builds a demo bundle from `scripts/demo/demo_docs.jsonl`
 with deterministic test doubles and prints three demo tokens (user, reviewer, admin) to paste into

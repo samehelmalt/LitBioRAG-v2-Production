@@ -14,6 +14,9 @@ until BASELINE_RESULTS.md says so.
 | Prices | `configs/pricing.yaml` | USD per 1M tokens per model id; `as_of` date must be filled before a budget is trusted |
 | GPU residency | `configs/resources.yaml: gpu` | which roles stay loaded, which are loaded per request, VRAM estimates for the pre-flight check |
 | Caching | `configs/resources.yaml: cache` | on-disk cache for verifier pair scores and query embeddings |
+| Admission control | `configs/resources.yaml: concurrency` (`AEOS_CONCURRENCY_<ROLE>` override) | how many requests may hold the generator / verifier at once, queue bound and timeout; overflow → 503 + Retry-After |
+| Micro-batching | `configs/resources.yaml: batching` | concurrent verifier / reranker calls share one forward pass (collection window, batch size) |
+| Shared state | `configs/api.yaml: state_backend`, `REDIS_URL` | Redis-backed rate limiter, trial / usage ledgers and KB jobs for several API replicas |
 
 ## Token optimization (`app/core/budget.py`)
 1. **Evidence is trimmed to the budget in rank order.** `fit_evidence` keeps the best-ranked units
@@ -72,8 +75,18 @@ Verifier (premise, hypothesis) scores and query embeddings are cached on disk ke
 so a model swap never serves stale scores. Generations are not cached by default: the evidence set
 changes with the corpus bundle. Hit rates are logged and will be reported in BASELINE_RESULTS.md.
 
+## Concurrency (`app/core/admission.py`, `app/core/batcher.py`)
+An in-process generator serves one sequence at a time, so concurrent requests are admitted per
+role: `capacity` holders, a FIFO queue of at most `queue_max` waiters (position shown as the
+`queued` progress stage), `queue_timeout_s` before a 503. With vLLM or a hosted generator the
+generator capacity is the server's batch size (`AEOS_CONCURRENCY_GENERATOR`). Verifier and
+reranker calls from different requests are collected for ≤ `max_wait_ms` and scored in one pass;
+a lone caller never waits, and scores are identical to direct calls (tests compare them). Counters
+for both are in `/health` (`concurrency`) and in the load-test report. See DEPLOYMENT.md "Scaling".
+
 ## What must be measured (E4, blocked on owner resources)
 - Tokens per answer (prompt / completion), cost per 1,000 answers for each hosted candidate.
 - p50 / p95 latency per stage (retrieval, rerank, generation, verification) on the serving host.
 - Cache hit rate on the evaluation splits.
 - VRAM peak per profile (`ModelPool.vram_report()`), compared with the pre-flight estimate.
+- Throughput and p95 under 10 / 50 / 100 concurrent users (`scripts/load_test.py`) per deployment shape.
