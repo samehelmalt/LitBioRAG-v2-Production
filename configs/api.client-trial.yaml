@@ -1,0 +1,30 @@
+# Client-trial settings: every request authenticated, questions hashed in the audit log, a fixed
+# allowance of answered questions per prospect, education scope. Used by compose.client-trial.yaml.
+bundle: ""
+profile: ""
+scope_profile: education
+trial:
+  questions: 5                      # per authenticated identity; AEOS_TRIAL_QUESTIONS overrides
+  db_path: data/audit/trial_uses.sqlite
+auth:
+  required: true
+  jwt_secret_env: LITBIORAG_JWT_SECRET
+  jwt_algorithms: [HS256]
+  jwt_audience: litbiorag
+  api_keys_env: LITBIORAG_API_KEYS
+  anonymous_courses: []
+limits:
+  max_question_chars: 1000
+  max_units: 12
+  rate_per_minute: 20
+  burst: 5
+  max_upload_mb: 50
+  max_files_per_kb: 500
+audit:
+  path: data/audit/requests.jsonl
+  store_question_text: false        # privacy mode: questions are hashed
+kb:
+  enabled: true
+  root: data/kb
+  default_scope: uploaded
+cors_origins: []

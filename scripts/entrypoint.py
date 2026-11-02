@@ -23,9 +23,59 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
+def _client_mode_guard(bundle: Path, profile: str) -> None:
+    """AEOS_CLIENT_MODE=1 (client trials): refuse anything that could pass a demo off as the real
+    product — the test doubles, the demo bundle, a per-run JWT secret."""
+    problems = []
+    if (profile or "test") == "test":
+        problems.append("profile 'test' uses deterministic doubles; set a real profile")
+    if bundle.name == "demo":
+        problems.append("the demo bundle is not client content; set CORPUS_ID to a real bundle")
+    if len(os.environ.get("LITBIORAG_JWT_SECRET", "")) < 32:
+        problems.append("LITBIORAG_JWT_SECRET must be a persistent secret of 32+ characters")
+    if problems:
+        for p in problems:
+            print(f"[entrypoint] client mode refused: {p}", file=sys.stderr, flush=True)
+        raise SystemExit(3)
+
+
+def _offline_demo(bundle: Path, profile: str) -> None:
+    """Real small CPU models: prefetch (or verify) the weights and build a real-embedding bundle
+    from the synthetic deck on first start."""
+    from scripts.model_cache import ensure_models
+
+    ensure_models(profile, offline=os.environ.get("AEOS_OFFLINE", "0") == "1")
+    if not (bundle / "manifest.json").exists():
+        from scripts.build_indexes import main as build
+        from scripts.make_prototype_deck import main as make_deck
+
+        out = ROOT / "data" / "prototype"
+        make_deck(["--out", str(out)])
+        from scripts.corpus.pptx_decks import extract_deck, write_jsonl
+
+        docs = extract_deck(out / "potassium_disorders.pptx", course_id="IM-2026",
+                            lecture_id="L03", lecture_title="Potassium disorders",
+                            academic_year="2026", version="2026a")  # fmt: skip
+        jsonl = out / "docs.jsonl"
+        write_jsonl(docs, jsonl)
+        from models.registry.loader import ModelRegistry
+
+        enc = ModelRegistry.load(profile=profile).spec("dense_encoder")
+        rc = build(["--docs", str(jsonl), "--out", str(bundle), "--corpus-id",
+                    "synthetic-potassium-v1", "--encoder", f"sentence_transformers:{enc.model_id}",
+                    "--shard-size", "25", "--batch-size", "8"])  # fmt: skip
+        if rc != 0:
+            raise SystemExit(f"[entrypoint] real-embedding demo bundle build failed: {rc}")
+
+
 def main() -> int:
     bundle = Path(os.environ.get("LITBIORAG_BUNDLE") or ROOT / "data" / "artifacts" / "demo")
     profile = os.environ.get("LITBIORAG_MODEL_PROFILE") or ""
+    client_mode = os.environ.get("AEOS_CLIENT_MODE", "0") == "1"
+    if profile == "offline-demo":
+        _offline_demo(bundle, profile)
+    if client_mode:
+        _client_mode_guard(bundle, profile)
     if not (bundle / "manifest.json").exists():
         from scripts.build_indexes import main as build
 
@@ -55,10 +105,14 @@ def main() -> int:
             return jwt.encode({"sub": sub, "roles": roles, "courses": [], "aud": "litbiorag",
                                "exp": exp}, s, algorithm="HS256")  # fmt: skip
 
-        print("[entrypoint] demo tokens (paste into the UI 'Sign in'):", flush=True)
-        for sub, roles in (("demo-user", []), ("demo-reviewer", ["reviewer"]),
-                           ("demo-admin", ["admin", "reviewer"])):
-            print(f"  {sub:14s} {tok(sub, roles)}", flush=True)
+        if client_mode:
+            print("[entrypoint] client mode: no demo tokens; issue prospect tokens with "
+                  "scripts/issue_client_token.py", flush=True)
+        else:
+            print("[entrypoint] demo tokens (paste into the UI 'Sign in'):", flush=True)
+            for sub, roles in (("demo-user", []), ("demo-reviewer", ["reviewer"]),
+                               ("demo-admin", ["admin", "reviewer"])):
+                print(f"  {sub:14s} {tok(sub, roles)}", flush=True)
     except Exception as e:  # noqa: BLE001
         print(f"[entrypoint] could not issue demo tokens: {e}", flush=True)
     from scripts.serve import main as serve

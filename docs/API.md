@@ -85,3 +85,11 @@ response echoes `scope` and the `kb_ids` searched. Uploaded sources carry `kb_id
 | POST | `/api/v1/corpus/enabled` | `{enabled}` serve the indexed corpus or uploads only |
 | POST | `/api/v1/corpus/jobs` | `{type: fetch|verify|update|fetch_preprints|rebuild, params}` background job |
 | GET | `/api/v1/corpus/jobs/{id}` | status, result, log tail |
+
+
+## Trial allowance
+`configs/api.yaml: trial.questions` (or `AEOS_TRIAL_QUESTIONS`) limits answered questions per
+authenticated identity. The allowance is reserved after all validation and before the pipeline
+runs, refunded when the request fails before an answer, charged once per request id (POST and
+stream share it), persisted in SQLite, never available anonymously; admins are exempt.
+`GET /api/v1/trial` → `{enabled, limit, remaining, used, exempt}`; an exhausted allowance is 429.

@@ -27,6 +27,7 @@ from app.api.chats import ChatStore
 from app.api.keys import KeyStore
 from app.api.ratelimit import RateLimiter
 from app.api.settings import ApiSettings
+from app.api.trials import TrialLedger, TrialLimitExceeded
 from app.core.budget import Pricing, ResourceConfig, UsageLedger
 from app.core.documents import Document, SourceType
 from app.corpus.manager import CorpusConfig, CorpusManager
@@ -171,6 +172,11 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
     chats = ChatStore(data_dir / "chats.sqlite" if data_dir else None)
     keys = KeyStore(data_dir / "api_keys.sqlite" if data_dir else None)
     records = RecordStore(data_dir / "answers.sqlite" if data_dir else None)
+    trials: TrialLedger | None = None
+    if st.trial.questions > 0:
+        tp = Path(st.trial.db_path)
+        trials = TrialLedger(tp if tp.is_absolute() else Path(__file__).resolve().parents[2] / tp,
+                             st.trial.questions)  # fmt: skip
     state: dict[str, Any] = {"pipeline": pipeline, "review": review, "corpus": None}
 
     @asynccontextmanager
@@ -301,6 +307,15 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
             ledger_spent_today_usd=ledger.spent_today if ledger else None,
         )  # fmt: skip
 
+    @app.get("/api/v1/trial")
+    def trial_status(p: Principal = Auth):
+        if trials is None:
+            return {"enabled": False, "limit": None, "remaining": None}
+        if p.anonymous:
+            raise HTTPException(401, "sign in to see your trial allowance")
+        return {"enabled": True, "limit": trials.limit, "remaining": trials.remaining(p.sub),
+                "used": trials.used(p.sub), "exempt": p.is_admin}  # fmt: skip
+
     @app.get("/api/v1/models")
     def models(_p: Principal = Auth):
         p = pipe()
@@ -345,9 +360,25 @@ def create_app(settings: ApiSettings | None = None, *, pipeline: AnswerPipeline 
                 if scope == "uploaded" and not kb_ids:
                     raise HTTPException(422, "no knowledge base selected or readable; upload "
                                              "files first or choose scope 'indexed'")  # fmt: skip
-        out = pl.run(req.question, course_ids=courses, request_id=rid,
-                     max_units=min(req.max_units or pl.max_units, st.limits.max_units),
-                     scope=scope, kb_ids=kb_ids, history=history, progress=progress)  # fmt: skip
+        # trial allowance: reserved after every validation, refunded when no answer is produced
+        charged = False
+        if trials is not None and not p.is_admin:
+            if p.anonymous:
+                raise HTTPException(401, "sign in to use the trial")
+            try:
+                trials.reserve(p.sub, rid)
+                charged = True
+            except TrialLimitExceeded as e:
+                raise HTTPException(429, str(e)) from e
+        try:
+            out = pl.run(req.question, course_ids=courses, request_id=rid,
+                         max_units=min(req.max_units or pl.max_units, st.limits.max_units),
+                         scope=scope, kb_ids=kb_ids, history=history,
+                         progress=progress)  # fmt: skip
+        except Exception:
+            if charged:
+                trials.refund(p.sub, rid)
+            raise
         resp = to_response(out, rid, pl.versions.as_dict(), bool(pl.gate_cfg.calibrated_on))
         resp.scope, resp.kb_ids = scope, kb_ids
         resp.attempts = [a.summary() for a in out.attempts]

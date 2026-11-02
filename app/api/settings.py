@@ -39,10 +39,16 @@ class AuditSettings(BaseModel):
     store_question_text: bool = True
 
 
+class TrialSettings(BaseModel):
+    questions: int = 0  # 0 = no trial limit; >0 = answered questions per authenticated identity
+    db_path: str = "data/audit/trial_uses.sqlite"
+
+
 class ApiSettings(BaseModel):
     bundle: str = ""
     profile: str = ""
     scope_profile: str = "research"
+    trial: TrialSettings = Field(default_factory=TrialSettings)
     auth: AuthSettings = Field(default_factory=AuthSettings)
     limits: LimitSettings = Field(default_factory=LimitSettings)
     audit: AuditSettings = Field(default_factory=AuditSettings)
@@ -57,6 +63,8 @@ class ApiSettings(BaseModel):
         s = cls.model_validate(raw)
         s.bundle = os.environ.get("LITBIORAG_BUNDLE", "") or s.bundle
         s.profile = os.environ.get("LITBIORAG_MODEL_PROFILE", "") or s.profile
+        if os.environ.get("AEOS_TRIAL_QUESTIONS"):
+            s.trial.questions = int(os.environ["AEOS_TRIAL_QUESTIONS"])
         return s
 
     @property

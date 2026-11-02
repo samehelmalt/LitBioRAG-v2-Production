@@ -1,0 +1,26 @@
+# Offline CPU demo with REAL small models (not doubles, not medically reliable): first start
+# downloads the weights into ./data/model-cache and builds a real-embedding bundle from the
+# synthetic 30-slide prototype deck; later starts can run with AEOS_OFFLINE=1 (no network).
+#   docker compose -f compose.offline-demo.yaml up --build -d
+services:
+  aeos:
+    build:
+      context: .
+      args: { EXTRAS: "index,api,kb,pptx,ml", WITH_OCR: "1" }
+    image: aeos-medical:offline-demo
+    ports: ["127.0.0.1:8471:8471"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      LITBIORAG_MODEL_PROFILE: offline-demo
+      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/synthetic-potassium-v1
+      LITBIORAG_API_PORT: "8471"
+      HF_HOME: /srv/aeos/data/model-cache
+      AEOS_OFFLINE: "${AEOS_OFFLINE:-0}"
+      HF_HUB_OFFLINE: "${AEOS_OFFLINE:-0}"
+      TRANSFORMERS_OFFLINE: "${AEOS_OFFLINE:-0}"
+      CUDA_VISIBLE_DEVICES: ""
+      OMP_NUM_THREADS: "${AEOS_CPU_THREADS:-4}"
+    volumes: ["./data:/srv/aeos/data"]
+    restart: unless-stopped

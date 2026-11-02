@@ -41,3 +41,17 @@ Token budgets, API spend caps, GPU residency and caching are configured in `conf
 and described in [COST_AND_RESOURCES.md](COST_AND_RESOURCES.md). The `hosted` profile in
 `configs/models.yaml` runs the generator behind an API key with no generator VRAM; run
 `ModelPool.preflight()` (done by the service at start-up in Step 9) before serving a new profile.
+
+
+## Deployment shapes (compose files)
+| File | Purpose | Guard rails |
+|---|---|---|
+| `docker-compose.yml` | local test run, zero preparation, demo bundle + test doubles | demo tokens printed; never for clients |
+| `compose.offline-demo.yaml` | real small CPU models (`offline-demo` profile) on a VPS without a GPU; first start downloads weights into `./data/model-cache` and builds a real-embedding bundle from the synthetic 30-slide deck; later starts work with `AEOS_OFFLINE=1` | profile is NOT medically reliable or calibrated; shows real generation, not accuracy |
+| `compose.client-trial.yaml` | client prospect trial: real profile (`PROFILE`), real bundle (`CORPUS_ID`), `configs/api.client-trial.yaml` (authenticated only, hashed questions, education scope, 5 questions per prospect), bound to 127.0.0.1 behind an HTTPS proxy | `AEOS_CLIENT_MODE=1` refuses the `test` profile, the demo bundle and a short/per-run JWT secret; prospect tokens via `scripts/issue_client_token.py` |
+
+OCR in the image: build with `--build-arg WITH_OCR=1` (installs Tesseract and the `ocr` extra);
+`configs/kb.yaml: images.ocr: tesseract` enables it. Cloud generator profiles (`hosted`,
+`cloud-anthropic`, `cloud-deepseek`) keep the biomedical retrieval and the large local verifier;
+selecting a cloud generator never downgrades retrieval or verification. Sending questions and
+evidence excerpts to a provider requires the content owner's authorization.

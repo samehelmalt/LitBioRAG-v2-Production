@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.10.1 — 2026-11-02
+Ported from the owner's "Cloud Selector v1.4" fork, adapted to the v0.10.0 base:
+- Trial allowance per authenticated identity (reserve-before-run, refund-on-failure, idempotent
+  per request id, persistent, admin-exempt) and `GET /api/v1/trial`.
+- Client-mode start-up guard (`AEOS_CLIENT_MODE=1`): refuses the test profile, the demo bundle and
+  a short or per-run JWT secret; prospect token issuer `scripts/issue_client_token.py`.
+- Native PowerPoint chart data (series and category values) in slide text, marked as read from
+  the chart object, never a pixel estimate.
+- `compose.client-trial.yaml` (localhost-bound, authenticated, hashed audit) and
+  `compose.offline-demo.yaml` with the `offline-demo` profile of real small CPU models and a
+  weight prefetch/verify script; `WITH_OCR` Docker build argument; `ocr` extra.
+- `cloud-anthropic` and `cloud-deepseek` profiles that keep MedCPT retrieval and the large verifier.
+Not ported on purpose: the credential-setting HTTP endpoint, the environment-variable OCR switch
+that wrote placeholder strings into indexed text, and cloud profiles built on general-domain MiniLM.
+
 ## 0.10.0 — 2026-11-02
 Closes the gaps of the external v0.9.2 assessment and the LitBioRAG failure classes.
 - Retrieval: paired MedCPT query/article encoders (searches use the query tower; registry

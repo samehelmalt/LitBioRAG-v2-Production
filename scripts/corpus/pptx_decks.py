@@ -45,6 +45,36 @@ def _pictures(shape) -> list[tuple[bytes, str]]:
     return out
 
 
+def _chart_texts(shape) -> list[str]:
+    """Series and category values of a native PowerPoint chart object. This reads the embedded
+    data, not the rendered picture; image-only graphs are handled by the OCR/vision extractor."""
+    if not getattr(shape, "has_chart", False) or not shape.has_chart:
+        return []
+    out: list[str] = []
+    try:
+        chart = shape.chart
+        title = ""
+        if chart.has_title and chart.chart_title.has_text_frame:
+            title = (chart.chart_title.text_frame.text or "").strip()
+        out.append(f"Chart{': ' + title if title else ''} (data from the chart object)")
+        categories: list[str] = []
+        try:
+            categories = [str(c) for c in chart.plots[0].categories]
+        except Exception:  # noqa: BLE001
+            categories = []
+        for n, series in enumerate(chart.series, start=1):
+            name = getattr(series, "name", "") or f"series {n}"
+            values = list(getattr(series, "values", []) or [])
+            pairs = [f"{categories[i] if i < len(categories) else f'item {i + 1}'}: {v:g}"
+                     if isinstance(v, (int, float)) else
+                     f"{categories[i] if i < len(categories) else f'item {i + 1}'}: {v}"
+                     for i, v in enumerate(values)]  # fmt: skip
+            out.append(f"{name} — " + "; ".join(pairs))
+    except Exception:  # noqa: BLE001  (a malformed chart never fails the deck)
+        out.append("Chart: data could not be read; see the original slide")
+    return out
+
+
 def _shape_texts(shape) -> list[str]:
     out: list[str] = []
     if getattr(shape, "has_text_frame", False) and shape.has_text_frame:
@@ -57,6 +87,7 @@ def _shape_texts(shape) -> list[str]:
             cells = [c.text.strip() for c in row.cells]
             if any(cells):
                 out.append(" | ".join(cells))
+    out.extend(_chart_texts(shape))
     if shape.shape_type == _PICTURE:
         try:
             descr = shape._element.nvPicPr.cNvPr.get("descr")  # alt text

@@ -90,6 +90,104 @@ profiles:
           date: ""
       entity_extractor: regex:biomed-v2
 
+  offline-demo:
+    description: >
+      Real but small CPU models for an offline demonstration on a VPS without a GPU: MiniLM
+      encoder and reranker, Qwen2.5-0.5B generator, DeBERTa-v3-base verifier. NOT medically
+      reliable and NOT calibrated; exists so a client can see real generation (not doubles) on
+      their own slides. Weights are prefetched by scripts/model_cache.py.
+    require_calibrated: false
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: sentence-transformers/all-MiniLM-L6-v2
+        max_tokens: 256
+      reranker:
+        kind: hf_seq_cls
+        model_id: cross-encoder/ms-marco-MiniLM-L-6-v2
+        max_tokens: 512
+        params: {batch_size: 8, dtype: float32}
+      generator:
+        kind: hf_causal
+        model_id: Qwen/Qwen2.5-0.5B-Instruct
+        max_tokens: 512
+        params: {dtype: float32}
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli
+        max_tokens: 512
+        params: {batch_size: 4, dtype: float32}
+      entity_extractor: regex:biomed-v2
+
+  cloud-anthropic:
+    description: >
+      Hosted Anthropic generator with the same biomedical retrieval and large local verifier as
+      `hosted` (a cloud generator never downgrades retrieval or verification). Model id is a
+      placeholder until MODEL_SELECTION.md records a benchmark; key from ANTHROPIC_API_KEY.
+      Sends question + evidence excerpts to the provider: requires content-owner authorization.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64}
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16}
+      generator:
+        kind: anthropic
+        model_id: claude-sonnet-5-5
+        api_key_env: ANTHROPIC_API_KEY
+        max_tokens: 1024
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+        max_tokens: 512
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v2
+
+  cloud-deepseek:
+    description: >
+      Hosted DeepSeek generator (OpenAI-compatible endpoint) with the `hosted` retrieval and
+      verifier; model id is a placeholder to verify against the provider catalog; key from
+      DEEPSEEK_API_KEY. Same authorization requirement as cloud-anthropic.
+    require_calibrated: true
+    models:
+      dense_encoder:
+        kind: sentence_transformers
+        model_id: ncbi/MedCPT-Article-Encoder
+        max_tokens: 512
+        params: {query: ncbi/MedCPT-Query-Encoder, query_max_tokens: 64}
+      reranker:
+        kind: hf_seq_cls
+        model_id: BAAI/bge-reranker-v2-m3
+        max_tokens: 1024
+        params: {batch_size: 16, dtype: float16}
+      generator:
+        kind: openai_compatible
+        model_id: deepseek-chat
+        endpoint: https://api.deepseek.com/v1
+        api_key_env: DEEPSEEK_API_KEY
+        max_tokens: 1024
+        params: {timeout_s: 90, max_retries: 3, backoff_s: 2.0, json_mode: "true"}
+      verifier:
+        kind: hf_seq_cls
+        model_id: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+        max_tokens: 512
+        calibration:
+          for_model: MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
+          thresholds: {}
+          validated_on: ""
+          date: ""
+      entity_extractor: regex:biomed-v2
+
   local-8b:
     description: >
       Profile A — local prototype on one 12 GB GPU: paired MedCPT retrievers, bge-reranker-v2-m3,

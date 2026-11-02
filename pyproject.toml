@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "litbiorag-v2"
-version = "0.10.0"
+version = "0.10.1"
 description = "Evidence-gated biomedical literature RAG"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -45,6 +45,10 @@ kb = [
     "python-docx>=1.1",
     "openpyxl>=3.1",
     "python-pptx>=1.0",
+]
+ocr = [
+    "pillow>=10",
+    "pytesseract>=0.3.10",
 ]
 ml = [
     "torch>=2.2",

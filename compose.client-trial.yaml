@@ -1,0 +1,22 @@
+# Client trial: real profile, real bundle, authenticated only, bound to localhost (put an HTTPS
+# reverse proxy in front). Refuses to start on the test profile or the demo bundle.
+#   PROFILE=hosted CORPUS_ID=<bundle> docker compose -f compose.client-trial.yaml up --build -d
+#   python -m scripts.issue_client_token --subject prospect-001 --days 7
+services:
+  aeos:
+    build:
+      context: .
+      args: { EXTRAS: "index,api,kb,pptx,ml", WITH_OCR: "1" }
+    image: aeos-medical:client-trial
+    ports: ["127.0.0.1:8471:8471"]
+    env_file: .env
+    environment:
+      AEOS_CLIENT_MODE: "1"
+      AEOS_TRIAL_QUESTIONS: "${AEOS_TRIAL_QUESTIONS:-5}"
+      LITBIORAG_API_CONFIG: /srv/aeos/configs/api.client-trial.yaml
+      LITBIORAG_BUNDLE: /srv/aeos/data/artifacts/${CORPUS_ID:?set CORPUS_ID to a real bundle}
+      LITBIORAG_MODEL_PROFILE: ${PROFILE:-hosted}
+      LITBIORAG_API_PORT: "8471"
+    volumes: ["./data:/srv/aeos/data"]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
